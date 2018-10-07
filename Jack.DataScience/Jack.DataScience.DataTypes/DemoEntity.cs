@@ -5,14 +5,16 @@ using MongoDB.Bson.Serialization.Attributes;
 using Jack.DataScience.Data.NpgSQL;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ArangoDB.Client;
 
 namespace Jack.DataScience.DataTypes
 {
 
-    class DemoEntity
+    public class DemoEntity: VertexBase
     {
         [BsonId, Key, Required]
-        public string _id { get; set; }
+        public new string _id { get; set; }
+
         [Index, StringLength(255)]
         public string Name { get; set; }
         [Index]

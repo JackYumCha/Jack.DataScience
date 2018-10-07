@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using Jack.DataScience.Common;
 using Autofac;
 using MongoDB.Bson.Serialization.Attributes;
+using Jack.DataScience.DataTypes;
 
 namespace Jack.DataScience.Data.MongoDB.Tests
 {
@@ -21,25 +22,15 @@ namespace Jack.DataScience.Data.MongoDB.Tests
             
             MongoClient client = serivcesContainer.Resolve<MongoClient>();
 
-            var testDB = client.GetDatabase("TestDB");
+            var testDB = client.GetDatabase("TestDB2");
 
-            testDB.CreateCollection(nameof(Demo));
+            // testDB.CreateCollection(nameof(DemoEntity));
 
-            testDB.GetCollection<Demo>(nameof(Demo)).InsertMany(
-                new List<Demo>()
+            testDB.GetCollection<DemoEntity>(nameof(DemoEntity)).InsertMany(
+                new List<DemoEntity>()
                 {
-                   new Demo(){ Age = 28, Email = "a@b.com", Name="Mongo"}
+                   new DemoEntity(){ Age = 28, Email = "a@b.com", Name="Mongo"}
                 });
         }
-    }
-
-    public class Demo
-    {
-        [BsonIdAttribute]
-        public string _id { get; set; }
-
-        public string Name { get; set; }
-        public int Age { get; set; }
-        public string Email { get; set; }
     }
 }

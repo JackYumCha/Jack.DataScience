@@ -1,6 +1,6 @@
 ﻿using Autofac;
 
-namespace Jack.DataScience.Data.NpqSQL
+namespace Jack.DataScience.Data.NpgSQL
 {
     public class NpgSQLDataModule: Module
     {

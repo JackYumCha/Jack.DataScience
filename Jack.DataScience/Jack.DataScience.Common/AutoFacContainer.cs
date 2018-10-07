@@ -17,6 +17,8 @@ namespace Jack.DataScience.Common
 
             ContainerBuilder = new ContainerBuilder();
 
+            ContainerBuilder.RegisterType<ArangoConnection>();
+
             RegisterOptions<PostgreSQLOptions>();
             RegisterOptions<SerilogOptions>();
             RegisterOptions<SqlServerOptions>();
@@ -29,6 +31,7 @@ namespace Jack.DataScience.Common
             RegisterOptions<AWSS3Options>();
             RegisterOptions<MongoBootstrapOptions>();
             RegisterOptions<MongoOptions>();
+            
         }
 
         public IConfiguration Configuration { get; set; }

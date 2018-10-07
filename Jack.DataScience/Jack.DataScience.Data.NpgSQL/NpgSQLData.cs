@@ -9,7 +9,7 @@ using Jack.DataScience.Common;
 using Jack.DataScience.DataTypes;
 using Npgsql;
 
-namespace Jack.DataScience.Data.NpqSQL
+namespace Jack.DataScience.Data.NpgSQL
 {
     public class NpgSQLData: IDisposable
     {

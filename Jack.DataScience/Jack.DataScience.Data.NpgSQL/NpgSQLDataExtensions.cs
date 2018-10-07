@@ -9,7 +9,7 @@ using Npgsql;
 using Newtonsoft.Json;
 using GeoJSON.Net.Geometry;
 
-namespace Jack.DataScience.Data.NpqSQL
+namespace Jack.DataScience.Data.NpgSQL
 {
     public static class NpgSQLDataExtensions
     {
