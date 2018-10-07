@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jack.DataScience.Data.MongoDB\Jack.DataScience.Data.MongoDB.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.NpgSQL\Jack.DataScience.Data.NpgSQL.csproj" />
+  </ItemGroup>
+
+</Project>
