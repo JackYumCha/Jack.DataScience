@@ -1,0 +1,73 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Common", "Jack.DataScience.Common\Jack.DataScience.Common.csproj", "{5BAA8311-0D46-4916-9D60-EF403B2AF5C7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.NpgSQL", "Jack.DataScience.Data.NpgSQL\Jack.DataScience.Data.NpgSQL.csproj", "{F3C9F1F6-D4D8-4C88-AF36-E79A5A48BAD9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.Parquet", "Jack.DataScience.Data.Parquet\Jack.DataScience.Data.Parquet.csproj", "{80772351-BE16-442E-8F20-5EA22C7F8DCD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAngular.Generator", "MvcAngular.Generator\MvcAngular.Generator.csproj", "{BAAD9737-B50A-4DEB-B335-D75A33D25835}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArangoDB.Client.Jack", "ArangoDB.Client\ArangoDB.Client.Jack.csproj", "{A8B7ACF4-1043-43C7-BFE5-6E43F530431C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.MongoDB", "Jack.DataScience.Data.MongoDB\Jack.DataScience.Data.MongoDB.csproj", "{8623C1E7-989F-46ED-AA7C-FD72FF450B6A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.MongoDB.Tests", "Jack.DataScience.Data.MongoDB.Tests\Jack.DataScience.Data.MongoDB.Tests.csproj", "{C70B500D-E369-453B-B019-5F51715B3F19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Logging.Serilog", "Jack.DataScience.Logging.Serilog\Jack.DataScience.Logging.Serilog.csproj", "{D1E70F2F-D3F1-40B3-ACD0-03C013683BAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Tasks", "Jack.DataScience.Tasks\Jack.DataScience.Tasks.csproj", "{30B80254-3116-4DA0-A0E3-FDFCB44D5C7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5BAA8311-0D46-4916-9D60-EF403B2AF5C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BAA8311-0D46-4916-9D60-EF403B2AF5C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BAA8311-0D46-4916-9D60-EF403B2AF5C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BAA8311-0D46-4916-9D60-EF403B2AF5C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C9F1F6-D4D8-4C88-AF36-E79A5A48BAD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C9F1F6-D4D8-4C88-AF36-E79A5A48BAD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C9F1F6-D4D8-4C88-AF36-E79A5A48BAD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C9F1F6-D4D8-4C88-AF36-E79A5A48BAD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80772351-BE16-442E-8F20-5EA22C7F8DCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80772351-BE16-442E-8F20-5EA22C7F8DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80772351-BE16-442E-8F20-5EA22C7F8DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80772351-BE16-442E-8F20-5EA22C7F8DCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAAD9737-B50A-4DEB-B335-D75A33D25835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAAD9737-B50A-4DEB-B335-D75A33D25835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAAD9737-B50A-4DEB-B335-D75A33D25835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAAD9737-B50A-4DEB-B335-D75A33D25835}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8B7ACF4-1043-43C7-BFE5-6E43F530431C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8B7ACF4-1043-43C7-BFE5-6E43F530431C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8B7ACF4-1043-43C7-BFE5-6E43F530431C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8B7ACF4-1043-43C7-BFE5-6E43F530431C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8623C1E7-989F-46ED-AA7C-FD72FF450B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8623C1E7-989F-46ED-AA7C-FD72FF450B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8623C1E7-989F-46ED-AA7C-FD72FF450B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8623C1E7-989F-46ED-AA7C-FD72FF450B6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C70B500D-E369-453B-B019-5F51715B3F19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C70B500D-E369-453B-B019-5F51715B3F19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C70B500D-E369-453B-B019-5F51715B3F19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C70B500D-E369-453B-B019-5F51715B3F19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1E70F2F-D3F1-40B3-ACD0-03C013683BAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1E70F2F-D3F1-40B3-ACD0-03C013683BAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1E70F2F-D3F1-40B3-ACD0-03C013683BAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1E70F2F-D3F1-40B3-ACD0-03C013683BAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30B80254-3116-4DA0-A0E3-FDFCB44D5C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30B80254-3116-4DA0-A0E3-FDFCB44D5C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30B80254-3116-4DA0-A0E3-FDFCB44D5C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30B80254-3116-4DA0-A0E3-FDFCB44D5C7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA78938A-D5F3-4F82-BE93-D1B14DF0A679}
+	EndGlobalSection
+EndGlobal
