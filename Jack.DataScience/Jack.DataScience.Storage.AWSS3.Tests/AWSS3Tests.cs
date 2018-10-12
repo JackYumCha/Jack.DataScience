@@ -8,7 +8,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
     public class AWSS3Tests
     {
         [Theory(DisplayName = "Create S3 Bucket")]
-        [InlineData("jack-datascience-testbucket")]
+        [InlineData("jack-datascience-trybucket-092")]
         public async void CreateS3Bucket(string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();
@@ -20,7 +20,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
         }
 
         [Theory(DisplayName = "Write S3 Object")]
-        [InlineData("myfirstobj.txt", "jack-datascience-testbucket")]
+        [InlineData("myfirstobj.txt", "jack-datascience-trybucket-092")]
         public async void WriteStringToS3Bucket(string key, string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();
@@ -36,7 +36,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
         }
 
         [Theory(DisplayName = "Delete S3 Object")]
-        [InlineData("myfirstobj.txt", "jack-datascience-testbucket")]
+        [InlineData("myfirstobj.txt", "jack-datascience-trybucket-092")]
         public async void DeleteS3Object(string key, string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();
@@ -48,7 +48,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
         }
 
         [Theory(DisplayName = "Delete S3 Bucket")]
-        [InlineData("jack-datascience-testbucket")]
+        [InlineData("jack-datascience-trybucket-092")]
         public async void DeleteS3Bucket(string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();

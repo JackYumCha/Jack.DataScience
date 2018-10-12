@@ -163,7 +163,7 @@ namespace Jack.DataScience.Storage.AzureBlobStorage
                 };
 
                 await cloudBlobContainer.SetPermissionsAsync(permissions);
-                return cloudBlobContainer.AllListBlobItems();
+                return cloudBlobContainer.ListAllBlobItems();
             }
             throw new Exception($@"Error in connecting ");
         }
@@ -219,7 +219,7 @@ namespace Jack.DataScience.Storage.AzureBlobStorage
             {
                 CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
 
-                cloudBlobContainer = cloudBlobClient.GetContainerReference(options.Container);
+                cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
 
                 await cloudBlobContainer.CreateIfNotExistsAsync();
 

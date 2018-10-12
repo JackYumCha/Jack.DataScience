@@ -52,7 +52,7 @@ namespace Jack.DataScience.Storage.AzureBlobStorage
             } while (blobContinuationToken != null);
         }
 
-        public static IEnumerable<IListBlobItem> AllListBlobItems(this CloudBlobContainer cloudBlobDirectory)
+        public static IEnumerable<IListBlobItem> ListAllBlobItems(this CloudBlobContainer cloudBlobDirectory)
         {
             BlobContinuationToken blobContinuationToken = null;
             BlobResultSegment blobResultSegment = null;
