@@ -24,9 +24,6 @@ namespace Jack.DataScience.Common
             RegisterOptions<SqlServerOptions>();
             RegisterOptions<SshOptions>();
             RegisterOptions<ArangoOptions>();
-            RegisterOptions<AzureStorageOptions>();
-            RegisterOptions<LandingZoneOptions>();
-            RegisterOptions<CuratedZoneOptions>();
             RegisterOptions<JwtSecretOptions>();
             RegisterOptions<AWSS3Options>();
             RegisterOptions<MongoBootstrapOptions>();

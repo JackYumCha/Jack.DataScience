@@ -5,19 +5,16 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Storage.AzureBlobStorage
 {
-    public class BlobStorage
+    public class AzureBlobStorageAPI
     {
-        private readonly AzureStorageOptions options;
-        public BlobStorage(AzureStorageOptions options)
+        private readonly AzureBlobStorageOptions options;
+        public AzureBlobStorageAPI(AzureBlobStorageOptions options)
         {
             this.options = options;
         }
-        public async Task WriteFileTo(
-            string path,
-            object value
-            )
+        public async Task WriteAsJson(string path, object value)
         {
             CloudStorageAccount storageAccount = null;
             CloudBlobContainer cloudBlobContainer = null;

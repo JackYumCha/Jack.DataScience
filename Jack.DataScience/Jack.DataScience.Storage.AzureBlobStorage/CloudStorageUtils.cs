@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Storage.AzureBlobStorage
 {
     public static class CloudStorageUtils
     {

@@ -25,7 +25,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.DataTypes"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.NpgSQL.Tests", "Jack.DataScience.Data.NpgSQL.Tests\Jack.DataScience.Data.NpgSQL.Tests.csproj", "{314D3FBB-0D61-4775-A7BE-DD4B4DAA14BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.Arango.Tests", "Jack.DataScience.Data.Arango.Tests\Jack.DataScience.Data.Arango.Tests.csproj", "{6683251A-A8F7-43E2-8FBA-2141AC6F0EAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.Arango.Tests", "Jack.DataScience.Data.Arango.Tests\Jack.DataScience.Data.Arango.Tests.csproj", "{6683251A-A8F7-43E2-8FBA-2141AC6F0EAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Storage.AWSS3", "Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj", "{913B731C-7789-4984-8BBD-C614AAD63C70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Storage.AzureBlobStorage", "Jack.DataScience.Storage.AzureBlobStorage\Jack.DataScience.Storage.AzureBlobStorage.csproj", "{CC8E6FC8-2AC6-4DBD-A10D-1BF1DDC5DA51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Compute.AWSEMR", "Jack.DataScience.Compute.AWSEMR\Jack.DataScience.Compute.AWSEMR.csproj", "{A1355373-13A1-46E2-A4B2-A10FB378BE9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Storage.SFTP", "Jack.DataScience.Storage.SFTP\Jack.DataScience.Storage.SFTP.csproj", "{59AE20F4-215C-40C1-A56D-F6BDF7545145}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +89,22 @@ Global
 		{6683251A-A8F7-43E2-8FBA-2141AC6F0EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6683251A-A8F7-43E2-8FBA-2141AC6F0EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6683251A-A8F7-43E2-8FBA-2141AC6F0EAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{913B731C-7789-4984-8BBD-C614AAD63C70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{913B731C-7789-4984-8BBD-C614AAD63C70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{913B731C-7789-4984-8BBD-C614AAD63C70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{913B731C-7789-4984-8BBD-C614AAD63C70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC8E6FC8-2AC6-4DBD-A10D-1BF1DDC5DA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC8E6FC8-2AC6-4DBD-A10D-1BF1DDC5DA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC8E6FC8-2AC6-4DBD-A10D-1BF1DDC5DA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC8E6FC8-2AC6-4DBD-A10D-1BF1DDC5DA51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1355373-13A1-46E2-A4B2-A10FB378BE9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1355373-13A1-46E2-A4B2-A10FB378BE9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1355373-13A1-46E2-A4B2-A10FB378BE9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1355373-13A1-46E2-A4B2-A10FB378BE9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59AE20F4-215C-40C1-A56D-F6BDF7545145}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59AE20F4-215C-40C1-A56D-F6BDF7545145}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59AE20F4-215C-40C1-A56D-F6BDF7545145}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59AE20F4-215C-40C1-A56D-F6BDF7545145}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
