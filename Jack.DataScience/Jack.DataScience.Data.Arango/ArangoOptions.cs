@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Data.Arango
 {
     public class ArangoOptions
     {

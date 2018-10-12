@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Npgsql.Logging;
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Data.NpgSQL
 {
     public class PostgreSQLOptions
     {

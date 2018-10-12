@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Data.MongoDB
 {
     public class MongoBootstrapOptions
     {

@@ -29,7 +29,7 @@ namespace Jack.DataScience.Storage.AWSS3
 
         public async Task<bool> BucketExists(string name = null)
         {
-            string bucketName = null;
+            string bucketName = name;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
@@ -40,7 +40,7 @@ namespace Jack.DataScience.Storage.AWSS3
 
         public async Task CreateBucketIfNotExists(string name = null)
         {
-            string bucketName = null;
+            string bucketName = name;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
@@ -59,7 +59,7 @@ namespace Jack.DataScience.Storage.AWSS3
 
         public async Task DeleteBucket(string name = null)
         {
-            string bucketName = null;
+            string bucketName = name;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
@@ -118,7 +118,7 @@ namespace Jack.DataScience.Storage.AWSS3
         public async Task<List<S3Object>> ListAllObjectsInBucket(string name = null)
         {
             List<S3Object> objects = new List<S3Object>();
-            string bucketName = null;
+            string bucketName = name;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
@@ -142,18 +142,43 @@ namespace Jack.DataScience.Storage.AWSS3
             return objects;
         }
 
-        public async Task WriteAsJson(string path, object value)
+        public async Task Delete(string key, string bucket = null, string versionId = null)
         {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
-             
+                await client.DeleteObjectAsync(new DeleteObjectRequest()
+                {
+                    BucketName = bucketName,
+                    Key = key,
+                    VersionId = versionId
+                });
+            }
+        }
 
+        public async Task Copy(string sourceKey, string desitnationKey, string sourceBucket = null, string desitnationBucket = null, string sourceVersionId = null) {
+            string sourceBucketName = sourceBucket;
+            if (sourceBucketName == null) sourceBucketName = awsS3Options.Bucket;
+            string destinationBucketName = desitnationBucket;
+            if (destinationBucketName == null) destinationBucketName = sourceBucketName;
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                await client.CopyObjectAsync(new CopyObjectRequest()
+                {
+                    SourceBucket = sourceBucketName,
+                    DestinationBucket = destinationBucketName,
+                    SourceKey = sourceKey,
+                    DestinationKey = desitnationKey,
+                    SourceVersionId = sourceVersionId
+                });
             }
         }
 
         public async Task Upload(string key, Stream stream, string bucket = null)
         {
-            string bucketName = null;
+            string bucketName = bucket;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
@@ -164,7 +189,7 @@ namespace Jack.DataScience.Storage.AWSS3
 
         public async Task UploadAsJson(string key, object value, string bucket = null)
         {
-            string bucketName = null;
+            string bucketName = bucket;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {

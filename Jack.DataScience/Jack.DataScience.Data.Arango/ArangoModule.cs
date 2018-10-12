@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using Autofac;
 
-namespace Jack.DataScience.Storage.AWSS3
+namespace Jack.DataScience.Data.Arango
 {
-    public class AWSS3Module: Module
+    public class ArangoModule: Module
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<AWSS3API>();
+            builder.RegisterType<ArangoConnection>();
             base.Load(builder);
         }
     }

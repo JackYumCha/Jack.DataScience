@@ -2,7 +2,7 @@
 using ArangoDB.Client;
 using System.Net;
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Data.Arango
 {
     public class ArangoConnection
     {
