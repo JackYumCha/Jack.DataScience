@@ -35,9 +35,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Compute.AW
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Storage.SFTP", "Jack.DataScience.Storage.SFTP\Jack.DataScience.Storage.SFTP.csproj", "{59AE20F4-215C-40C1-A56D-F6BDF7545145}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Storage.AWSS3.Tests", "Jack.DataScience.Storage.AWSS3.Tests\Jack.DataScience.Storage.AWSS3.Tests.csproj", "{228AB362-DC91-4AF7-BAEA-E616E8C14563}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Storage.AWSS3.Tests", "Jack.DataScience.Storage.AWSS3.Tests\Jack.DataScience.Storage.AWSS3.Tests.csproj", "{228AB362-DC91-4AF7-BAEA-E616E8C14563}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.Arango", "Jack.DataScience.Data.Arango\Jack.DataScience.Data.Arango.csproj", "{337F38A6-D1B4-4A47-BE32-61C78FAA42FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.Arango", "Jack.DataScience.Data.Arango\Jack.DataScience.Data.Arango.csproj", "{337F38A6-D1B4-4A47-BE32-61C78FAA42FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Storage.AzureBlobStorage.Tests", "Jack.DataScience.Storage.AzureBlobStorage.Tests\Jack.DataScience.Storage.AzureBlobStorage.Tests.csproj", "{8934D0A8-501C-43F5-80E0-F7219724D473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +119,10 @@ Global
 		{337F38A6-D1B4-4A47-BE32-61C78FAA42FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{337F38A6-D1B4-4A47-BE32-61C78FAA42FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{337F38A6-D1B4-4A47-BE32-61C78FAA42FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8934D0A8-501C-43F5-80E0-F7219724D473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8934D0A8-501C-43F5-80E0-F7219724D473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8934D0A8-501C-43F5-80E0-F7219724D473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8934D0A8-501C-43F5-80E0-F7219724D473}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,7 +8,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
     public class AWSS3Tests
     {
         [Theory(DisplayName = "Create S3 Bucket")]
-        [InlineData("TestBucket")]
+        [InlineData("jack-datascience-testbucket")]
         public async void CreateS3Bucket(string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();
@@ -16,11 +16,11 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
             container.ContainerBuilder.RegisterModule<AWSS3Module>();
             var servicesContainer = container.ContainerBuilder.Build();
             var api = servicesContainer.Resolve<AWSS3API>();
-            await api.CreateBucketIfNotExists(bucket);
+            await api.CreateBucket(bucket);
         }
 
-        [Theory(DisplayName = "Create S3 Object")]
-        [InlineData("myfirstobj.txt", "TestBucket")]
+        [Theory(DisplayName = "Write S3 Object")]
+        [InlineData("myfirstobj.txt", "jack-datascience-testbucket")]
         public async void WriteStringToS3Bucket(string key, string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();
@@ -36,7 +36,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
         }
 
         [Theory(DisplayName = "Delete S3 Object")]
-        [InlineData("myfirstobj.txt", "TestBucket")]
+        [InlineData("myfirstobj.txt", "jack-datascience-testbucket")]
         public async void DeleteS3Object(string key, string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();
@@ -48,7 +48,7 @@ namespace Jack.DataScience.Storage.AWSS3.Tests
         }
 
         [Theory(DisplayName = "Delete S3 Bucket")]
-        [InlineData("TestBucket")]
+        [InlineData("jack-datascience-testbucket")]
         public async void DeleteS3Bucket(string bucket)
         {
             AutoFacContainer container = new AutoFacContainer();

@@ -38,6 +38,21 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        public async Task CreateBucket(string name = null)
+        {
+            string bucketName = name;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                PutBucketRequest request = new PutBucketRequest()
+                {
+                    BucketName = name,
+                    BucketRegionName = awsS3Options.Region
+                };
+                var response = await client.PutBucketAsync(request);
+            }
+        }
+
         public async Task CreateBucketIfNotExists(string name = null)
         {
             string bucketName = name;
@@ -67,26 +82,26 @@ namespace Jack.DataScience.Storage.AWSS3
                 if (exists)
                 {
                     // make all objects expire so as to empty the bucket
-                    await client.PutLifecycleConfigurationAsync(new PutLifecycleConfigurationRequest()
-                    {
-                        BucketName = bucketName,
-                        Configuration = new LifecycleConfiguration()
-                        {
-                            Rules = {
-                                    new LifecycleRule()
-                                    {
-                                        Expiration = new LifecycleRuleExpiration()
-                                        {
-                                            Date = DateTime.Now.AddDays(-10)
-                                        },
-                                        NoncurrentVersionExpiration = new LifecycleRuleNoncurrentVersionExpiration()
-                                        {
-                                            NoncurrentDays = 0
-                                        }
-                                    }
-                                }
-                        }
-                    });
+                    //await client.PutLifecycleConfigurationAsync(new PutLifecycleConfigurationRequest()
+                    //{
+                    //    BucketName = bucketName,
+                    //    Configuration = new LifecycleConfiguration()
+                    //    {
+                    //        Rules = {
+                    //                new LifecycleRule()
+                    //                {
+                    //                    Expiration = new LifecycleRuleExpiration()
+                    //                    {
+                    //                        Date = DateTime.Now.AddDays(-10)
+                    //                    },
+                    //                    NoncurrentVersionExpiration = new LifecycleRuleNoncurrentVersionExpiration()
+                    //                    {
+                    //                        NoncurrentDays = 0
+                    //                    }
+                    //                }
+                    //            }
+                    //    }
+                    //});
 
                     // may need to iterate the objects for deleting
                     //string continuationToken = null;
