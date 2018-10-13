@@ -43,6 +43,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Storage.Az
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Storage.SFTP.Tests", "Jack.DataScience.Storage.SFTP.Tests\Jack.DataScience.Storage.SFTP.Tests.csproj", "{D17B98DF-03FB-4507-BB87-061FA3915BC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.NpgSQL.EF", "Jack.DataScience.Data.NpgSQL.EF\Jack.DataScience.Data.NpgSQL.EF.csproj", "{01C98C9F-FFE5-4848-A564-55C66407B3F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.NpgSQL.EF.Tests", "Jack.DataScience.Data.NpgSQL.EF.Tests\Jack.DataScience.Data.NpgSQL.EF.Tests.csproj", "{06E5A19D-6D2D-4A64-8A51-59CAD0FB6049}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +133,14 @@ Global
 		{D17B98DF-03FB-4507-BB87-061FA3915BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D17B98DF-03FB-4507-BB87-061FA3915BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D17B98DF-03FB-4507-BB87-061FA3915BC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01C98C9F-FFE5-4848-A564-55C66407B3F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01C98C9F-FFE5-4848-A564-55C66407B3F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01C98C9F-FFE5-4848-A564-55C66407B3F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01C98C9F-FFE5-4848-A564-55C66407B3F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06E5A19D-6D2D-4A64-8A51-59CAD0FB6049}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06E5A19D-6D2D-4A64-8A51-59CAD0FB6049}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06E5A19D-6D2D-4A64-8A51-59CAD0FB6049}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06E5A19D-6D2D-4A64-8A51-59CAD0FB6049}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
