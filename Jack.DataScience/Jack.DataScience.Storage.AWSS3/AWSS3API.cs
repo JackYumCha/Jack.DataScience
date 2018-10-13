@@ -23,7 +23,7 @@ namespace Jack.DataScience.Storage.AWSS3
             this.awsS3Options = awsS3Options;
         }
 
-        public AmazonS3Client CreateClient() => 
+        public AmazonS3Client CreateClient() =>
             new AmazonS3Client(new BasicAWSCredentials(awsS3Options.Key, awsS3Options.Secret), RegionEndpoint.GetBySystemName(awsS3Options.Region));
 
 
@@ -172,7 +172,8 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
-        public async Task Copy(string sourceKey, string desitnationKey, string sourceBucket = null, string desitnationBucket = null, string sourceVersionId = null) {
+        public async Task Copy(string sourceKey, string desitnationKey, string sourceBucket = null, string desitnationBucket = null, string sourceVersionId = null)
+        {
             string sourceBucketName = sourceBucket;
             if (sourceBucketName == null) sourceBucketName = awsS3Options.Bucket;
             string destinationBucketName = desitnationBucket;
