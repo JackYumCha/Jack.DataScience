@@ -19,6 +19,7 @@ namespace Jack.DataScience.Data.NpgSQL.EF.Tests
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Car> Cars { get; set; }
     }
 
     //[Table(nameof(User))]
@@ -27,7 +28,16 @@ namespace Jack.DataScience.Data.NpgSQL.EF.Tests
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Age { get; set; }
+        public int YearBirth { get; set; }
         public bool IsMale { get; set; }
+    }
+
+    public class Car
+    {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        public string Made { get; set; }
+        public int Year { get; set; }
+
     }
 }
