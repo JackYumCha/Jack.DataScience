@@ -16,8 +16,4 @@
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ArangoDB.Client\ArangoDB.Client.Jack.csproj" />
-  </ItemGroup>
-
 </Project>
