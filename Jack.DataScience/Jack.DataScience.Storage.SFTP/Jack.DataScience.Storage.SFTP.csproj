@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="SSH.NET" Version="2016.1.0" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

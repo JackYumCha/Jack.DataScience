@@ -38,6 +38,28 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        public async Task<bool> FileExists(string bucket, string key)
+        {
+            try
+            {
+                using (AmazonS3Client client = CreateClient())
+                {
+                    await client.GetObjectMetadataAsync(new GetObjectMetadataRequest()
+                    {
+                        BucketName = bucket,
+                        Key = key
+                    });
+                }
+                return true;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                    return false;
+                throw;
+            }
+        }
+
         public async Task CreateBucket(string name = null)
         {
             string bucketName = name;
