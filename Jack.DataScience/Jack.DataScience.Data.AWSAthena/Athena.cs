@@ -33,7 +33,6 @@ namespace Jack.DataScience.Data.AWSAthena
                 }
             });
 
-            amazonAthenaClient.CreateNamedQueryAsync
         }
     }
 }
