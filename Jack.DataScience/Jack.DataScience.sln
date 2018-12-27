@@ -49,7 +49,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.NpgSQ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.CSV", "Jack.DataScience.Data.CSV\Jack.DataScience.Data.CSV.csproj", "{CD43BAE2-70AD-4F0B-BA72-0BBDB3D64039}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.AWSAthena", "Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj", "{4FFF8E72-5E8F-4DE7-B5DF-73F848760CF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.AWSAthena", "Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj", "{4FFF8E72-5E8F-4DE7-B5DF-73F848760CF8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Compute.AWSEC2", "Jack.DataScience.Compute.AWSEC2\Jack.DataScience.Compute.AWSEC2.csproj", "{2D869C31-165A-489F-B3B8-2C0D3EC3A753}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Compute.AWSEC2.Task", "Jack.DataScience.Compute.AWSEC2.Task\Jack.DataScience.Compute.AWSEC2.Task.csproj", "{1035B7C8-FFDF-4C08-B8EA-AF34B09D77BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.WPF.Controls", "Jack.DataScience.WPF.Controls\Jack.DataScience.WPF.Controls.csproj", "{A66C5FBA-A080-4DFA-B920-6C9EA31782B5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Storage.AWSS3.Extensions", "Jack.DataScience.Storage.AWSS3.Extensions\Jack.DataScience.Storage.AWSS3.Extensions.csproj", "{E3BCF1E0-78F1-4E0A-A65C-991D285D722A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.Converters", "Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj", "{EA0DB429-75BE-481D-BA77-F1D89B4E594F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Http.Jwt", "Jack.DataScience.Http.Jwt\Jack.DataScience.Http.Jwt.csproj", "{C7290FB1-61AB-4945-B07C-37D1D2525905}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,6 +165,30 @@ Global
 		{4FFF8E72-5E8F-4DE7-B5DF-73F848760CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FFF8E72-5E8F-4DE7-B5DF-73F848760CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FFF8E72-5E8F-4DE7-B5DF-73F848760CF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D869C31-165A-489F-B3B8-2C0D3EC3A753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D869C31-165A-489F-B3B8-2C0D3EC3A753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D869C31-165A-489F-B3B8-2C0D3EC3A753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D869C31-165A-489F-B3B8-2C0D3EC3A753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1035B7C8-FFDF-4C08-B8EA-AF34B09D77BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1035B7C8-FFDF-4C08-B8EA-AF34B09D77BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1035B7C8-FFDF-4C08-B8EA-AF34B09D77BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1035B7C8-FFDF-4C08-B8EA-AF34B09D77BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A66C5FBA-A080-4DFA-B920-6C9EA31782B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A66C5FBA-A080-4DFA-B920-6C9EA31782B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A66C5FBA-A080-4DFA-B920-6C9EA31782B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A66C5FBA-A080-4DFA-B920-6C9EA31782B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3BCF1E0-78F1-4E0A-A65C-991D285D722A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3BCF1E0-78F1-4E0A-A65C-991D285D722A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3BCF1E0-78F1-4E0A-A65C-991D285D722A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3BCF1E0-78F1-4E0A-A65C-991D285D722A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA0DB429-75BE-481D-BA77-F1D89B4E594F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA0DB429-75BE-481D-BA77-F1D89B4E594F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA0DB429-75BE-481D-BA77-F1D89B4E594F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA0DB429-75BE-481D-BA77-F1D89B4E594F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7290FB1-61AB-4945-B07C-37D1D2525905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7290FB1-61AB-4945-B07C-37D1D2525905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7290FB1-61AB-4945-B07C-37D1D2525905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7290FB1-61AB-4945-B07C-37D1D2525905}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

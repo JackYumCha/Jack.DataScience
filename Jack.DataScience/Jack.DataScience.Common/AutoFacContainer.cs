@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Autofac;
-using Npgsql.Logging;
 
 namespace Jack.DataScience.Common
 {
@@ -19,7 +18,6 @@ namespace Jack.DataScience.Common
 
             RegisterOptions<SerilogOptions>();
             RegisterOptions<SqlServerOptions>();
-            RegisterOptions<JwtSecretOptions>(); 
         }
 
         public IConfiguration Configuration { get; set; }

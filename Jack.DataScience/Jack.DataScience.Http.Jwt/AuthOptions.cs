@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MediGraph.API.AutoFac
+namespace Jack.DataScience.Common
 {
     public class AuthOptions
     {

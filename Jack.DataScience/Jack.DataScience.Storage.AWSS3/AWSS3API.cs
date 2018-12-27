@@ -23,6 +23,11 @@ namespace Jack.DataScience.Storage.AWSS3
             this.awsS3Options = awsS3Options;
         }
 
+        public AWSS3Options Options
+        {
+            get => awsS3Options;
+        }
+
         public AmazonS3Client CreateClient() =>
             new AmazonS3Client(new BasicAWSCredentials(awsS3Options.Key, awsS3Options.Secret), RegionEndpoint.GetBySystemName(awsS3Options.Region));
 
@@ -38,8 +43,9 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
-        public async Task<bool> FileExists(string bucket, string key)
+        public async Task<bool> FileExists(string key, string bucket = null)
         {
+            if (bucket == null) bucket = awsS3Options.Bucket;
             try
             {
                 using (AmazonS3Client client = CreateClient())
@@ -152,10 +158,10 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
-        public async Task<List<S3Object>> ListAllObjectsInBucket(string name = null)
+        public async Task<List<S3Object>> ListAllObjectsInBucket(string bucket = null, string prefix = null)
         {
             List<S3Object> objects = new List<S3Object>();
-            string bucketName = name;
+            string bucketName = bucket;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
@@ -168,7 +174,8 @@ namespace Jack.DataScience.Storage.AWSS3
                         var response = await client.ListObjectsV2Async(new ListObjectsV2Request()
                         {
                             BucketName = bucketName,
-                            ContinuationToken = continuationToken
+                            ContinuationToken = continuationToken,
+                            Prefix = prefix
                         });
                         continuationToken = response.ContinuationToken;
                         objects.AddRange(response.S3Objects);
@@ -236,6 +243,17 @@ namespace Jack.DataScience.Storage.AWSS3
                 {
                     await transferUtility.UploadAsync(stream, bucketName, key);
                 }
+            }
+        }
+
+        public async Task<Stream> OpenReadAsync(string key, string bucket = null)
+        {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                return await transferUtility.OpenStreamAsync(bucketName, key);
             }
         }
 

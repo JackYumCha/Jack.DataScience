@@ -1,16 +1,13 @@
 ﻿using System;
-using Amazon.Athena;
-using Amazon.Athena.Model;
-using Amazon;
 using Autofac;
 
-namespace Jack.DataScience.Data.AWSAthena
+namespace Jack.DataScience.Compute.AWSEC2
 {
-    public class AthenaModule: Module
+    public class AWSEC2Module: Module
     {
         protected override void Load(ContainerBuilder builder)
         {
-            
+            builder.RegisterType<AWSEC2API>();
             base.Load(builder);
         }
     }

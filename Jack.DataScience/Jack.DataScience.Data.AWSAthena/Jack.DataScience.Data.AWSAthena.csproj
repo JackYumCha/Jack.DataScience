@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj" />
   </ItemGroup>
 
 </Project>

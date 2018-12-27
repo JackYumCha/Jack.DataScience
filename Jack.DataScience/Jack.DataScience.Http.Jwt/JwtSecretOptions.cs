@@ -1,4 +1,4 @@
-﻿namespace Jack.DataScience.Common
+﻿namespace Jack.DataScience.Http.Jwt
 {
     public class JwtSecretOptions
     {
