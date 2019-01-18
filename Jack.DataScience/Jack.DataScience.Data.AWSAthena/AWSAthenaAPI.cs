@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using Amazon;
 using Amazon.Runtime;
 using Amazon.Athena;
@@ -104,7 +105,7 @@ namespace Jack.DataScience.Data.AWSAthena
             return resultResponse;
         }
 
-        public async Task<string> GenerateQuerySchema(string query)
+        public async Task<string> GenerateQueryCSSchema(string query)
         {
             var result = await ExecuteQuery(query);
             return result.ToCSharpType();
@@ -120,7 +121,7 @@ namespace Jack.DataScience.Data.AWSAthena
 
     public static class AthenaQueryExtensions
     {
-        public static List<T> ReadRows<T>(this GetQueryResultsResponse getQueryResultsResponse) where T: class, new()
+        public static List<T> ReadRows<T>(this GetQueryResultsResponse getQueryResultsResponse, int skip = 1) where T: class, new()
         {
 
             var columnInfos = getQueryResultsResponse.ResultSet.ResultSetMetadata.ColumnInfo;
@@ -129,9 +130,23 @@ namespace Jack.DataScience.Data.AWSAthena
 
             var results = new List<T>();
 
-            foreach (var row in getQueryResultsResponse.ResultSet.Rows.Skip(1))
+            foreach (var row in getQueryResultsResponse.ResultSet.Rows.Skip(skip))
             {
                 results.Add(row.ReadRowAs<T>(columnInfos, propertyInfos));
+            }
+            return results;
+        }
+
+        public static List<List<object>> ReadData(this GetQueryResultsResponse getQueryResultsResponse, int skip = 1)
+        {
+            var columnInfos = getQueryResultsResponse.ResultSet.ResultSetMetadata.ColumnInfo;
+            var results = new List<List<object>>();
+            foreach (var row in getQueryResultsResponse.ResultSet.Rows.Skip(skip))
+            {
+                for(int i = 0; i < row.Data.Count; i++)
+                {
+                    results.Add(row.ReadRowAsObjects(columnInfos));
+                }
             }
             return results;
         }
@@ -156,10 +171,22 @@ namespace Jack.DataScience.Data.AWSAthena
             return stb.ToString();
         }
 
+        public static Dictionary<string, string>ToSchemaDictionary(this GetQueryResultsResponse getQueryResultsResponse)
+        {
+            var columnInfos = getQueryResultsResponse.ResultSet.ResultSetMetadata.ColumnInfo;
+            var results = new Dictionary<string, string>();
+            foreach (var column in columnInfos)
+            {
+                results.Add(column.Name, column.MapCSharpType());
+            }
+            return results;
+        }
+
         public static string MapCSharpType(this ColumnInfo column)
         {
             switch (column.Type)
             {
+                case AthenaDataTypes.@string:
                 case AthenaDataTypes.varchar:
                     return "string";
                 case AthenaDataTypes.tinyint:
@@ -173,11 +200,37 @@ namespace Jack.DataScience.Data.AWSAthena
                 case AthenaDataTypes.@double:
                     return "double";
                 case AthenaDataTypes.boolean:
-                    return "boolean";
+                    return "bool";
                 case AthenaDataTypes.date:
                     return "DateTime";
                 case AthenaDataTypes.timestamp:
                     return "DateTime";
+            }
+            throw new Exception("Unexpected Athena Type");
+        }
+
+        public static Type AsCSharpType(this ColumnInfo column)
+        {
+            switch (column.Type)
+            {
+                case AthenaDataTypes.varchar:
+                    return typeof(string);
+                case AthenaDataTypes.tinyint:
+                    return typeof(byte);
+                case AthenaDataTypes.smallint:
+                    return typeof(short);
+                case AthenaDataTypes.integer:
+                    return typeof(int);
+                case AthenaDataTypes.bigint:
+                    return typeof(long);
+                case AthenaDataTypes.@double:
+                    return typeof(double);
+                case AthenaDataTypes.boolean:
+                    return typeof(bool);
+                case AthenaDataTypes.date:
+                    return typeof(DateTime);
+                case AthenaDataTypes.timestamp:
+                    return typeof(DateTime);
             }
             throw new Exception("Unexpected Athena Type");
         }
@@ -192,15 +245,35 @@ namespace Jack.DataScience.Data.AWSAthena
             }
 
             var data = new T();
+
             for (int i = 0; i < columnInfos.Count; i++)
             {
                 var column = columnInfos[i];
-                var stringValue = row.Data[i].VarCharValue;
                 var property = propertyInfos[column.Name.ToLower()];
-                property.SetValue(data, row.Data[i].VarCharValue.As(property.PropertyType));
+                if(row.Data.Count < columnInfos.Count && row.Data.Count ==1)
+                {
+                    var splitted = row.Data[0].VarCharValue.Split(new char[] { '\t' }).Select(item => Regex.Replace(item, @"\s+$", "")).ToList();
+                    var value = splitted[i];
+                    property.SetValue(data, value.As(property.PropertyType));
+                }
+                else
+                {
+                    property.SetValue(data, row.Data[i].VarCharValue.As(property.PropertyType));
+                }
             }
 
             return data;
+        }
+
+        public static List<object> ReadRowAsObjects(this Row row, List<ColumnInfo> columnInfos)
+        {
+            var results = new List<object>();
+            for (int i = 0; i < columnInfos.Count; i++)
+            {
+                var column = columnInfos[i];
+                results.Add(row.Data[i].VarCharValue.As(column.AsCSharpType()));
+            }
+            return results;
         }
 
         //public static T ReadRow<T>(this Row row, List<ColumnInfo> columnInfos, Dictionary<string, PropertyInfo> propertyInfos = null) where T: class, new()
@@ -221,7 +294,7 @@ namespace Jack.DataScience.Data.AWSAthena
         //        {
         //            case AthenaDataTypes.varchar:
         //                {
-                            
+
         //                }
         //                break;
         //            case AthenaDataTypes.tinyint: 
@@ -271,6 +344,7 @@ namespace Jack.DataScience.Data.AWSAthena
 
     public static class AthenaDataTypes
     {
+        public const string @string = "string";
         public const string varchar = "varchar";
         public const string tinyint = "tinyint";
         public const string smallint = "smallint";

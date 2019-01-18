@@ -12,7 +12,7 @@ namespace Jack.DataScience.Http.Jwt
                          {nameof(JwtTokenBase<TRole>.Id), token.Id},
                          {nameof(JwtTokenBase<TRole>.Name), token.Name },
                          {nameof(JwtTokenBase<TRole>.Role), token.Role.ToString() },
-                         {nameof(JwtTokenBase<TRole>.ExpiringDate), token.ExpiringDate.ToString("yyyyMMddHHmmss")}
+                         {nameof(JwtTokenBase<TRole>.ExpiringDate), token.ExpiringDate.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFK")}
              };
     }
 }

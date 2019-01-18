@@ -177,7 +177,7 @@ namespace Jack.DataScience.Storage.AWSS3
                             ContinuationToken = continuationToken,
                             Prefix = prefix
                         });
-                        continuationToken = response.ContinuationToken;
+                        continuationToken = response.NextContinuationToken;
                         objects.AddRange(response.S3Objects);
                     }
                     while (continuationToken != null);
@@ -232,6 +232,31 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        /// <summary>
+        /// upload the file to S3 bucket with public access
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="stream"></param>
+        /// <param name="bucket"></param>
+        /// <returns></returns>
+        public async Task UploadAsPublic(string key, Stream stream, string bucket = null)
+        {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                var request = new TransferUtilityUploadRequest()
+                {
+                    InputStream = stream,
+                    Key = key,
+                    BucketName = bucketName,
+                    CannedACL = S3CannedACL.PublicRead
+                };
+                await transferUtility.UploadAsync(request);
+            }
+        }
+
         public async Task UploadAsJson(string key, object value, string bucket = null)
         {
             string bucketName = bucket;
@@ -257,5 +282,44 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        /// <summary>
+        /// Read file as bytes
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="bucket"></param>
+        /// <returns></returns>
+        public async Task<byte[]> ReadAsBytes(string key, string bucket = null)
+        {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                using (var stream = await transferUtility.OpenStreamAsync(bucketName, key))
+                {
+                    using(MemoryStream memoryStream = new MemoryStream())
+                    {
+                        await stream.CopyToAsync(memoryStream);
+                        return memoryStream.ToArray();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Read file as string
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="bucket"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public async Task<string> ReadAsString(string key, string bucket = null, Encoding encoding = null)
+        {
+            var bytes = await ReadAsBytes(key, bucket);
+            if (bytes == null) return null;
+            if (encoding == null) encoding = Encoding.UTF8;
+            var value = encoding.GetString(bytes);
+            return value;
+        }
     }
 }

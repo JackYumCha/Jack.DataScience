@@ -4,7 +4,7 @@ namespace Jack.DataScience.Data.Converters
 {
     public static class StringConversionExtensions
     {
-
+        private static Type stringType = typeof(string);
         private static Type intType = typeof(int);
         private static Type intNullableType = typeof(int?);
         private static Type doubleType = typeof(double);
@@ -28,7 +28,11 @@ namespace Jack.DataScience.Data.Converters
 
         public static object As(this string value, Type type)
         {
-            if (type == intType)
+            if(type == stringType)
+            {
+                return value;
+            }
+            else if (type == intType)
             {
                 int result = 0;
                 int.TryParse(value, out result);

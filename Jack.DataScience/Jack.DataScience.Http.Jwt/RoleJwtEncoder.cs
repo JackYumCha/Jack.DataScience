@@ -20,6 +20,10 @@ namespace Jack.DataScience.Http.Jwt
         private readonly IJwtValidator validator;
         private readonly IJwtEncoder encoder;
         private readonly IJwtDecoder decoder;
+        private static readonly JsonSerializer jsonSerializer = new JsonSerializer()
+        {
+            DateFormatString = "yyyy-MM-ddTHH:mm:ss.FFFFFFFK",
+        };
         public RoleJwtEncoder(JwtSecretOptions jwtSecretOptions)
         {
             secret = jwtSecretOptions.Secret;

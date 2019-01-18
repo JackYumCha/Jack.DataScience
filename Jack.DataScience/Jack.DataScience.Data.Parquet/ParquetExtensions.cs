@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Linq;
@@ -150,13 +151,15 @@ namespace Jack.DataScience.Data.Parquet
             return columns;
         }
 
-        public static IEnumerable<T> ReadParquet<T>(this Stream stream) where T: class, new()
+        public static List<T> ReadParquet<T>(this Stream stream) where T: class, new()
         {
             Type classType = typeof(T);
 
+            List<T> results = new List<T>();
+
             var properties = classType.GetProperties().ToDictionary(p => p.Name, p => p);
 
-            var bytes = stream.ReadAsBytes();
+            var bytes = stream.ReadAsBytes().GetAwaiter().GetResult();
 
             using (ParquetReader reader = new ParquetReader(new MemoryStream(bytes)))
             {
@@ -194,22 +197,24 @@ namespace Jack.DataScience.Data.Parquet
                                         prop.SetValue(item, column.Data.GetValue(i));
                                     }
                                 }
-                                yield return item;
+                                results.Add(item);
                             }
                         }
                     }
                 }
             }
+
+            return results;
         }
 
-        public static byte[] ReadAsBytes(this Stream stream)
+        public static async Task<byte[]> ReadAsBytes(this Stream stream)
         {
             List<byte> bytes = new List<byte>();
             byte[] buffer = new byte[4096];
             int readLength = 0;
             do
             {
-                readLength = stream.Read(buffer, 0, buffer.Length);
+                readLength = await stream.ReadAsync(buffer, 0, buffer.Length);
                 bytes.AddRange(buffer.Take(readLength));
             }
             while (readLength > 0);
