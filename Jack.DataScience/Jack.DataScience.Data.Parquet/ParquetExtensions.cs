@@ -42,10 +42,12 @@ namespace Jack.DataScience.Data.Parquet
 
         public static void WriteParquet<T>(this Stream stream, IEnumerable<T> items) where T: class
         {
-       
-
             var columns = items.ToDataColumns();
+            stream.WriteParquetColumns(columns);
+        }
 
+        public static void WriteParquetColumns(this Stream stream, List<DataColumn> columns)
+        {
             Schema schema = new Schema(new ReadOnlyCollection<Field>(columns.Select(column => column.Field).ToArray()));
 
             using (ParquetWriter writer = new ParquetWriter(schema, stream))
@@ -62,7 +64,7 @@ namespace Jack.DataScience.Data.Parquet
             }
         }
 
-        private static List<DataColumn> ToDataColumns<T>(this IEnumerable<T> items) where T: class
+        private static List<DataColumn> ToDataColumns<T>(this IEnumerable<T> items) where T : class
         {
             Type classType = typeof(T);
 
@@ -79,31 +81,31 @@ namespace Jack.DataScience.Data.Parquet
                     if (isNullable)
                     {
                         columns.Add(new DataColumn(
-    new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime, hasNulls: true),
-    items.Select(item => {
-        var value = prop.GetValue(item);
-        if (value == null) return new DateTimeOffset?();
-        return new DateTimeOffset((DateTime)value);
-    }).ToArray()
-    ));
+                            new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime, hasNulls: true),
+                            items.Select(item => {
+                                var value = prop.GetValue(item);
+                                if (value == null) return new DateTimeOffset?();
+                                return new DateTimeOffset((DateTime)value);
+                            }).ToArray()
+                            ));
                     }
                     else
                     {
                         columns.Add(new DataColumn(
-    new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime, hasNulls: false),
-    items.Select(item =>
-    {
-        var value = (DateTime?)prop.GetValue(item);
-        if (value.HasValue)
-        {
-            return new DateTimeOffset?(new DateTimeOffset(value.Value));
-        }
-        else
-        {
-            return null;
-        }
-    }).ToArray()
-    ));
+                            new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime, hasNulls: false),
+                            items.Select(item =>
+                            {
+                                var value = (DateTime?)prop.GetValue(item);
+                                if (value.HasValue)
+                                {
+                                    return new DateTimeOffset?(new DateTimeOffset(value.Value));
+                                }
+                                else
+                                {
+                                    return null;
+                                }
+                            }).ToArray()
+                            ));
                     }
                 }
                 else if (prop.PropertyType == DecimalType)
@@ -150,6 +152,9 @@ namespace Jack.DataScience.Data.Parquet
 
             return columns;
         }
+
+
+
 
         public static List<T> ReadParquet<T>(this Stream stream) where T: class, new()
         {

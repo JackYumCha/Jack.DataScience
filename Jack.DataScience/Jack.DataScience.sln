@@ -59,13 +59,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.WPF.Contro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Storage.AWSS3.Extensions", "Jack.DataScience.Storage.AWSS3.Extensions\Jack.DataScience.Storage.AWSS3.Extensions.csproj", "{E3BCF1E0-78F1-4E0A-A65C-991D285D722A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.Converters", "Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj", "{EA0DB429-75BE-481D-BA77-F1D89B4E594F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.Converters", "Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj", "{EA0DB429-75BE-481D-BA77-F1D89B4E594F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Http.Jwt", "Jack.DataScience.Http.Jwt\Jack.DataScience.Http.Jwt.csproj", "{C7290FB1-61AB-4945-B07C-37D1D2525905}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.Jwt", "Jack.DataScience.Http.Jwt\Jack.DataScience.Http.Jwt.csproj", "{C7290FB1-61AB-4945-B07C-37D1D2525905}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Tasks.Chain", "Jack.DataScience.Tasks.Chain\Jack.DataScience.Tasks.Chain.csproj", "{EFB6E7CF-D12C-4CFA-A4FC-7F4063800082}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Tasks.Chain", "Jack.DataScience.Tasks.Chain\Jack.DataScience.Tasks.Chain.csproj", "{EFB6E7CF-D12C-4CFA-A4FC-7F4063800082}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.Password", "Jack.DataScience.Http.Password\Jack.DataScience.Http.Password.csproj", "{9D6EC70F-B192-4210-8C45-E82242F543F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.AWSAthenaEtl", "Jack.DataScience.Data.AWSAthenaEtl\Jack.DataScience.Data.AWSAthenaEtl.csproj", "{B98839CE-77B3-4E83-9666-F1FCA6255CDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -201,6 +203,10 @@ Global
 		{9D6EC70F-B192-4210-8C45-E82242F543F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D6EC70F-B192-4210-8C45-E82242F543F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D6EC70F-B192-4210-8C45-E82242F543F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

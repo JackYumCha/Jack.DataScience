@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\source\repos\franchisee-opt-in\MvcAngular.Generator.Lambda\MvcAngular.Generator.Lambda.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.CSV\Jack.DataScience.Data.CSV.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.Parquet\Jack.DataScience.Data.Parquet.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3.Extensions\Jack.DataScience.Storage.AWSS3.Extensions.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Storage.SFTP\Jack.DataScience.Storage.SFTP.csproj" />
+  </ItemGroup>
+
+</Project>
