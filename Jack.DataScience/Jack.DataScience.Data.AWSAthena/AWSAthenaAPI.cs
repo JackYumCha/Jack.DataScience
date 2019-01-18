@@ -38,7 +38,7 @@ namespace Jack.DataScience.Data.AWSAthena
                 QueryString = $@"ALTER TABLE {tableName} ADD PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
                 ResultConfiguration = new ResultConfiguration()
                 {
-                    OutputLocation = "s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                    OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
                 }
             });
 
