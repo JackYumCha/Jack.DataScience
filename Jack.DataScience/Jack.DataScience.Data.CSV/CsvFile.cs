@@ -39,6 +39,21 @@ namespace Jack.DataScience.Data.CSV
             }
         }
 
+        public static void ReadCsvCallback<T>(this Stream stream, Action<T> action,  Configuration configuration) where T: class
+        {
+            using (var reader = new StreamReader(stream))
+            {
+                using (var csv = configuration == null ? new CsvReader(reader) : new CsvReader(reader, configuration))
+                {
+                    while(csv.Read())
+                    {
+                        var item = csv.GetRecord<T>();
+                        action(item);
+                    }
+                }
+            }
+        }
+
         public static void Write<T>(string filename, IEnumerable<T> items)
         {
             using (var stream = File.OpenWrite(filename))
