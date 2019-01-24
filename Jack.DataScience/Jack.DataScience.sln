@@ -67,7 +67,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Tasks.Chai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.Password", "Jack.DataScience.Http.Password\Jack.DataScience.Http.Password.csproj", "{9D6EC70F-B192-4210-8C45-E82242F543F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.AWSAthenaEtl", "Jack.DataScience.Data.AWSAthenaEtl\Jack.DataScience.Data.AWSAthenaEtl.csproj", "{B98839CE-77B3-4E83-9666-F1FCA6255CDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.AWSAthenaEtl", "Jack.DataScience.Data.AWSAthenaEtl\Jack.DataScience.Data.AWSAthenaEtl.csproj", "{B98839CE-77B3-4E83-9666-F1FCA6255CDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.AWS.CloudWatch", "Jack.DataScience.AWS.CloudWatch\Jack.DataScience.AWS.CloudWatch.csproj", "{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -207,6 +209,10 @@ Global
 		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B98839CE-77B3-4E83-9666-F1FCA6255CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

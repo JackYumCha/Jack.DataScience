@@ -116,7 +116,12 @@ namespace Jack.DataScience.Data.AWSAthena
             var result = await ExecuteQuery(query);
             return result.ReadRows<T>();
         }
-        
+
+        public async Task<List<List<object>>> GetQueryResults(string query)
+        {
+            var result = await ExecuteQuery(query);
+            return result.ReadData();
+        }
     }
 
     public static class AthenaQueryExtensions
@@ -143,10 +148,7 @@ namespace Jack.DataScience.Data.AWSAthena
             var results = new List<List<object>>();
             foreach (var row in getQueryResultsResponse.ResultSet.Rows.Skip(skip))
             {
-                for(int i = 0; i < row.Data.Count; i++)
-                {
-                    results.Add(row.ReadRowAsObjects(columnInfos));
-                }
+                results.Add(row.ReadRowAsObjects(columnInfos));
             }
             return results;
         }

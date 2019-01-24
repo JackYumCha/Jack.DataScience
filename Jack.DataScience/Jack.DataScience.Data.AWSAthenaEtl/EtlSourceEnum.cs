@@ -11,7 +11,9 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
     {
         SFTP,
         S3BucketCheck,
-        S3BucketEvent
+        S3BucketEvent,
+        GoogleAnalytics,
+        AmazonAthena
     }
 
     [AngularType]

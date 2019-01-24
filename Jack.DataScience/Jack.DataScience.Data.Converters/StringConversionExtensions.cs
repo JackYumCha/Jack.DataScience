@@ -68,6 +68,18 @@ namespace Jack.DataScience.Data.Converters
                 if (long.TryParse(value, out result)) return result;
                 return null;
             }
+            else if (type == boolType)
+            {
+                bool result = false;
+                bool.TryParse(value, out result);
+                return result;
+            }
+            else if (type == boolNullableType)
+            {
+                bool result = false;
+                if (bool.TryParse(value, out result)) return result;
+                return null;
+            }
             else if (type == datetimeType)
             {
                 DateTime result = DateTime.UtcNow;

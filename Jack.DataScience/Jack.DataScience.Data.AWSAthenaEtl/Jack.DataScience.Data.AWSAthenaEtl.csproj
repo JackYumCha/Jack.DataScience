@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Cloud.BigQuery.V2" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\source\repos\franchisee-opt-in\MvcAngular.Generator.Lambda\MvcAngular.Generator.Lambda.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj" />

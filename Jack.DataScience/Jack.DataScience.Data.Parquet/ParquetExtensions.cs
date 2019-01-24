@@ -212,6 +212,56 @@ namespace Jack.DataScience.Data.Parquet
             return results;
         }
 
+
+        public static List<Dictionary<string, object>> ReadParquetAdDictData(this Stream stream, List<string> mappedFields = null)
+        {
+            List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
+
+            var bytes = stream.ReadAsBytes().GetAwaiter().GetResult();
+
+            using (ParquetReader reader = new ParquetReader(new MemoryStream(bytes)))
+            {
+                DataField[] fields = reader.Schema.GetDataFields();
+                for (int g = 0; g < reader.RowGroupCount; g++)
+                {
+                    using (ParquetRowGroupReader rowGroupReader = reader.OpenRowGroupReader(g))
+                    {
+                        DataColumn[] columns = fields.Select(rowGroupReader.ReadColumn).ToArray();
+                        if (columns.Length > 0)
+                        {
+
+                            Dictionary<string, DataColumn> columnDict = columns.ToDictionary(c => c.Field.Name, c=>c);
+
+                            if (mappedFields != null)
+                            {
+                                Dictionary<string, DataColumn> mappedDict = new Dictionary<string, DataColumn>();
+                                for (int i =0; i< mappedFields.Count; i++)
+                                {
+                                    var mappedField = mappedFields[i];
+                                    if (!mappedDict.ContainsKey(mappedField) && columnDict.ContainsKey(mappedField))
+                                    {
+                                        mappedDict.Add(mappedField, columnDict[mappedField]);
+                                    }
+                                }
+                                columnDict = mappedDict;
+                            }
+
+                            for (int i = 0; i < columns[0].Data.Length; i++)
+                            {
+                                var item = new Dictionary<string, object>();
+                                foreach(var column in columnDict.Values)
+                                {
+                                    item.Add(column.Field.Name, column.Data.GetValue(i));
+                                }
+                                results.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+            return results;
+        }
+
         public static async Task<byte[]> ReadAsBytes(this Stream stream)
         {
             List<byte> bytes = new List<byte>();

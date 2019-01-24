@@ -12,6 +12,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         athena_integer,
         athena_bigint,
         athena_double,
+        athena_float,
         athena_boolean,
         athena_date,
         athena_timestamp
