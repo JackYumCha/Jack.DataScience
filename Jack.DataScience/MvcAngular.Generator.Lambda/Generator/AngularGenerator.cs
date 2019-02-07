@@ -519,6 +519,8 @@ namespace MvcAngular.Generator
                 //this is the way we map backend argument to front end. it shall not be used for return types
                 case "Microsoft.AspNetCore.Http.IFormFile":
                     return "File";
+                case "System.Object":
+                    return "any";
                 default:
                     //handle generic types and array types
 

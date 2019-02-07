@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Collections.Generic;
+using Jack.DataScience.Common;
 using Jack.DataScience.Data.CSV;
 using Jack.DataScience.Data.Converters;
 using Jack.DataScience.Data.Parquet;
@@ -137,9 +138,12 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
 
 
 
-        public static async Task<List<string>> TransferData(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI)
+        public static async Task<List<string>> TransferData(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI, GenericLogger logger = null)
         {
             var result = new List<string>();
+
+            logger?.Log?.Invoke($"ETL Mode: {etlSettings.SourceType}");
+
             switch (etlSettings.SourceType)
             {
                 case EtlSourceEnum.SFTP:
@@ -482,11 +486,12 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         /// <param name="s3FileKey">event source s3 key</param>
         /// <returns></returns>
         public static async Task<string> ProcessS3EtlEvent(this AWSS3API reportingAwsS3Api, string listKey, string etlPrefix, 
-            AWSAthenaAPI awsAthenaAPI, string bucketName, string s3FileKey)
+            AWSAthenaAPI awsAthenaAPI, string bucketName, string s3FileKey, GenericLogger logger = null)
         {
             if (!await reportingAwsS3Api.FileExists(listKey)) return $"event handler setting does not exist: '{listKey}'";
 
             var json = await reportingAwsS3Api.ReadAsString(listKey);
+            logger?.Log?.Invoke(json);
             var list = JsonConvert.DeserializeObject<List<S3EventHandler>>(json);
 
             var found = list.FirstOrDefault(handler => handler.BucketName == bucketName && Regex.IsMatch(s3FileKey, handler.PathRegex));
@@ -494,8 +499,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             if (found == null) return $"event handler not found for object: 's3://{bucketName}/{s3FileKey}'";
 
             var etlkey = $"{etlPrefix}{found.EtlName}.json";
-
-            if(! await reportingAwsS3Api.FileExists(etlkey)) return $"etl setting does not exist: '{etlkey}'"; ;
+            logger?.Log?.Invoke($"Find ETL setting: {etlkey}");
+            if (! await reportingAwsS3Api.FileExists(etlkey)) return $"etl setting does not exist: '{etlkey}'"; ;
 
             var jsonEtl = await reportingAwsS3Api.ReadAsString(etlkey);
 

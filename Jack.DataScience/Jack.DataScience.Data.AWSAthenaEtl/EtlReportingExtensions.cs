@@ -27,12 +27,13 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             var dateIntFrom = int.Parse(dateFrom.ToString("yyyyMMdd"));
             var dateIntTo = int.Parse(dateTo.ToString("yyyyMMdd"));
 
-            Regex dateKeyPathRegex = new Regex(@"^(\d{8})\/$");
+            Regex dateKeyPathRegex = new Regex(@"^(\d+)\/$");
 
             var dateKeys = paths.Where(p => dateKeyPathRegex.IsMatch(p))
                 .Where(p =>
                 {
-                    var dateInt = int.Parse(p.Substring(0, 8));
+                    var dateKey = dateKeyPathRegex.Match(p).Groups[1].Value;
+                    var dateInt = int.Parse(dateKey);
                     return dateInt >= dateIntFrom && dateInt <= dateIntTo;
                 })
                 .ToList();
@@ -48,13 +49,22 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 return seed;
             });
 
+            var partitionKey = etlSettings.DatePartitionKey;
+            var partitionPrefexLength = etlSettings.TargetS3Prefix.Length + 1;
             // read all parquet files
 
             var allDictLists = await Task.WhenAll(allObjects.Select(async s3Obj =>
            {
                using (var parquetStream = await awsS3Api.OpenReadAsync(s3Obj.Key))
                {
-                   return parquetStream.ReadParquetAdDictData(etlSettings.Mappings.Select(m => m.MappedName).ToList());
+                   var dictList = parquetStream.ReadParquetAdDictData(etlSettings.Mappings.Select(m => m.MappedName).ToList());
+                   var relativePath = s3Obj.Key.Substring(partitionPrefexLength);
+                   var dateKey = relativePath.Substring(0, relativePath.IndexOf("/"));
+                   foreach (var dict in dictList)
+                   {
+                       dict.Add(partitionKey, dateKey);
+                   }
+                   return dictList;
                }
            }).ToArray());
 
@@ -64,12 +74,15 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 return seed;
             });
 
+            var schema = etlSettings.Mappings.Select(m => m.MappedName).ToList();
+            schema.Add(partitionKey);
+
             return new EtlReportResponse()
             {
                 Name = request.Name,
                 DateFrom = request.DateFrom,
                 DateTo = request.DateTo,
-                Schema = etlSettings.Mappings.Select(m => m.MappedName).ToList(),
+                Schema = schema,
                 Data = resultDictData
             };
         }

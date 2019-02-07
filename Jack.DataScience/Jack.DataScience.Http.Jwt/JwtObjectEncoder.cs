@@ -3,6 +3,7 @@ using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
 namespace Jack.DataScience.Http.Jwt
@@ -10,7 +11,7 @@ namespace Jack.DataScience.Http.Jwt
     /// <summary>
     /// this encoder implements the JWT encoding. it can encode a dictionary into JWT and decode it
     /// </summary>
-    public class RoleJwtEncoder
+    public class JwtObjectEncoder
     {
         private readonly string secret;
         private readonly IJwtAlgorithm algorithm;
@@ -20,11 +21,13 @@ namespace Jack.DataScience.Http.Jwt
         private readonly IJwtValidator validator;
         private readonly IJwtEncoder encoder;
         private readonly IJwtDecoder decoder;
-        private static readonly JsonSerializer jsonSerializer = new JsonSerializer()
+        private const string payloadKey = "payload";
+        private static readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
         {
             DateFormatString = "yyyy-MM-ddTHH:mm:ss.FFFFFFFK",
+            Converters = { new StringEnumConverter() }
         };
-        public RoleJwtEncoder(JwtSecretOptions jwtSecretOptions)
+        public JwtObjectEncoder(JwtSecretOptions jwtSecretOptions)
         {
             secret = jwtSecretOptions.Secret;
             algorithm = new HMACSHA256Algorithm();
@@ -36,26 +39,17 @@ namespace Jack.DataScience.Http.Jwt
             decoder = new JwtDecoder(serializer, validator, urlEncoder);
         }
 
-        public string Encode(IDictionary<string, string> payload)
+        public string Encode<T>(T payload)
         {
-            return encoder.Encode(payload, secret);
+            Dictionary<string, string> jwt = new Dictionary<string, string>();
+            jwt.Add(payloadKey, JsonConvert.SerializeObject(payload, jsonSerializerSettings));
+            return encoder.Encode(jwt, secret);
         }
 
-        public JObject Decode(string jwt)
+        public T Decode<T>(string jwt)
         {
-            return JsonConvert.DeserializeObject<JObject>(decoder.Decode(jwt));
-        }
-
-        public string Encode<TRole>(JwtTokenBase<TRole> token) where TRole: struct
-        {
-            var payload = token.ToDictionary();
-            return Encode(payload);
-        }
-
-        public JwtTokenBase<TRole> Decode<TRole>(string jwt) where TRole : struct
-        {
-            var token = Decode(jwt);
-            return token.ToObject<JwtTokenBase<TRole>>();
+            var jDict = JsonConvert.DeserializeObject<JObject>(decoder.Decode(jwt));
+            return jDict.GetValue(payloadKey).ToObject<T>();
         }
     }
 }

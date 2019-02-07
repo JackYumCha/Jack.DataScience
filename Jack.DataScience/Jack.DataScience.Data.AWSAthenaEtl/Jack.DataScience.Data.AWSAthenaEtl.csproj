@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\source\repos\franchisee-opt-in\MvcAngular.Generator.Lambda\MvcAngular.Generator.Lambda.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj" />
@@ -18,6 +17,7 @@
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3.Extensions\Jack.DataScience.Storage.AWSS3.Extensions.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.SFTP\Jack.DataScience.Storage.SFTP.csproj" />
+    <ProjectReference Include="..\MvcAngular.Generator.Lambda\MvcAngular.Generator.Lambda.csproj" />
   </ItemGroup>
 
 </Project>
