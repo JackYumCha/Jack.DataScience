@@ -63,6 +63,8 @@ namespace Jack.DataScience.Data.CSV
                     using (var csv = new CsvWriter(writer))
                     {
                         csv.WriteRecords(items);
+                        csv.Flush();
+                        writer.Flush();
                     }
                 }
             }
@@ -80,6 +82,8 @@ namespace Jack.DataScience.Data.CSV
                 using (var csv = new CsvWriter(writer))
                 {
                     csv.WriteRecords(items);
+                    csv.Flush();
+                    writer.Flush();
                 }
             }
         }

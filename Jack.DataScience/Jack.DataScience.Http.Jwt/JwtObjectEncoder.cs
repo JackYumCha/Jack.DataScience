@@ -49,7 +49,8 @@ namespace Jack.DataScience.Http.Jwt
         public T Decode<T>(string jwt)
         {
             var jDict = JsonConvert.DeserializeObject<JObject>(decoder.Decode(jwt));
-            return jDict.GetValue(payloadKey).ToObject<T>();
+            var json = (jDict.GetValue(payloadKey) as JValue).Value<string>();
+            return JsonConvert.DeserializeObject<T>(json, jsonSerializerSettings);
         }
     }
 }

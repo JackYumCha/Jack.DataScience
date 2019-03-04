@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Jack.DataScience.Data.Converters
 {
@@ -20,10 +23,23 @@ namespace Jack.DataScience.Data.Converters
         private static Type byteType = typeof(byte);
         private static Type byteNullableType = typeof(byte?);
 
-        public static object As<T>(this string value)
+        private static Type stringListType = typeof(List<string>);
+        private static Type intListType = typeof(List<int>);
+        private static Type longListType = typeof(List<long>);
+        private static Type doubleListType = typeof(List<double>);
+        private static Type shortListType = typeof(List<short>);
+        private static Type boolListType = typeof(List<bool>);
+        private static Type byteListType = typeof(List<byte>);
+
+        private static Regex arrayBegin = new Regex(@"^\s*\[");
+        private static Regex arrayEnd = new Regex(@"\]\s*$");
+        private static Regex arraySplitter = new Regex(@",\s*");
+       
+
+        public static T As<T>(this string value)
         {
             var type = typeof(T);
-            return value.As(type);
+            return (T)value.As(type);
         }
 
         public static object As(this string value, Type type)
@@ -115,6 +131,42 @@ namespace Jack.DataScience.Data.Converters
                 byte result = 0;
                 if (byte.TryParse(value, out result)) return result;
                 return null;
+            }
+            else if (type == stringListType)
+            {
+                // this is not working !!!
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<string>()).ToList();
+            }
+            else if (type == intListType)
+            {
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<int>()).ToList();
+            }
+            else if(type == doubleListType)
+            {
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<double>()).ToList();
+            }
+            else if(type == longListType)
+            {
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<long>()).ToList();
+            }
+            else if(type == shortListType)
+            {
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<short>()).ToList();
+            }
+            else if(type == byteListType)
+            {
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<byte>()).ToList();
+            }
+            else if(type == boolListType)
+            {
+                var arrValues = arraySplitter.Split(arrayEnd.Replace(arrayBegin.Replace(value, ""), ""));
+                return arrValues.Select(arrValue => arrValue.As<bool>()).ToList();
             }
             throw new Exception("Unexpected");
         }

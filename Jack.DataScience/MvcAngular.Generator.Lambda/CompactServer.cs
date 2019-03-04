@@ -106,7 +106,7 @@ namespace MvcAngular.Generator.Lambda
             {
                 if (!(filter as IActionFilter).CanInvoke(services))
                 {
-                    throw new AuthenticationException($"The credential did not pass the authentication check by {filter.GetType().FullName}.");
+                    throw new CompactServerException(401, $"The credential did not pass the authentication check by {filter.GetType().FullName}.");
                 }
             }
 

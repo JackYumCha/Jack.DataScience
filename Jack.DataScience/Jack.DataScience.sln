@@ -69,13 +69,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.Passw
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.AWSAthenaEtl", "Jack.DataScience.Data.AWSAthenaEtl\Jack.DataScience.Data.AWSAthenaEtl.csproj", "{B98839CE-77B3-4E83-9666-F1FCA6255CDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.AWS.CloudWatch", "Jack.DataScience.AWS.CloudWatch\Jack.DataScience.AWS.CloudWatch.csproj", "{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.AWS.CloudWatch", "Jack.DataScience.AWS.CloudWatch\Jack.DataScience.AWS.CloudWatch.csproj", "{AF7766F0-5B62-4C1A-9AED-F2D5FE4F119C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAngular.Generator.Lambda", "MvcAngular.Generator.Lambda\MvcAngular.Generator.Lambda.csproj", "{723F2F42-9E25-464A-B9F1-F1CB28FE6577}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Automation.TwilioSMS", "Jack.DataScience.Automation.TwilioSMS\Jack.DataScience.Automation.TwilioSMS.csproj", "{390C4157-B6C4-40DE-98EB-B633B45B5479}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Automation.TwilioSMS", "Jack.DataScience.Automation.TwilioSMS\Jack.DataScience.Automation.TwilioSMS.csproj", "{390C4157-B6C4-40DE-98EB-B633B45B5479}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Compute.AWSLambda", "Jack.DataScience.Compute.AWSLambda\Jack.DataScience.Compute.AWSLambda.csproj", "{3C9A129E-892A-4E29-BD00-45FFA5F07A0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Compute.AWSLambda", "Jack.DataScience.Compute.AWSLambda\Jack.DataScience.Compute.AWSLambda.csproj", "{3C9A129E-892A-4E29-BD00-45FFA5F07A0B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.AWSDynamoDB", "Jack.DataScience.Data.AWSDynamoDB\Jack.DataScience.Data.AWSDynamoDB.csproj", "{286C507E-4D4A-4813-93E0-D15D7CC3BBB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.JsonConverters", "Jack.DataScience.Data.JsonConverters\Jack.DataScience.Data.JsonConverters.csproj", "{3FBD1612-167B-40BC-A00D-B757D71040E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -231,6 +235,14 @@ Global
 		{3C9A129E-892A-4E29-BD00-45FFA5F07A0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C9A129E-892A-4E29-BD00-45FFA5F07A0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C9A129E-892A-4E29-BD00-45FFA5F07A0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{286C507E-4D4A-4813-93E0-D15D7CC3BBB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{286C507E-4D4A-4813-93E0-D15D7CC3BBB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{286C507E-4D4A-4813-93E0-D15D7CC3BBB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{286C507E-4D4A-4813-93E0-D15D7CC3BBB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FBD1612-167B-40BC-A00D-B757D71040E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FBD1612-167B-40BC-A00D-B757D71040E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FBD1612-167B-40BC-A00D-B757D71040E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FBD1612-167B-40BC-A00D-B757D71040E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

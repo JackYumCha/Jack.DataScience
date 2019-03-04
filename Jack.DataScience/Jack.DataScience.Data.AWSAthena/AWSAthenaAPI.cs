@@ -105,7 +105,53 @@ namespace Jack.DataScience.Data.AWSAthena
             return resultResponse;
         }
 
-        public async Task<string> GenerateQueryCSSchema(string query)
+        public async Task<string> StartQuery(string query)
+        {
+            var startResponse = await amazonAthenaClient.StartQueryExecutionAsync(new StartQueryExecutionRequest()
+            {
+                QueryString = query,
+                ResultConfiguration = new ResultConfiguration()
+                {
+                    OutputLocation = awsAthenaOptions.DefaultOutputLocation,
+                }
+            });
+            return startResponse.QueryExecutionId;
+        }
+
+        public async Task<List<T>> TryObtainQueryResultById<T>(string queryId, int skip = 1) where T : class, new()
+        {
+            GetQueryExecutionRequest getQueryExecutionRequest = new GetQueryExecutionRequest()
+            {
+                QueryExecutionId = queryId
+            };
+
+            bool isStillingRunning = true;
+            var executionResponse = await amazonAthenaClient.GetQueryExecutionAsync(getQueryExecutionRequest);
+            var state = executionResponse.QueryExecution.Status.State;
+
+            if (state == QueryExecutionState.FAILED)
+            {
+                throw new Exception($"Query Failed to run with Error Message: \n{executionResponse.QueryExecution.Status.StateChangeReason}");
+            }
+            else if (state == QueryExecutionState.CANCELLED)
+            {
+                throw new Exception($"Query was cancelled.");
+            }
+            else if (state == QueryExecutionState.SUCCEEDED)
+            {
+                isStillingRunning = false;
+            }
+            if (isStillingRunning) return null;
+
+            var resultResponse = await amazonAthenaClient.GetQueryResultsAsync(new GetQueryResultsRequest()
+            {
+                QueryExecutionId = queryId
+            });
+
+            return resultResponse.ReadRows<T>(skip);
+        }
+
+        public async Task<string> GenerateQueryCSSchema(string query) 
         {
             var result = await ExecuteQuery(query);
             return result.ToCSharpType();

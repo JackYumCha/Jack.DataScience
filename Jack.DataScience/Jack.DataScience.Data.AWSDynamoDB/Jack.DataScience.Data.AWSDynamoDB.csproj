@@ -5,12 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Athena" Version="3.3.2.1" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.17.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
-    <ProjectReference Include="..\Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj" />
   </ItemGroup>
 
 </Project>

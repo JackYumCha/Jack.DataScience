@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using Autofac;
 
-namespace Jack.DataScience.Http.Jwt
+namespace Jack.DataScience.Data.AWSDynamoDB
 {
-    public class JwtModule: Module
+    public class AWSDynamoDBModule: Module
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<JwtObjectEncoder>();
+            builder.RegisterType<AWSDynamoAPI>();
             base.Load(builder);
         }
     }
