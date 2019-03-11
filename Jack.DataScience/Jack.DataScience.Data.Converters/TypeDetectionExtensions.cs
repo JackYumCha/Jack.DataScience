@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Jack.DataScience.Data.Converters
 {
-    public static class TypeDectionExtensions
+    public static class TypeDetectionExtensions
     {
         private static readonly Regex regexInteger = new Regex(@"^\d+$");
         private static readonly Regex regexDouble = new Regex(@"^\-?(\d+\.\d+|\d+)(e\-?\d+|)$", RegexOptions.IgnoreCase);

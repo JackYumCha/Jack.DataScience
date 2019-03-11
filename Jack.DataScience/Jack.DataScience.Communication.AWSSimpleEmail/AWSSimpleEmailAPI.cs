@@ -27,7 +27,7 @@ namespace Jack.DataScience.Communication.AWSSimpleEmail
                 Destination = new Destination(new List<string>() { to }),
                 Source = from,
                 ReplyToAddresses = new List<string>() { from },
-                Message = new Message(new Content(subject), new Body(new Content(body)))
+                Message = new Message(new Content(subject) { Charset = "utf8" }, new Body() { Html = new Content(body) { Charset = "utf8" } })
             });
         }
     }

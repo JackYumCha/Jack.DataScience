@@ -8,6 +8,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Jack.DataScience.Data.AWSDynamoDB
 {
@@ -16,6 +18,7 @@ namespace Jack.DataScience.Data.AWSDynamoDB
         private readonly AWSDynamoDBOptions awsDynamoDBOptions;
         private readonly AmazonDynamoDBClient amazonDynamoDBClient;
         private readonly BasicAWSCredentials basicAWSCredentials;
+        private readonly JsonSerializerSettings jsonSerializerSettings;
         private static readonly object[] EmptyObjectArray = new object[] { };
 
         public AWSDynamoAPI(AWSDynamoDBOptions awsDynamoDBOptions )
@@ -23,6 +26,10 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             this.awsDynamoDBOptions = awsDynamoDBOptions;
             basicAWSCredentials = new BasicAWSCredentials(awsDynamoDBOptions.Key, awsDynamoDBOptions.Secret);
             amazonDynamoDBClient = new AmazonDynamoDBClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsDynamoDBOptions.Region));
+            jsonSerializerSettings = new JsonSerializerSettings()
+            {
+                Converters = { new StringEnumConverter() }
+            };
         }
 
         /// <summary>
@@ -51,6 +58,16 @@ namespace Jack.DataScience.Data.AWSDynamoDB
                 if (property.PropertyType.IsEnum)
                 {
                     property.SetValue(obj, Enum.Parse(property.PropertyType, document[property.Name].AsString()));
+                }
+                else if (property.PropertyType == typeof(string))
+                {
+                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
+                }
+                else if (property.PropertyType.IsClass)
+                {
+                    var json = document[property.Name].AsType(typeof(string)) as string;
+
+                    property.SetValue(obj, JsonConvert.DeserializeObject(json, property.PropertyType, jsonSerializerSettings));
                 }
                 else
                 {
@@ -83,6 +100,16 @@ namespace Jack.DataScience.Data.AWSDynamoDB
                 {
                     // enum as string
                     var value = Enum.GetName(property.PropertyType, property.GetValue(obj));
+                    document[property.Name] = value;
+                }
+                else if (property.PropertyType == typeof(string))
+                {
+                    dynamic value = property.GetValue(obj);
+                    document[property.Name] = value;
+                }
+                else if(property.PropertyType.IsClass)
+                {
+                    string value = JsonConvert.SerializeObject(property.GetValue(obj), jsonSerializerSettings);
                     document[property.Name] = value;
                 }
                 else
