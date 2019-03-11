@@ -19,10 +19,14 @@ namespace Jack.DataScience.Data.MongoDB
 
                 MongoClientSettings mongoClientSettings = MongoClientSettings.FromUrl(new MongoUrl(options.Url));
 
-                mongoClientSettings.SslSettings = new SslSettings()
+                if(options.SslProtocol != SslProtocols.None)
                 {
-                    EnabledSslProtocols = SslProtocols.Tls12
-                };
+                    mongoClientSettings.SslSettings = new SslSettings()
+                    {
+                        EnabledSslProtocols = options.SslProtocol // SslProtocols.Tls12
+                    };
+                }
+
                 return new MongoClient(mongoClientSettings);
             });
             base.Load(builder);
