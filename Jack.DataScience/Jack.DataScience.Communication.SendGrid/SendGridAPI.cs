@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Net;
 
 namespace Jack.DataScience.Communication.SendGrid
 {
@@ -20,12 +21,13 @@ namespace Jack.DataScience.Communication.SendGrid
             sendGridClient = new SendGridClient(sendGridClientOptions);
         }
 
-        public async Task SendEmail(string to, string from, string subject, string body)
+        public async Task<HttpStatusCode> SendEmail(string to, string from, string subject, string body)
         {
             var message = MailHelper.CreateSingleEmail(new EmailAddress(from),
                 new EmailAddress(to),
                 subject, null, body);
-            await sendGridClient.SendEmailAsync(message);
+            var response =  await sendGridClient.SendEmailAsync(message);
+            return response.StatusCode;
         }
     }
 }
