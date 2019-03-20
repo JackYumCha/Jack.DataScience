@@ -8,6 +8,7 @@ namespace Jack.DataScience.Data.MongoDB
     public class MongoOptions
     {
         public string Url { get; set; }
+        public string Database { get; set; }
         public SslProtocols SslProtocol { get; set; }
     }
 }

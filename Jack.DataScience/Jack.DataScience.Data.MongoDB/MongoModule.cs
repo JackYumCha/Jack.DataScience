@@ -29,6 +29,9 @@ namespace Jack.DataScience.Data.MongoDB
 
                 return new MongoClient(mongoClientSettings);
             });
+
+            builder.RegisterType<MongoContext>();
+
             base.Load(builder);
         }
     }
