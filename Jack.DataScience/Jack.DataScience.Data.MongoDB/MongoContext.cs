@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Authentication;
 using System.Text;
 using MongoDB.Driver;
 
@@ -14,7 +15,16 @@ namespace Jack.DataScience.Data.MongoDB
         public MongoContext(MongoOptions mongoOptions)
         {
             this.mongoOptions = mongoOptions;
-            mongoClient = new MongoClient(mongoOptions.Url);
+            MongoClientSettings mongoClientSettings = MongoClientSettings.FromUrl(new MongoUrl(mongoOptions.Url));
+
+            if (mongoOptions.SslProtocol != SslProtocols.None)
+            {
+                mongoClientSettings.SslSettings = new SslSettings()
+                {
+                    EnabledSslProtocols = mongoOptions.SslProtocol // SslProtocols.Tls12
+                };
+            }
+            mongoClient = new MongoClient(mongoClientSettings);
             MongoDatabase = mongoClient.GetDatabase(mongoOptions.Database);
         }
 

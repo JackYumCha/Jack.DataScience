@@ -11,7 +11,7 @@ namespace Jack.DataScience.Common
         public AutoFacContainer(string environment = null)
         {
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile($"{AppContext.BaseDirectory}/appsettings{((environment == null) ? "" : $".{environment}")}.json");
+            configBuilder.AddJsonFile($"{AppContext.BaseDirectory}/appsettings{(string.IsNullOrWhiteSpace(environment) ? "" : $".{environment}")}.json");
             Configuration = configBuilder.Build();
 
             ContainerBuilder = new ContainerBuilder();
