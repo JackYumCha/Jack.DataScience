@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Jack.DataScience.Data.MongoDB
@@ -27,6 +29,7 @@ namespace Jack.DataScience.Data.MongoDB
                     EnabledSslProtocols = mongoOptions.SslProtocol // SslProtocols.Tls12
                 };
             }
+
             mongoClient = new MongoClient(mongoClientSettings);
             MongoDatabase = mongoClient.GetDatabase(mongoOptions.Database);
         }
@@ -40,10 +43,27 @@ namespace Jack.DataScience.Data.MongoDB
         {
             return MongoDatabase.GetCollection<T>(typeof(TBase).Name);
         }
+
+        public void DropCollection<T>() where T: class
+        {
+            MongoDatabase.DropCollection(typeof(T).Name);
+        }
     }
 
     public static class MongoCollectionExtensions
     {
+
+        //public static ReplaceOneResult Find<T, TProjection>(this IMongoCollection<T> collection,
+        //    Func<FilterDefinitionBuilder<T>, FilterDefinition<T>> filterBuilder,
+        //    Func<ProjectionDefinitionBuilder<TProjection>, ProjectionDefinition<TProjection>> projectionBuilder
+        //    ) where T : DocumentBase
+        //{
+        //    return collection.FindSync(filterBuilder(Builders<T>.Filter), new FindOptions<T, TProjection>()
+        //    {
+        //        Projection = projectionBuilder(Builders<T>.Projection. )
+        //    };
+        //}
+
         public static ReplaceOneResult ReplaceOne<T>(this IMongoCollection<T> collection, T item) where T : DocumentBase
         {
             return collection.ReplaceOne(Builders<T>.Filter.Where(f => f._id == item._id), item);

@@ -5,6 +5,8 @@ using Autofac;
 using MongoDB.Driver;
 using System.Security.Authentication;
 using Jack.DataScience.Common;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson;
 
 namespace Jack.DataScience.Data.MongoDB
 {
@@ -13,6 +15,7 @@ namespace Jack.DataScience.Data.MongoDB
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<MongoBootstrap>();
+
             builder.Register((context) =>
             {
                 var options = context.Resolve<MongoOptions>();
@@ -26,7 +29,6 @@ namespace Jack.DataScience.Data.MongoDB
                         EnabledSslProtocols = options.SslProtocol // SslProtocols.Tls12
                     };
                 }
-
                 return new MongoClient(mongoClientSettings);
             });
 
