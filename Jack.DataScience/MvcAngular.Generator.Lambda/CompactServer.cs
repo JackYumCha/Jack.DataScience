@@ -95,7 +95,7 @@ namespace MvcAngular.Generator.Lambda
 
             if (!services.TryResolve(out requestCredential))
             {
-                throw new Exception($"Type '{nameof(RequestCredential)}' was not registered in the AutoFac services");
+                throw new CompactServerException(500, $"Type '{nameof(RequestCredential)}' was not registered in the AutoFac services");
             }
 
             requestCredential.Value = credential;
