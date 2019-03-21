@@ -765,7 +765,7 @@ namespace MvcAngular.Generator
             }).ToArray();
 
             // code for the beginning of the service class
-            stb.AppendFormat("@Injectable()", service.Namespace); stb.AppendLf();
+            stb.AppendFormat("@Injectable({{providedIn: 'root'}})", service.Namespace); stb.AppendLf();
             stb.AppendFormat("export class {0} {{", string.Format("{0}{1}", Regex.Replace(service.Name, "controller$", "", RegexOptions.IgnoreCase), "Service")); stb.AppendLf();
 
             // inject Http service from @angular/core in the contructor
