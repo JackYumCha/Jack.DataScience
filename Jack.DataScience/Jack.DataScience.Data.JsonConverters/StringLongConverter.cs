@@ -13,7 +13,7 @@ namespace Jack.DataScience.Data.JsonConverters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            long value = 0l;
+            long value = 0L;
             long.TryParse(reader.Value as string, out value);
             return value;
         }

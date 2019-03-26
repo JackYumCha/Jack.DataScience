@@ -10,6 +10,6 @@ namespace MvcAngular.Generator.Lambda
     /// </summary>
     public interface IActionFilter
     {
-        bool CanInvoke(IContainer services);
+        bool CanInvoke(IComponentContext services);
     }
 }

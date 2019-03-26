@@ -14,7 +14,7 @@ namespace MvcAngular.Generator.Lambda
     public class CompactServer
     {
 
-        private readonly IContainer services;
+        private readonly IComponentContext services;
         private readonly CompactServerTypes serviceTypes;
         private readonly JsonSerializerSettings jsonSerializerSettings;
         private static Type IActionFilterType = typeof(IActionFilter);
@@ -28,14 +28,14 @@ namespace MvcAngular.Generator.Lambda
         /// </summary>
         /// <param name="services"></param>
         /// <param name="jsonSerializerSettings"></param>
-        public CompactServer(IContainer services, JsonSerializerSettings jsonSerializerSettings)
+        public CompactServer(IComponentContext services)
         {
             this.services = services;
             if(!services.TryResolve(out serviceTypes))
             {
                 throw new Exception($"Type '{nameof(CompactServerTypes)}' was not registerd in AutoFace. Please register it as instance and add controller types to it.");
             }
-            this.jsonSerializerSettings = jsonSerializerSettings;
+            this.jsonSerializerSettings = services.Resolve<JsonSerializerSettings>();
         }
 
         /// <summary>
@@ -66,6 +66,17 @@ namespace MvcAngular.Generator.Lambda
         {
             object service = null;
 
+            // credential is set here, this is because we need a workaround for AWS or other API Gateway/Load Balancer that can do proper CORS response
+
+            RequestCredential requestCredential = null;
+
+            if (!services.TryResolve(out requestCredential))
+            {
+                throw new CompactServerException(500, $"Type '{nameof(RequestCredential)}' was not registered in the AutoFac services");
+            }
+
+            requestCredential.Value = credential;
+
             if (!serviceTypes.ContainsKey(controllerName))
             {
                 throw new ServiceNotFoundException($"Controller '{controllerName}' was not found in the CompactServerTypes instance. Please make sure you have added it to the registered instance of CompactServerTypes in AutoFac.");
@@ -88,17 +99,6 @@ namespace MvcAngular.Generator.Lambda
             {
                 throw new ServiceNotFoundException($"Method '{methodName}' of '{serviceTypes[controllerName].FullName}' does not have {nameof(RpcAttribute)}. You need to add {nameof(RpcAttribute)} to service method.");
             }
-
-            // credential is set here, this is because we need a workaround for AWS or other API Gateway/Load Balancer that can do proper CORS response
-
-            RequestCredential requestCredential = null;
-
-            if (!services.TryResolve(out requestCredential))
-            {
-                throw new CompactServerException(500, $"Type '{nameof(RequestCredential)}' was not registered in the AutoFac services");
-            }
-
-            requestCredential.Value = credential;
 
             var filters = methodInfo.GetCustomAttributes(true).Where(attr => IActionFilterType.IsAssignableFrom(attr.GetType())).ToList();
 
