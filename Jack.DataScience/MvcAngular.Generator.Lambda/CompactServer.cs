@@ -30,8 +30,8 @@ namespace MvcAngular.Generator.Lambda
         /// <param name="jsonSerializerSettings"></param>
         public CompactServer(IComponentContext services)
         {
-            this.services = services;
-            if(!services.TryResolve(out serviceTypes))
+            this.services = services.Resolve<IComponentContext>();
+            if (!services.TryResolve(out serviceTypes))
             {
                 throw new Exception($"Type '{nameof(CompactServerTypes)}' was not registerd in AutoFace. Please register it as instance and add controller types to it.");
             }
@@ -69,6 +69,8 @@ namespace MvcAngular.Generator.Lambda
             // credential is set here, this is because we need a workaround for AWS or other API Gateway/Load Balancer that can do proper CORS response
 
             RequestCredential requestCredential = null;
+
+            
 
             if (!services.TryResolve(out requestCredential))
             {

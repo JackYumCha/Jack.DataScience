@@ -29,7 +29,6 @@ namespace Jack.DataScience.Data.MongoDB
                     EnabledSslProtocols = mongoOptions.SslProtocol // SslProtocols.Tls12
                 };
             }
-
             mongoClient = new MongoClient(mongoClientSettings);
             MongoDatabase = mongoClient.GetDatabase(mongoOptions.Database);
         }
@@ -63,6 +62,15 @@ namespace Jack.DataScience.Data.MongoDB
         //        Projection = projectionBuilder(Builders<T>.Projection. )
         //    };
         //}
+        public static DeleteResult DeleteOneById<T>(this IMongoCollection<T> collection, string id) where T : DocumentBase
+        {
+            return collection.DeleteOne(Builders<T>.Filter.Where(f => f._id == id));
+        }
+
+        public static T GetOneById<T>(this IMongoCollection<T> collection, string id) where T : DocumentBase
+        {
+            return collection.Find(Builders<T>.Filter.Where(f => f._id == id)).FirstOrDefault();
+        }
 
         public static ReplaceOneResult ReplaceOne<T>(this IMongoCollection<T> collection, T item) where T : DocumentBase
         {
