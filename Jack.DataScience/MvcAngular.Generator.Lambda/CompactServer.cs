@@ -125,18 +125,25 @@ namespace MvcAngular.Generator.Lambda
 
             // the response could be a task
             var response = methodInfo.Invoke(service, parameterList.ToArray());
-            var responseType = response.GetType();
-            if (responseType.IsGenericType && TaskType.IsAssignableFrom(responseType))
+            if(response == null)
             {
-                // process the task await
-                var awaiter = responseType.GetMethod(nameof(Task<object>.GetAwaiter)).Invoke(response, EmptyParameters);
-                var awaiterType = awaiter.GetType();
-                var result = awaiterType.GetMethod(nameof(TaskAwaiter<object>.GetResult)).Invoke(awaiter, EmptyParameters);
-                return JsonConvert.SerializeObject(result, jsonSerializerSettings);
+                return JsonConvert.SerializeObject(response, jsonSerializerSettings);
             }
             else
             {
-                return JsonConvert.SerializeObject(response, jsonSerializerSettings);
+                var responseType = response.GetType();
+                if (responseType.IsGenericType && TaskType.IsAssignableFrom(responseType))
+                {
+                    // process the task await
+                    var awaiter = responseType.GetMethod(nameof(Task<object>.GetAwaiter)).Invoke(response, EmptyParameters);
+                    var awaiterType = awaiter.GetType();
+                    var result = awaiterType.GetMethod(nameof(TaskAwaiter<object>.GetResult)).Invoke(awaiter, EmptyParameters);
+                    return JsonConvert.SerializeObject(result, jsonSerializerSettings);
+                }
+                else
+                {
+                    return JsonConvert.SerializeObject(response, jsonSerializerSettings);
+                }
             }
         }
     }
