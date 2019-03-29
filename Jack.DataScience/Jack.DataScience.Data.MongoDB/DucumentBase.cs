@@ -12,6 +12,15 @@ namespace Jack.DataScience.Data.MongoDB
         public string _id { get; set; }
     }
 
+    public abstract class EdgeBase: DocumentBase
+    {
+
+        [BsonRequired]
+        public string _from { get; set; }
+        [BsonRequired]
+        public string _to { get; set; }
+    }
+
     public abstract class CosmosDocumentBase: DocumentBase
     {
         public string Key { get; set; }
