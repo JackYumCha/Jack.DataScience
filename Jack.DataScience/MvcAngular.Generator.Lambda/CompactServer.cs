@@ -30,7 +30,7 @@ namespace MvcAngular.Generator.Lambda
         /// <param name="jsonSerializerSettings"></param>
         public CompactServer(IComponentContext services)
         {
-            this.services = services.Resolve<IComponentContext>();
+            this.services = services;
             if (!services.TryResolve(out serviceTypes))
             {
                 throw new Exception($"Type '{nameof(CompactServerTypes)}' was not registerd in AutoFace. Please register it as instance and add controller types to it.");

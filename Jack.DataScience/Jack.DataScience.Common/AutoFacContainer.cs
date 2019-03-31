@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Autofac;
+using Newtonsoft.Json;
 
 namespace Jack.DataScience.Common
 {
@@ -17,7 +18,6 @@ namespace Jack.DataScience.Common
             ContainerBuilder = new ContainerBuilder();
 
             RegisterOptions<SerilogOptions>();
-            RegisterOptions<SqlServerOptions>();
         }
 
         public IConfiguration Configuration { get; set; }

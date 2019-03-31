@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using MvcAngular;
+using MvcAngular.Generator.Lambda;
 
 namespace MvcAngular.Generator
 {
@@ -464,6 +465,7 @@ namespace MvcAngular.Generator
         /// <returns></returns>
         internal static string TypeMapping(Type type, HashSet<string> imports, Type host)
         {
+            //Console.WriteLine($"before unwrap type: {type}, host: {host}");
             type = UnwrapNullable(type);
 
             var currentPath = CalculateTypePath(host);
@@ -577,6 +579,15 @@ namespace MvcAngular.Generator
                         return String.Format("{0}[]", TypeMapping(elementType, imports, host));
                     }
 
+                    // Map PagedList
+                    else if (type.IsConstructedGenericType &&
+                            (
+                                type.GetGenericTypeDefinition() == typeof(PagedList<>)
+                            ))
+                    {
+                        var ItemType = type.GetGenericArguments().First();
+                        return $"PagedList<{TypeMapping(ItemType, imports, host)}>";
+                    }
                     // deprecated
                     //Map JsonResult<T> to T
                     //else if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(JsonTypeResult<>)) // type.FullName.StartsWith("Microsoft.AspNetCore.Mvc.JsonResult`1"))

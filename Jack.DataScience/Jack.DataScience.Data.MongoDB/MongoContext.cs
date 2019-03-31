@@ -72,9 +72,25 @@ namespace Jack.DataScience.Data.MongoDB
             return collection.Find(Builders<T>.Filter.Where(f => f._id == id)).FirstOrDefault();
         }
 
+        public static bool HasId<T>(this IMongoCollection<T> collection, string id) where T : DocumentBase
+        {
+            return collection.AsQueryable().Any(f => f._id == id);
+        }
+
         public static ReplaceOneResult ReplaceOne<T>(this IMongoCollection<T> collection, T item) where T : DocumentBase
         {
             return collection.ReplaceOne(Builders<T>.Filter.Where(f => f._id == item._id), item);
+        }
+
+        public static ReplaceOneResult UpsertOne<T>(this IMongoCollection<T> collection, T item, string newId) where T : DocumentBase
+        {
+            if(item._id != newId)
+            {
+                // remove old
+                collection.DeleteOneById(item._id);
+                item._id = newId;
+            }
+            return collection.ReplaceOne(Builders<T>.Filter.Where(f => f._id == item._id), item, new UpdateOptions() { IsUpsert = true });
         }
 
         public static ReplaceOneResult UpsertOne<T>(this IMongoCollection<T> collection, T item) where T : DocumentBase
