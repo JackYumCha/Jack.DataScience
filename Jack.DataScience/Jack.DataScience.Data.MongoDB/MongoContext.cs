@@ -43,6 +43,11 @@ namespace Jack.DataScience.Data.MongoDB
             return MongoDatabase.GetCollection<T>(typeof(TBase).Name);
         }
 
+        public IMongoCollection<BsonDocument> Collection(Type type)
+        {
+            return MongoDatabase.GetCollection<BsonDocument>(type.Name);
+        }
+
         public void DropCollection<T>() where T: class
         {
             MongoDatabase.DropCollection(typeof(T).Name);
