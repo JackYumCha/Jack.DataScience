@@ -22,7 +22,11 @@ namespace Jack.DataScience.Data.MongoDB.Serializers
                         Types.Add(type.FullName, type);
                 }
                 Volatile.Write(ref IsRegistered, true);
-                BsonSerializer.RegisterSerializer(new TypeBsonSerializer());
+                try
+                {
+                    BsonSerializer.RegisterSerializer(new TypeBsonSerializer());
+                }
+                catch { }
             }
         }
 
