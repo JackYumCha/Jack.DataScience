@@ -11,7 +11,7 @@ namespace Jack.DataScience.Data.JsonConverters
         {
             var type = value as Type;
             var jObject = JToken.FromObject(new object()) as JObject;
-            jObject.Add("@type", JToken.FromObject(type.FullName));
+            jObject.Add("TypeFullName", JToken.FromObject(type.FullName));
             jObject.WriteTo(writer);
         }
 
@@ -19,7 +19,7 @@ namespace Jack.DataScience.Data.JsonConverters
         {
 
             var jObject = JObject.Load(reader);
-            var jProperty = jObject.Property("@type");
+            var jProperty = jObject.Property("TypeFullName");
             var typeFullname = jProperty.Value.Value<string>();
             var type = Assembly.GetExecutingAssembly().GetType(typeFullname);
             return type;

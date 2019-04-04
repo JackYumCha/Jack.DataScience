@@ -30,7 +30,7 @@ namespace Jack.DataScience.Data.MongoDB.Serializers
             }
         }
 
-        private static Dictionary<string, Type> Types = new Dictionary<string, Type>();
+        public static Dictionary<string, Type> Types = new Dictionary<string, Type>();
 
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Type value)
         {
@@ -41,7 +41,7 @@ namespace Jack.DataScience.Data.MongoDB.Serializers
             else
             {
                 context.Writer.WriteStartDocument();
-                context.Writer.WriteName("@type");
+                context.Writer.WriteName("TypeFullName");
                 context.Writer.WriteString(value.FullName);
                 context.Writer.WriteEndDocument();
             }

@@ -7,7 +7,7 @@ namespace MvcAngular
     /// <summary>
     /// force the angular tranpilor to use the specified type
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class AngularForceTypeAttribute: Attribute
     {
         public AngularForceTypeAttribute(string cutomizedType): base()

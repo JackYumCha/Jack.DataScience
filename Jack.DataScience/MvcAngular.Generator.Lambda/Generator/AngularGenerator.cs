@@ -19,7 +19,6 @@ namespace MvcAngular.Generator
     /// </summary>
     public class AngularGenerator
     {
-
         /// <summary>
         /// Use this at startup to generate if "--generate-angular" is passed to the command line.
         /// </summary>
@@ -456,6 +455,11 @@ namespace MvcAngular.Generator
         }
 
         /// <summary>
+        /// You can map a type to your defined type
+        /// </summary>
+        public static Func<Type, Type> TypeMapper = null;
+
+        /// <summary>
         /// Handle type mappings from back end to front end.
         /// </summary>
         /// <param name="type"></param>
@@ -467,7 +471,10 @@ namespace MvcAngular.Generator
         {
             //Console.WriteLine($"before unwrap type: {type}, host: {host}");
             type = UnwrapNullable(type);
-
+            if(TypeMapper!= null)
+            {
+                type = TypeMapper(type);
+            }
             var currentPath = CalculateTypePath(host);
 
             // add type support for enum
@@ -522,7 +529,10 @@ namespace MvcAngular.Generator
                 case "Microsoft.AspNetCore.Http.IFormFile":
                     return "File";
                 case "System.Object":
+                case "Newtonsoft.Json.Linq.JObject":
                     return "any";
+                //case "System.Type":
+                //    return "IType";
                 default:
                     //handle generic types and array types
 
@@ -658,13 +668,23 @@ namespace MvcAngular.Generator
         {
             return String.Join(", ", parameters.Select(p => {
                 var attr = p.GetCustomAttribute<JsonPostParameterAttribute>();
-                if (attr != null)
+                var forceType = p.GetCustomAttribute<AngularForceTypeAttribute>();
+                var mapType = p.GetCustomAttribute<AngularMapTypeAttribute>();
+                if (forceType != null)
                 {
-                    return String.Format("{0}: {1}", p.Name, TypeMapping(attr.Type, imports, host));
+                    return $"{p.Name}: {forceType.CustomizedType}";
+                }
+                else if(mapType != null)
+                {
+                    return $"{p.Name}: {TypeMapping(mapType.MappedType, imports, host)}";
+                }
+                else if (attr != null)
+                {
+                    return $"{p.Name}: {TypeMapping(attr.Type, imports, host)}";
                 }
                 else
                 {
-                    return String.Format("{0}: {1}", p.Name, TypeMapping(p.ParameterType, imports, host));
+                    return $"{p.Name}: {TypeMapping(p.ParameterType, imports, host)}";
                 }
             }));
         }
@@ -854,9 +874,13 @@ namespace MvcAngular.Generator
                 }).ToArray();
 
                 var forceTypes = property.GetCustomAttributes<AngularForceTypeAttribute>().ToList();
+                var mapTypes = property.GetCustomAttributes<AngularMapTypeAttribute>();
                 if (forceTypes.Any())
                 {
                     stb.AppendFormat("\t{0}?: {1};", CamelCase(property.Name), forceTypes.First().CustomizedType); stb.AppendLf();
+                }
+                else if (mapTypes.Any()){
+                    stb.AppendFormat("\t{0}?: {1};", CamelCase(property.Name), TypeMapping(mapTypes.First().MappedType, imports, json)); stb.AppendLf();
                 }
                 else
                 {
@@ -985,7 +1009,7 @@ namespace MvcAngular.Generator
                 return true;
             }).ToArray();
             var forceTypes = method.GetCustomAttributes<AngularForceTypeAttribute>().ToList();
-            
+            var mapTypes = method.GetCustomAttributes<AngularMapTypeAttribute>();
             if (forceTypes.Any())
             {
                 var tsReturnType = forceTypes.First().CustomizedType;
@@ -994,6 +1018,26 @@ namespace MvcAngular.Generator
 
                 stb.Append($"\t\treturn this.$httpClient.post<{tsReturnType}> (this.$baseURL,"); stb.AppendLf();
                 stb.Append($"\t\t\t{{");stb.AppendLf();
+                stb.Append($"\t\t\t\tController: '{service.FullName}',"); stb.AppendLf();
+                stb.Append($"\t\t\t\tMethod: '{method.Name}',"); stb.AppendLf();
+                stb.Append($"\t\t\t\tParameters: [{string.Join(", ", method.GetParameters().Select(p => p.Name))}]"); stb.AppendLf();
+                stb.Append($"\t\t\t}},"); stb.AppendLf();
+                stb.Append($"\t\t\t{{}});"); stb.AppendLf();
+                //stb.AppendFormat("\t\treturn this.$httpClient.post<{2}>(this.$baseURL + '{0}', {1}, {{}});",
+                //    baseroute.Replace("[action]", method.Name),
+                //    method.GetParameters().First().Name,
+                //    TypeMapping(method.ReturnType, imports, service)
+                //    ); stb.AppendLf();
+                stb.AppendFormat("\t}}"); stb.AppendLf();
+            }
+            else if (mapTypes.Any())
+            {
+                var tsReturnType = TypeMapping(mapTypes.First().MappedType, imports, service);
+                //there is only one complex value, which is posted via body as json.
+                stb.AppendFormat("\tpublic {0}({1}): Observable<{2}> {{", CamelCase(method.Name), ResolveParameters(method.GetParameters(), imports, service), tsReturnType); stb.AppendLf();
+
+                stb.Append($"\t\treturn this.$httpClient.post<{tsReturnType}> (this.$baseURL,"); stb.AppendLf();
+                stb.Append($"\t\t\t{{"); stb.AppendLf();
                 stb.Append($"\t\t\t\tController: '{service.FullName}',"); stb.AppendLf();
                 stb.Append($"\t\t\t\tMethod: '{method.Name}',"); stb.AppendLf();
                 stb.Append($"\t\t\t\tParameters: [{string.Join(", ", method.GetParameters().Select(p => p.Name))}]"); stb.AppendLf();
