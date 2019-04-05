@@ -77,6 +77,11 @@ namespace Jack.DataScience.Data.MongoDB
             return collection.Find(Builders<T>.Filter.Where(f => f._id == id)).FirstOrDefault();
         }
 
+        public static List<T> GetByIds<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentBase
+        {
+            return collection.Find(Builders<T>.Filter.In(doc => doc._id, ids)).ToList();
+        }
+
         public static bool HasId<T>(this IMongoCollection<T> collection, string id) where T : DocumentBase
         {
             return collection.AsQueryable().Any(f => f._id == id);
