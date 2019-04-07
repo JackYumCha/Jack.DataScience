@@ -157,16 +157,20 @@ namespace Jack.DataScience.Data.MongoDB
                 item)));
         }
 
-        public static BulkWriteResult<T> BulkReplaceEach<T>(
+        public static long BulkReplaceEach<T>(
             this IMongoCollection<T> collection,
             IEnumerable<T> items
             )
             where T : DocumentBase
         {
+            if (!items.Any())
+            {
+                return 0L;
+            }
             return collection.BulkWrite(
                 items.Select(
                     item => new ReplaceOneModel<T>(Builders<T>.Filter.Where(document => document._id == item._id),item)
-                    ));
+                    )).ModifiedCount;
         }
 
         public static BulkWriteResult<T> BulkUpdateEach<T>(
