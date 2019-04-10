@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
@@ -31,11 +32,22 @@ namespace Jack.DataScience.Automation.TwilioSMS
 
         public async Task Send(string number, string message, string from)
         {
-            var messageResource = await MessageResource.CreateAsync(new CreateMessageOptions(number)
+            bool shouldTry = true;
+            while(shouldTry)
             {
-                From = from,
-                Body = message
-            });
+                var messageResource = await MessageResource.CreateAsync(new CreateMessageOptions(number)
+                {
+                    From = from,
+                    Body = message
+                });
+                shouldTry = false;
+                // the error code 429 is when concurrent limit is reached, then we should retry.
+                if(messageResource.ErrorCode == 429)
+                {
+                    Thread.Sleep(1); // sleep 1ms to retry
+                    shouldTry = true;
+                }
+            }
         }
     }
 }

@@ -10,5 +10,9 @@ namespace MvcAngular.Generator.Lambda
             Type type = typeof(T);
             base.Add(type.FullName, type);
         }
+        public void Add(Type type)
+        {
+            base.Add(type.FullName, type);
+        }
     }
 }
