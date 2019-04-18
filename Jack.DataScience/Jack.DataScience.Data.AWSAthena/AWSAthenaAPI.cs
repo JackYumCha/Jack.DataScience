@@ -168,6 +168,11 @@ namespace Jack.DataScience.Data.AWSAthena
             var result = await ExecuteQuery(query);
             return result.ReadData();
         }
+
+        public async Task RepairTable(string tableName)
+        {
+            await ExecuteQuery($"MSCK REPAIR TABLE {tableName}");
+        }
     }
 
     public static class AthenaQueryExtensions

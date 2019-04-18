@@ -155,12 +155,16 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                         {
                             sftpClient.Connect();
                             var files = sftpClient.ListDirectory(sftp.BasePath);
-                            files = files.Where(f => nameRegex.IsMatch(f.FullName) && dateRegex.IsMatch(f.Name)).ToList();
+                            files = files
+                                .Where(f => nameRegex.IsMatch(f.FullName) && dateRegex.IsMatch(f.Name))
+                                .OrderByDescending(f => f.Name)
+                                .ToList();
                             // find in the target to work out if there is the corresponding parquet file
                             var targetS3 = etlSettings.CreateTargetS3API();
                             SftpFile first = null;
                             foreach (var file in files)
                             {
+                                Console.WriteLine($"Check File: {file.FullName}");
                                 var s3Key = etlSettings.TargetFlagFile(file.Name);
                                 if (!await targetS3.FileExists(s3Key))
                                 {
@@ -171,6 +175,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                             // transfer that file
                             if (first != null)
                             {
+                                Console.WriteLine($"Transfer File: {first.FullName}");
                                 var dateKey = first.Name.MakeRegexExtraction(dateRegex);
                                 using (var sftpStream = sftpClient.OpenRead(first.FullName))
                                 {
@@ -179,7 +184,6 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                             }
                             sftpClient.Disconnect();
                         }
-                         
                     }
                     break;
                 case EtlSourceEnum.S3BucketCheck:

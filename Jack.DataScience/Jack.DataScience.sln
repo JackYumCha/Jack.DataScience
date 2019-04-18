@@ -81,11 +81,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.AWSDy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.JsonConverters", "Jack.DataScience.Data.JsonConverters\Jack.DataScience.Data.JsonConverters.csproj", "{3FBD1612-167B-40BC-A00D-B757D71040E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Communication.AWSSNS", "Jack.DataScience.Communication.AWSSNS\Jack.DataScience.Communication.AWSSNS.csproj", "{04EE864A-8E9F-4DA2-A035-312D7A78F716}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Communication.AWSSNS", "Jack.DataScience.Communication.AWSSNS\Jack.DataScience.Communication.AWSSNS.csproj", "{04EE864A-8E9F-4DA2-A035-312D7A78F716}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Communication.AWSSimpleEmail", "Jack.DataScience.Communication.AWSSimpleEmail\Jack.DataScience.Communication.AWSSimpleEmail.csproj", "{6542B75E-13EB-4129-874A-1CF3573EB26A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Communication.AWSSimpleEmail", "Jack.DataScience.Communication.AWSSimpleEmail\Jack.DataScience.Communication.AWSSimpleEmail.csproj", "{6542B75E-13EB-4129-874A-1CF3573EB26A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Communication.SendGrid", "Jack.DataScience.Communication.SendGrid\Jack.DataScience.Communication.SendGrid.csproj", "{473425AC-5739-4DE9-9666-2D62583714F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Communication.SendGrid", "Jack.DataScience.Communication.SendGrid\Jack.DataScience.Communication.SendGrid.csproj", "{473425AC-5739-4DE9-9666-2D62583714F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Logging.AWSCloudWatch", "Jack.DataScience.Logging.AWSCloudWatch\Jack.DataScience.Logging.AWSCloudWatch.csproj", "{5990902E-57E8-4277-9831-AB0524EFDFD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -261,6 +263,10 @@ Global
 		{473425AC-5739-4DE9-9666-2D62583714F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{473425AC-5739-4DE9-9666-2D62583714F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{473425AC-5739-4DE9-9666-2D62583714F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

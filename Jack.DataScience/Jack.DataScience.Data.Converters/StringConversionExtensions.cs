@@ -34,7 +34,8 @@ namespace Jack.DataScience.Data.Converters
         private static Regex arrayBegin = new Regex(@"^\s*\[");
         private static Regex arrayEnd = new Regex(@"\]\s*$");
         private static Regex arraySplitter = new Regex(@",\s*");
-       
+
+        private static List<string> trueStrings = new List<string>() { "1", "ok", "true", "yes", "y", "sure", "agree", "fine"};
 
         public static T As<T>(this string value)
         {
@@ -86,9 +87,14 @@ namespace Jack.DataScience.Data.Converters
             }
             else if (type == boolType)
             {
-                bool result = false;
-                bool.TryParse(value, out result);
-                return result;
+                if (!string.IsNullOrWhiteSpace(value) && trueStrings.Contains(value.ToLower())) return true;
+                // in case of number
+                double numberValue;
+                if(double.TryParse(value, out numberValue))
+                {
+                    if (numberValue > 0d) return true;
+                }
+                return false;
             }
             else if (type == boolNullableType)
             {
