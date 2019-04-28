@@ -12,20 +12,39 @@ namespace Jack.DataScience.Logging.Serilog
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.Register(context =>
-            {
-                var options = context.Resolve<SerilogOptions>();
-                if(loggerConfiguration == null || logger == null)
-                {
-                    loggerConfiguration = new LoggerConfiguration();
-                    loggerConfiguration.MinimumLevel.Debug();
-                    loggerConfiguration.WriteTo.RollingFile("logs/{Date}.txt", (LogEventLevel) Enum.Parse(typeof(LogEventLevel), options.RollingFileLogEventLevel));
-                    loggerConfiguration.WriteTo.ColoredConsole((LogEventLevel)Enum.Parse(typeof(LogEventLevel), options.ConsoleLogEventLevel));
-                    logger = loggerConfiguration.CreateLogger();
-                }
-                return logger;
-            });
+            //builder.Register(context =>
+            //{
+            //    var options = context.Resolve<SerilogOptions>();
+            //    if(loggerConfiguration == null || logger == null)
+            //    {
+            //        loggerConfiguration = new LoggerConfiguration();
+            //        loggerConfiguration.MinimumLevel.Debug();
+            //        var rollingFileEventLevel = (LogEventLevel)Enum.Parse(typeof(LogEventLevel), options.RollingFileLogEventLevel);
+            //        loggerConfiguration.WriteTo.RollingFile("logs/{Date}.txt", rollingFileEventLevel);
+            //        var coloredConsoleEventLevel = (LogEventLevel)Enum.Parse(typeof(LogEventLevel), options.ConsoleLogEventLevel);
+            //        loggerConfiguration.WriteTo.ColoredConsole(coloredConsoleEventLevel);
+            //        logger = loggerConfiguration.CreateLogger();
+            //    }
+            //    return logger;
+            //});
+
+            builder.RegisterInstance(GetLogger());
             base.Load(builder);
+        }
+
+        private ILogger GetLogger()
+        {
+            if (loggerConfiguration == null || logger == null)
+            {
+                loggerConfiguration = new LoggerConfiguration();
+                loggerConfiguration.MinimumLevel.Debug();
+                LogEventLevel rollingFileEventLevel = LogEventLevel.Debug; // (LogEventLevel)Enum.Parse(typeof(LogEventLevel), options.RollingFileLogEventLevel);
+                loggerConfiguration.WriteTo.RollingFile("logs/{Date}.txt", rollingFileEventLevel);
+                LogEventLevel coloredConsoleEventLevel = LogEventLevel.Debug;  // (LogEventLevel)Enum.Parse(typeof(LogEventLevel), options.ConsoleLogEventLevel);
+                loggerConfiguration.WriteTo.ColoredConsole(coloredConsoleEventLevel);
+                logger = loggerConfiguration.CreateLogger();
+            }
+            return logger;
         }
 
         private static LoggerConfiguration loggerConfiguration;

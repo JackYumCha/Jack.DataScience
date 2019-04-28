@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Autofac;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace Jack.DataScience.Common
 {
@@ -12,12 +13,15 @@ namespace Jack.DataScience.Common
         public AutoFacContainer(string environment = null)
         {
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile($"{AppContext.BaseDirectory}/appsettings{(string.IsNullOrWhiteSpace(environment) ? "" : $".{environment}")}.json");
+            var appsettingsFile = $"{AppContext.BaseDirectory}/appsettings{(string.IsNullOrWhiteSpace(environment) ? "" : $".{environment}")}.json";
+            if (!File.Exists(appsettingsFile))
+            {
+                throw new Exception($"appsettings file was not found at: {appsettingsFile}");
+            }
+            configBuilder.AddJsonFile(appsettingsFile);
             Configuration = configBuilder.Build();
 
             ContainerBuilder = new ContainerBuilder();
-
-            RegisterOptions<SerilogOptions>();
         }
 
         public IConfiguration Configuration { get; set; }
