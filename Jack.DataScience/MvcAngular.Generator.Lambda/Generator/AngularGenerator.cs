@@ -138,25 +138,25 @@ namespace MvcAngular.Generator
 
                     if (json.GetTypeInfo().IsEnum)
                     {
-                        FileEmitResult result = TranspileJsonEnumType(json, BaseDirectory, assemblyName, string.Format(AutoGenratedCodeDeclaration, assemblyName, assemblies[assemblyName], DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.FFF")), filesInAssembly);
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.Write($"\tTranspiling Enum Type : ");
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Write(json.FullName);
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.Write(" -> ");
+                        FileEmitResult result = TranspileJsonEnumType(json, BaseDirectory, assemblyName, string.Format(AutoGenratedCodeDeclaration, assemblyName, assemblies[assemblyName], DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.FFF")), filesInAssembly);
                         Console.ForegroundColor = colorSettings[result];
                         Console.WriteLine($"{result}");
                     }
                     else
                     {
-                        FileEmitResult result = TranspileJsonType(json, BaseDirectory, assemblyName, string.Format(AutoGenratedCodeDeclaration, assemblyName, assemblies[assemblyName], DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.FFF")), filesInAssembly);
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.Write($"\tTranspiling Json Type : ");
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Write(json.FullName);
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.Write(" -> ");
+                        FileEmitResult result = TranspileJsonType(json, BaseDirectory, assemblyName, string.Format(AutoGenratedCodeDeclaration, assemblyName, assemblies[assemblyName], DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.FFF")), filesInAssembly);
                         Console.ForegroundColor = colorSettings[result];
                         Console.WriteLine($"{result}");
                     }
@@ -167,13 +167,13 @@ namespace MvcAngular.Generator
                     //if (regexPatterns != null && !regexPatterns.Any(pattern => pattern.IsMatch(service.FullName)))
                     //    continue;
 
-                    FileEmitResult result = TranspilieAngularService(service, controllerBaseType, rootPathCodeEmitting, BaseDirectory.FullName, assemblyName, string.Format(AutoGenratedCodeDeclaration, assemblyName, assemblies[assemblyName], DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.FFF")), filesInAssembly);
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write($"\tTranspiling Service : ");
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.Write(service.FullName);
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write(" -> ");
+                    FileEmitResult result = TranspilieAngularService(service, controllerBaseType, rootPathCodeEmitting, BaseDirectory.FullName, assemblyName, string.Format(AutoGenratedCodeDeclaration, assemblyName, assemblies[assemblyName], DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.FFF")), filesInAssembly);
                     Console.ForegroundColor = colorSettings[result];
                     Console.WriteLine($"{result}");
                 }
@@ -185,13 +185,13 @@ namespace MvcAngular.Generator
                 if (!filesInAssembly[fileOfAssembly])
                 {
                     FileInfo fileInfo = new FileInfo(fileOfAssembly);
-                    File.Delete(fileOfAssembly);
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write($"\tValidating File : ");
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.Write(fileInfo.Name);
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write(" -> ");
+                    File.Delete(fileOfAssembly);
                     Console.ForegroundColor = colorSettings[FileEmitResult.Removed];
                     Console.WriteLine("Deleted");
                 }

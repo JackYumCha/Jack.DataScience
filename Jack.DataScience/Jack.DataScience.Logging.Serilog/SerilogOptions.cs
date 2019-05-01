@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 
-namespace Jack.DataScience.Common
+namespace Jack.DataScience.Logging.Serilog
 {
     public class SerilogOptions
     {
