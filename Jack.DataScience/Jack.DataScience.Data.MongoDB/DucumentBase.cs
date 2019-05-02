@@ -6,20 +6,14 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Jack.DataScience.Data.MongoDB
 {
 
-    public abstract class DocumentBase
+    public class DocumentBase
     {
         [BsonId]
         public string _id { get; set; }
+        [BsonIgnoreIfNull]
+        public string TypeName { get; set; }
     }
 
-    public abstract class EdgeBase: DocumentBase
-    {
-
-        [BsonRequired]
-        public string _from { get; set; }
-        [BsonRequired]
-        public string _to { get; set; }
-    }
 
     public abstract class CosmosDocumentBase: DocumentBase
     {

@@ -80,6 +80,14 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
     }
 
     [AngularType]
+    public class DataSampleWithSchema {
+
+        public List<FieldMapping> FieldMappings { get; set; }
+        public DataSample DataSample { get; set; }
+    }
+
+
+    [AngularType]
     public class SFTPSetting
     {
         public string Host { get; set; }

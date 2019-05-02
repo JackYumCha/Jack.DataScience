@@ -44,6 +44,40 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             etlSettings.Sample = sample;
         }
 
+        /// <summary>
+        /// execute athena query and return sample data
+        /// </summary>
+        /// <param name="athenaApi"></param>
+        /// <param name="sql"></param>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public static async Task<DataSampleWithSchema> GetSampleDataBySQL(this AWSAthenaAPI athenaApi, string sql)
+        {
+            var result = new DataSampleWithSchema()
+            {
+                FieldMappings = new List<FieldMapping>(),
+            };
+            var sample = new DataSample()
+            {
+                Rows = new List<DataRow>()
+            };
+            result.DataSample = sample;
+
+            var response = await athenaApi.ExecuteQuery(sql);
+            var data = response.ReadData();
+            result.FieldMappings = response.ToFieldMapping();
+
+            foreach (var row in data)
+            {
+                var dataRow = new DataRow()
+                {
+                    Items = row.Select(item => item.ToString()).ToList()
+                };
+                sample.Rows.Add(dataRow);
+            }
+            return result;
+        }
+
         public static async Task<List<string>> TransferAthenaQueryResultByDate(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI)
         {
             var result = new List<string>();

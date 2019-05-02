@@ -1,0 +1,6 @@
+{
+    "description": "",
+    "scripts":{
+        "compile": "rmdir /s /q compiled && tsc"
+    }
+}
