@@ -31,7 +31,8 @@ namespace Jack.DataScience.Data.MongoDB
             {
                 mongoClientSettings.SslSettings = new SslSettings()
                 {
-                    EnabledSslProtocols = mongoOptions.SslProtocol // SslProtocols.Tls12
+                    EnabledSslProtocols = mongoOptions.SslProtocol, // SslProtocols.Tls12
+                    CheckCertificateRevocation = false,
                 };
             }
             mongoClient = new MongoClient(mongoClientSettings);

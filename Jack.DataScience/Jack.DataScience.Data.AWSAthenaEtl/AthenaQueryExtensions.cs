@@ -23,7 +23,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             var date = today.AddDays(-athena.DaysAgo);
             query = query.Replace("{date}", date.ToString(athena.DateFormat));
             query += $"\nlimit {lines}";
-            var response = await athenaApi.ExecuteQuery(query);
+            var getResultRequest = await athenaApi.ExecuteQuery(query);
+            var response = await athenaApi.ReadOneResult(getResultRequest);
             etlSettings.Mappings = response.ToFieldMapping();
             // load data schema to the etlsetting schema
 
@@ -63,7 +64,9 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             };
             result.DataSample = sample;
 
-            var response = await athenaApi.ExecuteQuery(sql);
+            // var response = await athenaApi.ExecuteQuery(sql);
+            var getResultRequest = await athenaApi.ExecuteQuery(sql);
+            var response = await athenaApi.ReadOneResult(getResultRequest);
             var data = response.ReadData();
             result.FieldMappings = response.ToFieldMapping();
 
@@ -91,9 +94,15 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             query = query.Replace("{date}", date.ToString(athena.DateFormat));
             var dateKey = date.ToString("yyyyMMdd");
 
-            var response = await athenaApi.ExecuteQuery(query);
+            // var response = await athenaApi.ExecuteQuery(query);
 
-            var enumerator = response.ResultSet.Rows.GetEnumerator();
+            var getResultRequest = await athenaApi.ExecuteQuery(query);
+            //var response = await athenaApi.ReadOneResult(getResultRequest);
+
+            //var enumerator = response.ResultSet.Rows.GetEnumerator();
+            ResultSetMetadata resultSetMetadata = null;
+
+            var enumerator = athenaApi.EnumerateRows(getResultRequest, res=> resultSetMetadata = res.ResultSet.ResultSetMetadata).GetEnumerator();
 
             List<Row> rows = new List<Row>();
 
@@ -109,7 +118,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 if (rows.Count >= etlSettings.NumberOfItemsPerParquet)
                 {
                     var s3key = etlSettings.MakeTargetS3Key(dateKey, "", false, parquetIndex);
-                    await targetS3.WriteResultRowsToS3Bucket(rows, response.ResultSet.ResultSetMetadata, etlSettings, s3key);
+                    await targetS3.WriteResultRowsToS3Bucket(rows, resultSetMetadata, etlSettings, s3key);
                     result.Add($"s3://{etlSettings.TargetS3BucketName}/{s3key}");
                     parquetIndex += 1;
                 }
@@ -119,7 +128,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             if (rows.Count > 0)
             {
                 var s3key = etlSettings.MakeTargetS3Key(dateKey, "", false, parquetIndex);
-                await targetS3.WriteResultRowsToS3Bucket(rows, response.ResultSet.ResultSetMetadata, etlSettings, s3key);
+                await targetS3.WriteResultRowsToS3Bucket(rows, resultSetMetadata, etlSettings, s3key);
                 result.Add($"s3://{etlSettings.TargetS3BucketName}/{s3key}");
                 parquetIndex += 1;
             }

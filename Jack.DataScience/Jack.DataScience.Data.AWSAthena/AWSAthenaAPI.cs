@@ -59,7 +59,7 @@ namespace Jack.DataScience.Data.AWSAthena
         }
 
 
-        public async Task<GetQueryResultsResponse> ExecuteQuery(string query)
+        public async Task<GetQueryResultsRequest> ExecuteQuery(string query) // Task<GetQueryResultsResponse>
         {
             var startResponse = await amazonAthenaClient.StartQueryExecutionAsync(new StartQueryExecutionRequest()
             {
@@ -97,12 +97,59 @@ namespace Jack.DataScience.Data.AWSAthena
                 }
             }
 
-            var resultResponse = await amazonAthenaClient.GetQueryResultsAsync(new GetQueryResultsRequest()
+            return new GetQueryResultsRequest()
             {
                 QueryExecutionId = queryId
-            });
+            };
 
-            return resultResponse;
+            //var resultResponse = await amazonAthenaClient.GetQueryResultsAsync(new GetQueryResultsRequest()
+            //{
+            //    QueryExecutionId = queryId
+            //});
+
+            //return resultResponse;
+        }
+
+        public async Task<GetQueryResultsResponse> ReadOneResult(GetQueryResultsRequest request)
+        {
+            var response = await amazonAthenaClient.GetQueryResultsAsync(request);
+            request.NextToken = response.NextToken;
+            return response;
+        }
+
+        public IEnumerable<T> EnumerateResults<T>(GetQueryResultsRequest request) where T: class, new()
+        {
+            int first = 1;
+            do
+            {
+                var response = ReadOneResult(request).GetAwaiter().GetResult();
+                foreach(var item in response.ReadRows<T>(first))
+                {
+                    yield return item;
+                }
+                if (first == 1) first = 0;
+            }
+            while (request.NextToken != null);
+        }
+
+        /// <summary>
+        /// you have to skip the first row, which is the schema
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="responseReceived"></param>
+        /// <returns></returns>
+        public IEnumerable<Row> EnumerateRows(GetQueryResultsRequest request, Action<GetQueryResultsResponse> responseReceived)
+        {
+            do
+            {
+                var response = ReadOneResult(request).GetAwaiter().GetResult();
+                responseReceived?.Invoke(response);
+                foreach (var row in response.ResultSet.Rows)
+                {
+                    yield return row;
+                }
+            }
+            while (request.NextToken != null);
         }
 
         public async Task<string> StartQuery(string query)
@@ -154,19 +201,39 @@ namespace Jack.DataScience.Data.AWSAthena
         public async Task<string> GenerateQueryCSSchema(string query) 
         {
             var result = await ExecuteQuery(query);
-            return result.ToCSharpType();
+            var response = await ReadOneResult(result);
+            return response.ToCSharpType();
         }
 
         public async Task<List<T>> GetQueryResults<T>(string query) where T: class, new()
         {
             var result = await ExecuteQuery(query);
-            return result.ReadRows<T>();
+
+            List<T> results = new List<T>();
+            int first = 1;
+            do
+            {
+                var response = await ReadOneResult(result);
+                results.AddRange(response.ReadRows<T>(first));
+                if (first > 0) first = 0;
+            }
+            while (result.NextToken != null);
+            return results;
         }
 
         public async Task<List<List<object>>> GetQueryResults(string query)
         {
             var result = await ExecuteQuery(query);
-            return result.ReadData();
+            List<List<object>> results = new List<List<object>>();
+            int first = 1;
+            do
+            {
+                var response = await ReadOneResult(result);
+                results.AddRange(response.ReadData(first));
+                if (first > 0) first = 0;
+            }
+            while (result.NextToken != null);
+            return results;
         }
 
         public async Task RepairTable(string tableName)
