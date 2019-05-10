@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Twilio;
+using Twilio.Clients;
 using Twilio.Rest.Api.V2010.Account;
 
 namespace Jack.DataScience.Automation.TwilioSMS
