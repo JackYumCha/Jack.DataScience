@@ -89,7 +89,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Communicat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Logging.AWSCloudWatch", "Jack.DataScience.Logging.AWSCloudWatch\Jack.DataScience.Logging.AWSCloudWatch.csproj", "{5990902E-57E8-4277-9831-AB0524EFDFD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Compute.AWSBatch", "Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj", "{D2CAA400-4D39-4906-A203-8F2070D7F7AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Compute.AWSBatch", "Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj", "{D2CAA400-4D39-4906-A203-8F2070D7F7AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Trigger.AWSCloudWatch", "Jack.DataScience.Trigger.AWSCloudWatch\Jack.DataScience.Trigger.AWSCloudWatch.csproj", "{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Http.AWSCloudFront", "Jack.DataScience.Http.AWSCloudFront\Jack.DataScience.Http.AWSCloudFront.csproj", "{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -273,6 +277,14 @@ Global
 		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
