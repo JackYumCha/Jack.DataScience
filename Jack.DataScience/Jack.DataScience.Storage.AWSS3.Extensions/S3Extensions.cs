@@ -57,15 +57,19 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
         /// <param name="key"></param>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        public static async Task WriteParquetPerPartition<T>(this AWSS3API awsS3, IEnumerable<T> items, int partitionSize, int digitCount,
+        public static async Task<List<string>> WriteParquetPerPartition<T>(this AWSS3API awsS3, IEnumerable<T> items, int partitionSize, int digitCount,
             string key, string bucket = null) where T : class
         {
             key = parquetSuffix.Replace(key, "");
+            List<string> files = new List<string>();
             var writeTasks = items.SplitIntoPartitions(partitionSize).Select(async (partition, index) =>
             {
-               await awsS3.WriteParquet(partition, $"{key}-{index.ToString().PadLeft(digitCount, '0')}.parquet", bucket);
+                var fileKey = $"{key}-{index.ToString().PadLeft(digitCount, '0')}.parquet";
+                await awsS3.WriteParquet(partition, fileKey, bucket);
+                files.Add(fileKey);
             }).ToArray();
             await Task.WhenAll(writeTasks);
+            return files;
         }
 
         public static async Task<IEnumerable<T>> ReadParquet<T>(this AWSS3API awsS3, string key, string bucket = null) where T: class, new()

@@ -14,7 +14,6 @@ namespace Jack.DataScience.Data.MongoDB
         public string TypeName { get; set; }
     }
 
-
     public abstract class CosmosDocumentBase: DocumentBase
     {
         public string Key { get; set; }

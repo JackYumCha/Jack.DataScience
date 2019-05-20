@@ -87,7 +87,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Communicat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Communication.SendGrid", "Jack.DataScience.Communication.SendGrid\Jack.DataScience.Communication.SendGrid.csproj", "{473425AC-5739-4DE9-9666-2D62583714F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Logging.AWSCloudWatch", "Jack.DataScience.Logging.AWSCloudWatch\Jack.DataScience.Logging.AWSCloudWatch.csproj", "{5990902E-57E8-4277-9831-AB0524EFDFD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Logging.AWSCloudWatch", "Jack.DataScience.Logging.AWSCloudWatch\Jack.DataScience.Logging.AWSCloudWatch.csproj", "{5990902E-57E8-4277-9831-AB0524EFDFD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Compute.AWSBatch", "Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj", "{D2CAA400-4D39-4906-A203-8F2070D7F7AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -267,6 +269,10 @@ Global
 		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5990902E-57E8-4277-9831-AB0524EFDFD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2CAA400-4D39-4906-A203-8F2070D7F7AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

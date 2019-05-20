@@ -18,7 +18,7 @@ namespace MvcAngular.Generator.Lambda
         {
             pagedList.NumberPerPage = request.NumberPerPage;
             pagedList.PageIndex = request.PageIndex;
-            pagedList.NumberOfPages = (int)Math.Floor(count / (double)pagedList.NumberPerPage);
+            pagedList.NumberOfPages = (int)Math.Ceiling(count / (double)pagedList.NumberPerPage);
             if (pagedList.PageIndex >= pagedList.NumberOfPages)
             {
                 pagedList.PageIndex = pagedList.NumberOfPages - 1;

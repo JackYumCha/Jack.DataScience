@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.Batch" Version="3.3.101.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
+  </ItemGroup>
+
+</Project>
