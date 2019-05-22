@@ -4,6 +4,7 @@ using Amazon.CloudWatchEvents.Model;
 using System;
 using Amazon;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace Jack.DataScience.Trigger.AWSCloudWatch
 {
@@ -19,20 +20,31 @@ namespace Jack.DataScience.Trigger.AWSCloudWatch
             amazonCloudWatchEventsClient = new AmazonCloudWatchEventsClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsCloudWatchEventOptions.Region));
         }
 
-        public async Task DisableRule(string name)
+        public async Task<HttpStatusCode> DisableRule(string name)
         {
-            await amazonCloudWatchEventsClient.DisableRuleAsync(new DisableRuleRequest()
+            var disableRuleResponse = await amazonCloudWatchEventsClient.DisableRuleAsync(new DisableRuleRequest()
             {
                 Name = name
             });
+            return disableRuleResponse.HttpStatusCode;
         }
 
-        public async Task EnableRule(string name)
+        public async Task<HttpStatusCode> EnableRule(string name)
         {
-            await amazonCloudWatchEventsClient.EnableRuleAsync(new EnableRuleRequest()
+            var enableRuleResponse = await amazonCloudWatchEventsClient.EnableRuleAsync(new EnableRuleRequest()
             {
                 Name = name
             });
+            return enableRuleResponse.HttpStatusCode;
+        }
+
+        public async Task<string> GetRuleState(string name)
+        {
+            var describeRuleResponse = await amazonCloudWatchEventsClient.DescribeRuleAsync(new DescribeRuleRequest()
+            {
+                Name = name
+            });
+            return describeRuleResponse.State.Value;
         }
     }
 }
