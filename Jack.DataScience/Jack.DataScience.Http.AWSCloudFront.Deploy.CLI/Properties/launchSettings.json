@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Jack.DataScience.Http.AWSCloudFront.Deploy.CLI": {
+      "commandName": "Project"
+    }
+  }
+}

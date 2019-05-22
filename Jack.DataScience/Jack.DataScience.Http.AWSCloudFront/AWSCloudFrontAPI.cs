@@ -2,6 +2,7 @@
 using Amazon.Runtime;
 using Amazon.CloudFront;
 using Amazon.CloudFront.Model;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -20,16 +21,19 @@ namespace Jack.DataScience.Http.AWSCloudFront
             amazonCloudFrontClient = new AmazonCloudFrontClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsCloudFrontOptions.Region));
         }
 
-        public async Task CreateInvalidation(string distributionId)
+        public async Task<string> CreateInvalidation(string distributionId)
         {
-            await amazonCloudFrontClient.CreateInvalidationAsync(new CreateInvalidationRequest()
+            var callerReference = Guid.NewGuid().ToString();
+            var createInvalidationResponse = await amazonCloudFrontClient.CreateInvalidationAsync(new CreateInvalidationRequest()
             {
                 DistributionId = distributionId,
                 InvalidationBatch = new InvalidationBatch()
                 {
-                    Paths = new Paths() { Items = new List<string>() { "*" } }
+                    Paths = new Paths() { Items = new List<string>() { "/*" } , Quantity = 1 },
+                    CallerReference = callerReference
                 }
             });
+            return createInvalidationResponse.Invalidation.Id;
         }
     }
 }

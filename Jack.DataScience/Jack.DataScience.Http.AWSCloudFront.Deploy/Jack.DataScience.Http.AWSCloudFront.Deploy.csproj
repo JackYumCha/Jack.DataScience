@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jack.DataScience.Http.AWSCloudFront\Jack.DataScience.Http.AWSCloudFront.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj" />
+  </ItemGroup>
+
+</Project>
