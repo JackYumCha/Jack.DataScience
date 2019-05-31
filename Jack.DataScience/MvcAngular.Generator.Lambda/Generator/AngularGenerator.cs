@@ -598,6 +598,16 @@ namespace MvcAngular.Generator
                         var ItemType = type.GetGenericArguments().First();
                         return $"PagedList<{TypeMapping(ItemType, imports, host)}>";
                     }
+
+                    // Map LongJob
+                    else if(type.IsConstructedGenericType &&
+                        (
+                            type.GetGenericTypeDefinition() == typeof(LongJob<>)
+                        ))
+                    {
+                        var ItemType = type.GetGenericArguments().First();
+                        return $"LongJob<{TypeMapping(ItemType, imports, host)}>";
+                    }
                     // deprecated
                     //Map JsonResult<T> to T
                     //else if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(JsonTypeResult<>)) // type.FullName.StartsWith("Microsoft.AspNetCore.Mvc.JsonResult`1"))

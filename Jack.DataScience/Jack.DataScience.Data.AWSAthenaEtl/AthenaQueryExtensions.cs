@@ -81,6 +81,56 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             return result;
         }
 
+        public static async Task<string> StartSampleDataBySQL(this AWSAthenaAPI athenaApi, string sql)
+        {
+            var result = new DataSampleWithSchema()
+            {
+                FieldMappings = new List<FieldMapping>(),
+            };
+            var sample = new DataSample()
+            {
+                Rows = new List<DataRow>()
+            };
+            result.DataSample = sample;
+
+            // var response = await athenaApi.ExecuteQuery(sql);
+            return await athenaApi.StartQuery(sql);
+        }
+
+        public static async Task<DataSampleWithSchema> TryObtainSampleDataResult(this AWSAthenaAPI athenaApi, string executionId)
+        {
+            if(await athenaApi.IsExecutionCompleted(executionId))
+            {
+                var result = new DataSampleWithSchema()
+                {
+                    FieldMappings = new List<FieldMapping>(),
+                };
+                var sample = new DataSample()
+                {
+                    Rows = new List<DataRow>()
+                };
+                result.DataSample = sample;
+                var response = await athenaApi.ReadOneResult(new GetQueryResultsRequest() { QueryExecutionId = executionId });
+                var data = response.ReadData();
+                result.FieldMappings = response.ToFieldMapping();
+
+                foreach (var row in data)
+                {
+                    var dataRow = new DataRow()
+                    {
+                        Items = row.Select(item => item.ToString()).ToList()
+                    };
+                    sample.Rows.Add(dataRow);
+                }
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
         public static async Task<List<string>> TransferAthenaQueryResultByDate(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI)
         {
             var result = new List<string>();

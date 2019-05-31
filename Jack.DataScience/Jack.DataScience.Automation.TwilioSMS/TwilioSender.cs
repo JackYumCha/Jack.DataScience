@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Newtonsoft.Json;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Twilio;
@@ -18,6 +20,8 @@ namespace Jack.DataScience.Automation.TwilioSMS
             this.options = options;
         }
 
+        public TwilioOptions Options { get => options; }
+
         public async Task<long> MeasureSend(string number, string message, string from)
         {
             Stopwatch stopwatch = new Stopwatch();
@@ -31,23 +35,34 @@ namespace Jack.DataScience.Automation.TwilioSMS
             return stopwatch.ElapsedMilliseconds;
         }
 
-        public async Task Send(string number, string message, string from)
+        public async Task Send(string number, string message)
         {
             bool shouldTry = true;
-            while(shouldTry)
+            int retries = 3;
+
+            try
             {
-                var messageResource = await MessageResource.CreateAsync(new CreateMessageOptions(number)
+                while (shouldTry && retries > 0)
                 {
-                    From = from,
-                    Body = message
-                });
-                shouldTry = false;
-                // the error code 429 is when concurrent limit is reached, then we should retry.
-                if(messageResource.ErrorCode == 429)
-                {
-                    Thread.Sleep(1); // sleep 1ms to retry
-                    shouldTry = true;
+                    shouldTry = false;
+                    var messageResource = await MessageResource.CreateAsync(new CreateMessageOptions(number)
+                    {
+                        From = options.From,
+                        Body = message
+                    });
+                    retries -= 1;
+                    // the error code 429 is when concurrent limit is reached, then we should retry.
+                    if (messageResource.ErrorCode == 429)
+                    {
+                        Thread.Sleep(1); // sleep 1ms to retry
+                        shouldTry = true;
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Error when trying to send to: {number}");
+                Console.WriteLine(ex.Message);
             }
         }
     }

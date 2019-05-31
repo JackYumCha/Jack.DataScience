@@ -24,10 +24,12 @@ namespace Jack.DataScience.Compute.AWSLambda
 
         public async Task Invoke(string name, object parameter)
         {
+
             await amazonLambdaClient.InvokeAsync(new InvokeRequest()
             {
                 FunctionName = name,
-                Payload = JsonConvert.SerializeObject(parameter)
+                Payload = JsonConvert.SerializeObject(parameter),
+                InvocationType = InvocationType.Event
             });
         }
     }

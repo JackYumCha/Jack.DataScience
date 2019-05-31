@@ -6,5 +6,6 @@ namespace Jack.DataScience.Automation.TwilioSMS
     {
         public string AccoundSID { get; set; }
         public string Token { get; set; }
+        public string From { get; set; }
     }
 }

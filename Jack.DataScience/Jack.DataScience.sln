@@ -91,17 +91,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Logging.AW
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Compute.AWSBatch", "Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj", "{D2CAA400-4D39-4906-A203-8F2070D7F7AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Trigger.AWSCloudWatch", "Jack.DataScience.Trigger.AWSCloudWatch\Jack.DataScience.Trigger.AWSCloudWatch.csproj", "{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Trigger.AWSCloudWatch", "Jack.DataScience.Trigger.AWSCloudWatch\Jack.DataScience.Trigger.AWSCloudWatch.csproj", "{4B4A0A3B-9B85-4F47-BE26-2AEDD0D84642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Http.AWSCloudFront", "Jack.DataScience.Http.AWSCloudFront\Jack.DataScience.Http.AWSCloudFront.csproj", "{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.AWSCloudFront", "Jack.DataScience.Http.AWSCloudFront\Jack.DataScience.Http.AWSCloudFront.csproj", "{F895B5EE-5AA6-465F-AC8D-B4F3E81BBBB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Http.AWSCloudFront.Deploy", "Jack.DataScience.Http.AWSCloudFront.Deploy\Jack.DataScience.Http.AWSCloudFront.Deploy.csproj", "{A758E10D-860F-4600-967A-D03DEC4364CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.AWSCloudFront.Deploy", "Jack.DataScience.Http.AWSCloudFront.Deploy\Jack.DataScience.Http.AWSCloudFront.Deploy.csproj", "{A758E10D-860F-4600-967A-D03DEC4364CE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Console", "Jack.DataScience.Console\Jack.DataScience.Console.csproj", "{2F9FE741-DA8B-42AE-9605-74BA7FE3EEE3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Http.AWSCloudFront.Deploy.CLI", "Jack.DataScience.Http.AWSCloudFront.Deploy.CLI\Jack.DataScience.Http.AWSCloudFront.Deploy.CLI.csproj", "{0C4CE525-7448-4E7E-B648-2193C6CAD666}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.AWS.SecurityToken", "Jack.DataScience.AWS.SecurityToken\Jack.DataScience.AWS.SecurityToken.csproj", "{2FAFA9A6-7BC1-4686-B3F4-60B1BF1C2661}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.AWS.SecurityToken", "Jack.DataScience.AWS.SecurityToken\Jack.DataScience.AWS.SecurityToken.csproj", "{2FAFA9A6-7BC1-4686-B3F4-60B1BF1C2661}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.MQ.AWSKinesis", "Jack.DataScience.MQ.AWSKinesis\Jack.DataScience.MQ.AWSKinesis.csproj", "{8B83118C-5409-4FE1-AE19-566633AA1870}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.MQ.AWSSQS", "Jack.DataScience.MQ.AWSSQS\Jack.DataScience.MQ.AWSSQS.csproj", "{ACD42341-4948-4753-A0DF-9AB1CC42E012}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -309,6 +313,14 @@ Global
 		{2FAFA9A6-7BC1-4686-B3F4-60B1BF1C2661}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FAFA9A6-7BC1-4686-B3F4-60B1BF1C2661}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FAFA9A6-7BC1-4686-B3F4-60B1BF1C2661}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B83118C-5409-4FE1-AE19-566633AA1870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B83118C-5409-4FE1-AE19-566633AA1870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B83118C-5409-4FE1-AE19-566633AA1870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B83118C-5409-4FE1-AE19-566633AA1870}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD42341-4948-4753-A0DF-9AB1CC42E012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD42341-4948-4753-A0DF-9AB1CC42E012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD42341-4948-4753-A0DF-9AB1CC42E012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD42341-4948-4753-A0DF-9AB1CC42E012}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

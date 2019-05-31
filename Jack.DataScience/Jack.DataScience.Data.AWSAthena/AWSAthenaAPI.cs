@@ -110,6 +110,32 @@ namespace Jack.DataScience.Data.AWSAthena
             //return resultResponse;
         }
 
+        public async Task<bool> IsExecutionCompleted(string executionId) // Task<GetQueryResultsResponse>
+        {
+            GetQueryExecutionRequest getQueryExecutionRequest = new GetQueryExecutionRequest()
+            {
+                QueryExecutionId = executionId
+            };
+
+            bool completed = false;
+            var executionResponse = await amazonAthenaClient.GetQueryExecutionAsync(getQueryExecutionRequest);
+            var state = executionResponse.QueryExecution.Status.State;
+
+            if (state == QueryExecutionState.FAILED)
+            {
+                throw new Exception($"Query Failed to run with Error Message: \n{executionResponse.QueryExecution.Status.StateChangeReason}");
+            }
+            else if (state == QueryExecutionState.CANCELLED)
+            {
+                throw new Exception($"Query was cancelled.");
+            }
+            else if (state == QueryExecutionState.SUCCEEDED)
+            {
+                completed = true;
+            }
+            return completed;
+        }
+
         public async Task<GetQueryResultsResponse> ReadOneResult(GetQueryResultsRequest request)
         {
             var response = await amazonAthenaClient.GetQueryResultsAsync(request);
