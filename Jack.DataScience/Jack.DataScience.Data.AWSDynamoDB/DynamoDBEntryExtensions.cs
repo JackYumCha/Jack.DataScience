@@ -41,7 +41,7 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             {
                 return entry.AsDateTime();
             }
-            else if (type == dateTimeType)
+            else if (type == doubleType)
             {
                 return entry.AsDouble();
             }
