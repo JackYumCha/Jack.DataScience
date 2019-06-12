@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.IO.Compression;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -288,16 +289,55 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
-        public async Task UploadAsJson(string key, object value, string bucket = null)
+        public async Task UploadAsJson(string key, object value, string bucket = null, JsonSerializerSettings jsonSerializerSettings = null)
         {
             string bucketName = bucket;
             if (bucketName == null) bucketName = awsS3Options.Bucket;
             using (AmazonS3Client client = CreateClient())
             {
                 TransferUtility transferUtility = new TransferUtility(client);
-                using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value))))
+                byte[] data = null;
+                if(jsonSerializerSettings == null)
+                {
+                    data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value));
+                }
+                else
+                {
+                    data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value, jsonSerializerSettings));
+                }
+                using (MemoryStream stream = new MemoryStream(data))
                 {
                     await transferUtility.UploadAsync(stream, bucketName, key);
+                }
+            }
+        }
+
+        public async Task UploadAsGZipJson(string key, object value, string bucket = null, JsonSerializerSettings jsonSerializerSettings = null)
+        {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                byte[] data = null;
+                if (jsonSerializerSettings == null)
+                {
+                    data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value));
+                }
+                else
+                {
+                    data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value, jsonSerializerSettings));
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (GZipStream gZipStream = new GZipStream(stream, CompressionLevel.Optimal))
+                    {
+                        gZipStream.Write(data, 0, data.Length);
+                    }
+                    using(MemoryStream streamToUpload = new MemoryStream(stream.ToArray()))
+                    {
+                        await transferUtility.UploadAsync(streamToUpload, bucketName, key);
+                    }
                 }
             }
         }

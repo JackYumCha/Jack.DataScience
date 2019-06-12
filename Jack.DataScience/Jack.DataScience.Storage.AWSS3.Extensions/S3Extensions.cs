@@ -64,9 +64,12 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             List<string> files = new List<string>();
             var writeTasks = items.SplitIntoPartitions(partitionSize).Select(async (partition, index) =>
             {
-                var fileKey = $"{key}-{index.ToString().PadLeft(digitCount, '0')}.parquet";
-                await awsS3.WriteParquet(partition, fileKey, bucket);
-                files.Add(fileKey);
+                if(partition.Count > 0)
+                {
+                    var fileKey = $"{key}-{index.ToString().PadLeft(digitCount, '0')}.parquet";
+                    await awsS3.WriteParquet(partition, fileKey, bucket);
+                    files.Add(fileKey);
+                }
             }).ToArray();
             await Task.WhenAll(writeTasks);
             return files;
