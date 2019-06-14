@@ -107,7 +107,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.MQ.AWSKine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.MQ.AWSSQS", "Jack.DataScience.MQ.AWSSQS\Jack.DataScience.MQ.AWSSQS.csproj", "{ACD42341-4948-4753-A0DF-9AB1CC42E012}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.AzureTableStorage", "Jack.DataScience.Data.AzureTableStorage\Jack.DataScience.Data.AzureTableStorage.csproj", "{D5B9CE45-B0D2-43FC-BB72-D56931B143CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.AzureTableStorage", "Jack.DataScience.Data.AzureTableStorage\Jack.DataScience.Data.AzureTableStorage.csproj", "{D5B9CE45-B0D2-43FC-BB72-D56931B143CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Network.SSH", "Jack.DataScience.Network.SSH\Jack.DataScience.Network.SSH.csproj", "{729D5B46-A87C-4B3B-96A8-8943C7C0B07C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -327,6 +329,10 @@ Global
 		{D5B9CE45-B0D2-43FC-BB72-D56931B143CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5B9CE45-B0D2-43FC-BB72-D56931B143CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5B9CE45-B0D2-43FC-BB72-D56931B143CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{729D5B46-A87C-4B3B-96A8-8943C7C0B07C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{729D5B46-A87C-4B3B-96A8-8943C7C0B07C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{729D5B46-A87C-4B3B-96A8-8943C7C0B07C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{729D5B46-A87C-4B3B-96A8-8943C7C0B07C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,5 +10,7 @@ namespace Jack.DataScience.Storage.SFTP
         public string Username { get; set; }
         public string Password { get; set; }
         public string DefaultPath { get; set; }
+        public string PrivateKeyPath { get; set; }
+        public string AuthenticationMethod { get; set; }
     }
 }

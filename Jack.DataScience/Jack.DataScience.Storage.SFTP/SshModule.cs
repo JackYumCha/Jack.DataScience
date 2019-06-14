@@ -13,12 +13,26 @@ namespace Jack.DataScience.Storage.SFTP
             builder.Register((context) =>
             {
                 var options = context.Resolve<SshOptions>();
-                return new SftpClient(options.Url, options.Username, options.Password);
+                switch (options.AuthenticationMethod)
+                {
+                    case "PrivateKey":
+                        return new SftpClient(options.Url, options.Username, new PrivateKeyFile($"{AppContext.BaseDirectory}/{options.PrivateKeyPath}"));
+                    case "Password":
+                    default:
+                        return new SftpClient(options.Url, options.Username, options.Password);
+                }
             });
             builder.Register((context) =>
             {
                 var options = context.Resolve<SshOptions>();
-                return new SshClient(options.Url, options.Username, options.Password);
+                switch (options.AuthenticationMethod)
+                {
+                    case "PrivateKey":
+                        return new SshClient(options.Url, options.Username, new PrivateKeyFile($"{AppContext.BaseDirectory}/{options.PrivateKeyPath}"));
+                    case "Password":
+                    default:
+                        return new SshClient(options.Url, options.Username, options.Password);
+                }
             });
             base.Load(builder);
         }
