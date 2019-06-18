@@ -39,9 +39,19 @@ namespace Jack.DataScience.Data.MongoDB
             MongoDatabase = mongoClient.GetDatabase(mongoOptions.Database);
         }
 
+        public List<string> ListCollections()
+        {
+            return MongoDatabase.ListCollectionNames().ToList();
+        }
+
         public IMongoCollection<T> Collection<T>() where T : class
         {
             return MongoDatabase.GetCollection<T>(typeof(T).Name);
+        }
+
+        public IMongoCollection<BsonDocument> Collection(string name)
+        {
+            return MongoDatabase.GetCollection<BsonDocument>(name);
         }
 
         public IMongoCollection<MongoFunction> Functions()

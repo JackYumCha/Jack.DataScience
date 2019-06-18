@@ -342,6 +342,27 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        public  async Task UploadGZip(string key, byte[] data, string bucket = null)
+        {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (GZipStream gZipStream = new GZipStream(stream, CompressionLevel.Optimal))
+                    {
+                        gZipStream.Write(data, 0, data.Length);
+                    }
+                    using (MemoryStream streamToUpload = new MemoryStream(stream.ToArray()))
+                    {
+                        await transferUtility.UploadAsync(streamToUpload, bucketName, key);
+                    }
+                }
+            }
+        }
+
         public async Task<T> ReadFromJson<T>(string key, string bucket = null) where T: class, new()
         {
             var bytes = await ReadAsBytes(key, bucket);
