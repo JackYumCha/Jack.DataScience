@@ -329,6 +329,14 @@ namespace Jack.DataScience.Data.MongoDB
             return collection.DeleteOne(Builders<T>.Filter.Where(f => f._id == item._id));
         }
 
+        public static DeleteResult DeleteMany<T>(
+            this IMongoCollection<T> collection,
+            Expression<Func<T, bool>> fieldSelector)
+            where T : DocumentBase
+        {
+            return collection.DeleteMany(Builders<T>.Filter.Where(fieldSelector));
+        }
+
         public static UpdateResult UpdateWhereMany<T>(
             this IMongoCollection<T> collection, 
             Expression<Func<T, bool>> fieldSelector, Func<UpdateDefinitionBuilder<T>, UpdateDefinition<T>> updater)

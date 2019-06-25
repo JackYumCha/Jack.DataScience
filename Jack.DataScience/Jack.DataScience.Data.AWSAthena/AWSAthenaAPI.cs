@@ -11,6 +11,9 @@ using Amazon.Runtime;
 using Amazon.Athena;
 using Amazon.Athena.Model;
 using Jack.DataScience.Data.Converters;
+using Jack.DataScience.Compute.AWSLambda;
+using Jack.DataScience.MQ.AWSSQS;
+using Newtonsoft.Json;
 
 namespace Jack.DataScience.Data.AWSAthena
 {
@@ -33,16 +36,33 @@ namespace Jack.DataScience.Data.AWSAthena
             LOCATION 's3://datascience-twilio-sms-logs/twilio-sms-log-2018-12-03/'
              */
 
-            var queryInfo = await amazonAthenaClient.StartQueryExecutionAsync(new StartQueryExecutionRequest()
+            if(awsAthenaOptions.SQSOptions != null)
             {
-                QueryString = $@"ALTER TABLE {tableName} ADD PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
-                ResultConfiguration = new ResultConfiguration()
+                AWSSQSAPI awsSQSAPI = new AWSSQSAPI(awsAthenaOptions.SQSOptions);
+                var request = new StartQueryExecutionRequest()
                 {
-                    OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
-                }
-            });
+                    QueryString = $@"ALTER TABLE {tableName} ADD PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
+                    ResultConfiguration = new ResultConfiguration()
+                    {
+                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                    }
+                };
+                await awsSQSAPI.SendMessage(JsonConvert.SerializeObject(request));
+                return $"SQS-{awsAthenaOptions.SQSOptions.Url}";
+            }
+            else
+            {
+                var queryInfo = await amazonAthenaClient.StartQueryExecutionAsync(new StartQueryExecutionRequest()
+                {
+                    QueryString = $@"ALTER TABLE {tableName} ADD PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
+                    ResultConfiguration = new ResultConfiguration()
+                    {
+                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                    }
+                });
 
-            return queryInfo.QueryExecutionId;
+                return queryInfo.QueryExecutionId;
+            }
 
             //var queryStatus = amazonAthenaClient.GetQueryExecutionAsync(new GetQueryExecutionRequest() { QueryExecutionId = queryInfo.QueryExecutionId });
 
@@ -56,6 +76,51 @@ namespace Jack.DataScience.Data.AWSAthena
             //if (queryStatus.IsCompleted) return "completed";
             //if (queryStatus.IsFaulted) return "faulted";
             //return "unknown";
+        }
+
+
+        public async Task<int> LoadPartitionViaSQS()
+        {
+            int result = 0;
+            if (awsAthenaOptions.SQSOptions != null)
+            {
+                AWSSQSAPI awsSQSAPI = new AWSSQSAPI(awsAthenaOptions.SQSOptions);
+
+                var messages = await awsSQSAPI.ReceiveMessage(10, 30);
+
+                if (messages.Any())
+                {
+                    foreach (var message in messages)
+                    {
+                        try
+                        {
+                            var request = JsonConvert.DeserializeObject<StartQueryExecutionRequest>(message.Body);
+                            Console.WriteLine($"Execute Query: {request.QueryString}");
+                            await amazonAthenaClient.StartQueryExecutionAsync(request);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Exception on Load Partition: {ex.Message}");
+                            Console.WriteLine(ex.Source);
+                            Console.WriteLine(ex.StackTrace);
+                        }
+                        await awsSQSAPI.DeleteMessage(message.ReceiptHandle);
+                        result += 1;
+                    }
+
+                    // invoke next function
+                    if (awsAthenaOptions.LambdaOptions != null && !string.IsNullOrWhiteSpace(awsAthenaOptions.LoaderFunction))
+                    {
+                        AWSLambdaAPI awsLambdaAPI = new AWSLambdaAPI(awsAthenaOptions.LambdaOptions);
+
+                        awsLambdaAPI.Invoke(awsAthenaOptions.LoaderFunction, JsonConvert.SerializeObject(""));
+                        awsLambdaAPI.Invoke(awsAthenaOptions.LoaderFunction, JsonConvert.SerializeObject(""));
+
+                        Thread.Sleep(2000);
+                    }
+                }
+            }
+            return result;
         }
 
 
