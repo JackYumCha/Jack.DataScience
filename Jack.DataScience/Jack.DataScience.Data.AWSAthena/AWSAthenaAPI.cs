@@ -96,7 +96,8 @@ namespace Jack.DataScience.Data.AWSAthena
                         {
                             var request = JsonConvert.DeserializeObject<StartQueryExecutionRequest>(message.Body);
                             Console.WriteLine($"Execute Query: {request.QueryString}");
-                            await amazonAthenaClient.StartQueryExecutionAsync(request);
+                            await ExecuteQuery(request); // this will wait until the query completes
+                            await awsSQSAPI.DeleteMessage(message.ReceiptHandle);
                         }
                         catch (Exception ex)
                         {
@@ -104,7 +105,7 @@ namespace Jack.DataScience.Data.AWSAthena
                             Console.WriteLine(ex.Source);
                             Console.WriteLine(ex.StackTrace);
                         }
-                        await awsSQSAPI.DeleteMessage(message.ReceiptHandle);
+                        
                         result += 1;
                     }
 
@@ -157,6 +158,50 @@ namespace Jack.DataScience.Data.AWSAthena
                     throw new Exception($"Query was cancelled.");
                 }
                 else if(state == QueryExecutionState.SUCCEEDED)
+                {
+                    isStillingRunning = false;
+                }
+            }
+
+            return new GetQueryResultsRequest()
+            {
+                QueryExecutionId = queryId
+            };
+
+            //var resultResponse = await amazonAthenaClient.GetQueryResultsAsync(new GetQueryResultsRequest()
+            //{
+            //    QueryExecutionId = queryId
+            //});
+
+            //return resultResponse;
+        }
+
+        public async Task<GetQueryResultsRequest> ExecuteQuery(StartQueryExecutionRequest startQueryExecutionRequest) // Task<GetQueryResultsResponse>
+        {
+            var startResponse = await amazonAthenaClient.StartQueryExecutionAsync(startQueryExecutionRequest);
+
+            var queryId = startResponse.QueryExecutionId;
+
+            GetQueryExecutionRequest getQueryExecutionRequest = new GetQueryExecutionRequest()
+            {
+                QueryExecutionId = queryId
+            };
+
+            bool isStillingRunning = true;
+            while (isStillingRunning)
+            {
+                var executionResponse = await amazonAthenaClient.GetQueryExecutionAsync(getQueryExecutionRequest);
+                var state = executionResponse.QueryExecution.Status.State;
+
+                if (state == QueryExecutionState.FAILED)
+                {
+                    throw new Exception($"Query Failed to run with Error Message: \n{executionResponse.QueryExecution.Status.StateChangeReason}");
+                }
+                else if (state == QueryExecutionState.CANCELLED)
+                {
+                    throw new Exception($"Query was cancelled.");
+                }
+                else if (state == QueryExecutionState.SUCCEEDED)
                 {
                     isStillingRunning = false;
                 }
