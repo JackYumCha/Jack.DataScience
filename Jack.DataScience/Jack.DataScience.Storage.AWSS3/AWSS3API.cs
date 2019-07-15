@@ -363,12 +363,12 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
-        public async Task<T> ReadFromJson<T>(string key, string bucket = null) where T: class, new()
+        public async Task<T> ReadFromJson<T>(string key, string bucket = null, JsonSerializerSettings jsonSerializerSettings = null) where T: class, new()
         {
             var bytes = await ReadAsBytes(key, bucket);
             if (bytes == null) return null;
             var value = Encoding.UTF8.GetString(bytes);
-            return JsonConvert.DeserializeObject<T>(value);
+            return jsonSerializerSettings == null ? JsonConvert.DeserializeObject<T>(value) : JsonConvert.DeserializeObject<T>(value, jsonSerializerSettings);
         }
 
         public async Task<Stream> OpenReadAsync(string key, string bucket = null)

@@ -10,6 +10,8 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Jack.DataScience.Data.AWSDynamoDB
 {
@@ -32,6 +34,8 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             };
         }
 
+        public JsonSerializerSettings JsonSerializerSettings { get => jsonSerializerSettings; }
+
         /// <summary>
         /// read item from the table
         /// </summary>
@@ -51,30 +55,27 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             };
 
             var document = await table.GetItemAsync(key, config);
+            if (document == null) return null;
+            return document.ParseDocument<T>(jsonSerializerSettings);
+        }
 
-            var obj = new T();
-            foreach(var property in properties)
+        public async Task<T> ReadItem<T>(Dictionary<string, object> keys) where T : class, new()
+        {
+            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            var type = typeof(T);
+            var properties = type.GetProperties();
+
+            var config = new GetItemOperationConfig
             {
-                if (property.PropertyType.IsEnum)
-                {
-                    property.SetValue(obj, Enum.Parse(property.PropertyType, document[property.Name].AsString()));
-                }
-                else if (property.PropertyType == typeof(string))
-                {
-                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
-                }
-                else if (property.PropertyType.IsClass)
-                {
-                    var json = document[property.Name].AsType(typeof(string)) as string;
+                AttributesToGet = properties.Select(property => property.Name).ToList(),
+                ConsistentRead = true
+            };
 
-                    property.SetValue(obj, JsonConvert.DeserializeObject(json, property.PropertyType, jsonSerializerSettings));
-                }
-                else
-                {
-                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
-                }
-            }
-            return obj;
+            var attributeKeys = keys.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsDBEntry(jsonSerializerSettings));
+
+            var document = await table.GetItemAsync(attributeKeys, config);
+
+            return document.ParseDocument<T>(jsonSerializerSettings);
         }
 
         /// <summary>
@@ -86,39 +87,73 @@ namespace Jack.DataScience.Data.AWSDynamoDB
         public async Task WriteItem<T>(T obj) where T : class, new()
         {
             var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
-            var document = new Document();
+            var document = obj.BuildDocument(jsonSerializerSettings);
+            await table.PutItemAsync(document);
+        }
+
+        public async Task UpsertItem<T>(T obj, IEnumerable<string> keys) where T : class, new()
+        {
+            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
             var type = typeof(T);
             var properties = type.GetProperties();
-            foreach (var property in properties)
+            var attributeKeys = new Dictionary<string, DynamoDBEntry>();
+            foreach(var key in keys)
             {
-                if(property.PropertyType == DynamoDBEntryExtensions.boolType)
-                {
-                    var value = new DynamoDBBool((bool)property.GetValue(obj));
-                    document[property.Name] = value;
-                }
-                else if (property.PropertyType.IsEnum)
-                {
-                    // enum as string
-                    var value = Enum.GetName(property.PropertyType, property.GetValue(obj));
-                    document[property.Name] = value;
-                }
-                else if (property.PropertyType == typeof(string))
-                {
-                    dynamic value = property.GetValue(obj);
-                    document[property.Name] = value;
-                }
-                else if(property.PropertyType.IsClass)
-                {
-                    string value = JsonConvert.SerializeObject(property.GetValue(obj), jsonSerializerSettings);
-                    document[property.Name] = value;
-                }
-                else
-                {
-                    dynamic value = property.GetValue(obj);
-                    document[property.Name] = value;
-                }
+                attributeKeys.Add(key, type.GetProperty(key).GetValue(obj).AsDBEntry(jsonSerializerSettings));
             }
-            await table.PutItemAsync(document);
+            var config = new GetItemOperationConfig
+            {
+                AttributesToGet = keys.ToList(),
+                ConsistentRead = true
+            };
+            var found = await table.GetItemAsync(attributeKeys, config);
+            if(found == null) // insert
+            {
+                var document = obj.BuildDocument(jsonSerializerSettings);
+                await table.PutItemAsync(document);
+            }
+            else // update
+            {
+                var document = obj.BuildDocument(jsonSerializerSettings);
+                await table.UpdateItemAsync(document);
+            }
+        }
+
+        public async Task<bool> Exists<T>(T obj, IEnumerable<string> keys) where T : class, new()
+        {
+            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            var type = typeof(T);
+            var properties = type.GetProperties();
+            var attributeKeys = new Dictionary<string, DynamoDBEntry>();
+            foreach (var key in keys)
+            {
+                attributeKeys.Add(key, type.GetProperty(key).GetValue(obj).AsDBEntry(jsonSerializerSettings));
+            }
+            var config = new GetItemOperationConfig
+            {
+                AttributesToGet = keys.ToList(),
+                ConsistentRead = true
+            };
+            var found = await table.GetItemAsync(attributeKeys, config);
+            return found != null;
+        }
+
+        public async Task<List<T>> Query<T>(string indexName, QueryOperator op, List<object> values, int limit = 0) where T: class, new()
+        {
+            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            var attributeValues = values.Select(value => value.AsAttributeValue()).ToList();
+            var filter = new QueryFilter(indexName, op, attributeValues);
+            var request = new QueryRequest()
+            {
+                KeyConditions = filter.ToConditions(),
+                TableName = awsDynamoDBOptions.TableName,
+            };
+            if (limit > 0) request.Limit = limit;
+            var response = await amazonDynamoDBClient.QueryAsync(request);
+            return response
+                .Items
+                .Select(item => item.ParseDocument<T>(jsonSerializerSettings))
+                .ToList();
         }
     }
 }

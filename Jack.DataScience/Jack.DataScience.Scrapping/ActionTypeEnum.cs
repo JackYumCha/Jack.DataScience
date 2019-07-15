@@ -6,16 +6,19 @@ namespace Jack.DataScience.Scrapping
 {
     public enum ActionTypeEnum
     {
+        Null,
         // only works on driver
         GoTo,
 
         // operations
         Click,
+        ScrollIntoView,
+        ScrollTo,
         SendKeys,
 
         Wait, // {time}, [On|Show|Off], [CSS|XPath|Id|Class], {selector}
-        LoopWhen, // {count}, [CSS|XPath|Id|Class], {selector}, [<|<=|=|>=|>], {number}, [?Attr|Inter|Outer], {?attr}
-        LoopUntil, // {count}, [CSS|XPath|Id|Class], {selector}, [<|<=|=|>=|>], {number}, [?Attr|Inter|Outer], {?attr}
+        LoopWhen, // {count}, [CSS|XPath|Id|Class], {selector}, [<|<=|=|>=|>], {number}, [[Attribute]|Inter|Outer] Regex
+        LoopUntil, // {count}, [CSS|XPath|Id|Class], {selector}, [<|<=|=|>=|>], {number}, [[Attribute]|Inter|Outer] Regex
 
         // filter selection only
         By, // [CSS|XPath|Id|Class], {selector}, [?Root]
@@ -36,28 +39,46 @@ namespace Jack.DataScience.Scrapping
         /// <summary>
         /// Get attribute value
         /// </summary>
-        PutAttr, // {key}, {attr}, {?regex}
-        PutInner, // {key}, {?regex}
-        PutOuter, // {key}, {?regex}
-        CollectAttr, // {key}, {attr}, {separator}, {?regex}
-        CollectInner, // {key}, {separator}, {?regex}
-        CollectOuter, // {key}, {separator}, {?regex}
+        Put, // {key}, [Text|Inner|Outer|[Attribute-Name]|=value] {?separator} {?regex} 
+        Collect, // {key}, [Text|Inner|Outer|[Attribute-Name]|=value] {?separator} {?regex} 
+        SwitchBy, // [CSS|XPath|Id|Class], {selector}, [None|Text|[Attribute-Name]|Inner|Outer] {regex} {condition:1} {condition:2} //<0 >=0 =2
         SplitOne, // {key}, {separator}, {target}
         LoopSplitOne, // {key}, {separator}, {target}
+
+        If, // Execute the first "Then" if parent exists, otherwise execute the second "Then"
         // json data operations
 
         // Create New Object or Replace the existing one with new JObject
         JsonNew, // {key},
-        JsonSet, // {key} {field} [Ref|String|Double|Int] {value}
+        JsonSet, // {key} {field} [Ref|String|Double|Int|Bool] {value}
         JsonPush, // {key} {field} [Ref|String] {value}
         // Append String to Json Field
         JsonAdd, // {key} {field} {value}
+        JsonAs, // {key} {as-key}
         JsonDelete, // {key}
         JsonDeleteWhere, // {key-regex}
         JsonUnset, // {key} {field}
-        JsonSave, // [Array|Map] [File|S3|BlobStorage] {path}
+        JsonSave, // [One|Array|Map] {path} {?pattern|json-key}
 
         Log,
+        LogData,
         LogJson,
+        LogJsonWhere,
+        Break,
+
+        // declare a set of scripts as function for invoke
+        Function, // {function-name}
+        // call a defined function
+        Call, // {funcation-name}
+
+        // SQS Integration
+        SQSSend, // {url} {json-key} {?aws-key} {?aws-secret}
+        SQSDelete, // {url} {handle} {?aws-key} {?aws-secret}
+        DynamoDBSet, // {key} {json-key} {?aws-key} {?aws-secret}
+        
+        // update the ScriptJob to DynamoDB and Create SQS Message
+        JobUpdate, // {json-key}
+        // create a ScriptJob with null payload
+        JobNew, // {json-key} {script} {job} {ttl as int} {shouldSchedule as bool}
     }
 }

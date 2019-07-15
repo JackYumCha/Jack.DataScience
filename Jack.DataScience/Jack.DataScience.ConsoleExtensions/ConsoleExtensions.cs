@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Jack.DataScience.Console
+namespace Jack.DataScience.ConsoleExtensions
 {
     public static class ConsoleExtensions
     {
