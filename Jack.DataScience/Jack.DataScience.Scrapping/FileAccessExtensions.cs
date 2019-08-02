@@ -44,6 +44,23 @@ namespace Jack.DataScience.Scrapping
                 File.WriteAllText(path, value);
             }
         }
+        public static void SaveBytes(this string path, byte[] value, IComponentContext componentContext)
+        {
+            var s3Obj = path.ParseS3URI();
+            if (s3Obj != null)
+            {
+                var awsS3API = componentContext.Resolve<AWSS3API>();
+                using (MemoryStream memory = new MemoryStream(value))
+                {
+                    awsS3API.Upload(s3Obj.Key, memory, s3Obj.BucketName).Wait();
+                }
+            }
+            else
+            {
+                if (path.StartsWith(".")) path = $"{AppContext.BaseDirectory}/{path}";
+                File.WriteAllBytes(path, value);
+            }
+        }
 
         public static T ReadJson<T>(this string path, IComponentContext componentContext, JsonSerializerSettings jsonSerializerSettings = null) where T: class, new()
         {

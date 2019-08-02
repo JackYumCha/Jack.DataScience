@@ -22,6 +22,8 @@ namespace Jack.DataScience.Compute.AWSEC2
             amazonEC2Client = new AmazonEC2Client(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsEC2Options.Region));
         }
 
+        public AWSEC2Options AWSEC2Options { get => awsEC2Options; }
+
         /// <summary>
         /// Execute the defined job in the EC2
         /// </summary>
@@ -43,6 +45,17 @@ namespace Jack.DataScience.Compute.AWSEC2
                     InstanceIds = awsEC2Options.StopIds,
                     Force = true,
                     Hibernate = false
+                });
+            }
+        }
+
+        public async Task RebootByIds(List<string> instanceIds)
+        {
+            if (instanceIds is List<string>)
+            {
+                await amazonEC2Client.RebootInstancesAsync(new RebootInstancesRequest()
+                {
+                    InstanceIds = instanceIds
                 });
             }
         }
@@ -69,6 +82,46 @@ namespace Jack.DataScience.Compute.AWSEC2
                     Hibernate = false
                 });
             }
+        }
+
+        public async Task TerminateByIds(List<string> instanceIds)
+        {
+            if (instanceIds is List<string>)
+            {
+                await amazonEC2Client.TerminateInstancesAsync(new TerminateInstancesRequest()
+                {
+                    InstanceIds = instanceIds
+                });
+            }
+        }
+
+        public async Task<RunInstancesResponse> RunInstanceByTemplate(string launchTemplateId, int count = 1)
+        {
+            return await amazonEC2Client.RunInstancesAsync(new RunInstancesRequest()
+            {
+                LaunchTemplate = new LaunchTemplateSpecification()
+                {
+                    LaunchTemplateId = launchTemplateId
+                },
+                MinCount = count,
+                MaxCount = count,
+            });
+        }
+
+        public async Task<List<Reservation>> DescribeAllInstances()
+        {
+            var results = new List<Reservation>();
+            string token = "";
+            do
+            {
+                var response = await amazonEC2Client.DescribeInstancesAsync(new DescribeInstancesRequest()
+                {
+                    NextToken = token
+                });
+                results.AddRange(response.Reservations);
+                token = response.NextToken;
+            } while (token != null);
+            return results;
         }
     }
 }

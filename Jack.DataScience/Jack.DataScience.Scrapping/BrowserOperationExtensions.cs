@@ -14,6 +14,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using ExpectedConditions = SeleniumExtras.WaitHelpers.ExpectedConditions;
+using Console = Jack.DataScience.Common.Logging.Console;
+using Jack.DataScience.Cloud.HeartBeat;
 
 namespace Jack.DataScience.Scrapping
 {
@@ -33,7 +35,7 @@ namespace Jack.DataScience.Scrapping
         {
             List<IWebElement> results = new List<IWebElement>();
             var options = componentContext.Resolve<AWSScrapeJobOptions>();
-            var parameters = operation.GetParameters(data);
+            var parameters = operation.GetParameters(data, driver);
             bool shouldRunThen = true;
             string stepInfo = $"({level}) -> {operation.Action}({string.Join(", ", parameters)}) {(string.IsNullOrWhiteSpace(operation.Label) ? "" : operation.Label)}";
             if(options.Verbose || !string.IsNullOrWhiteSpace(operation.Label)) Console.WriteLine($"{(operation.Disabled ? "[Disabled] ":"")}{stepInfo}");
@@ -51,7 +53,7 @@ namespace Jack.DataScience.Scrapping
                         driver.Wait(parameters, results);
                         break;
                     case ActionTypeEnum.By:
-                        ByElements(parameters, null, driver, results);
+                        ByElements(parameters, null, driver, results, componentContext, operation);
                         break;
                     case ActionTypeEnum.LoopWhen:
                         shouldRunThen = LoopWhen(operation, parameters, null, data, jobs, references, jsons, functions, driver, level, componentContext);
@@ -71,6 +73,12 @@ namespace Jack.DataScience.Scrapping
                         break;
                     case ActionTypeEnum.SendKeys:
                         throw new ScrapingException($"{nameof(ActionTypeEnum.SendKeys)} is not avaliable on {nameof(IWebDriver)}.");
+                    case ActionTypeEnum.ScreenShot:
+                        driver.ScreenShot(parameters, componentContext);
+                        break;
+                    case ActionTypeEnum.JS:
+                        driver.JS(null, parameters);
+                        break;
                     case ActionTypeEnum.SkipTake:
                         throw new ScrapingException($"{nameof(ActionTypeEnum.SkipTake)} is not avaliable on {nameof(IWebDriver)}.");
                     case ActionTypeEnum.AttrRegex:
@@ -80,7 +88,7 @@ namespace Jack.DataScience.Scrapping
                     case ActionTypeEnum.OuterRegex:
                         throw new ScrapingException($"{nameof(ActionTypeEnum.OuterRegex)} is not avaliable on {nameof(IWebDriver)}.");
                     case ActionTypeEnum.Put:
-                        Put(data, parameters, null, driver);
+                        Put(data, parameters, null, driver, results, options.Verbose);
                         break;
                     case ActionTypeEnum.Collect:
                         Collect(data, parameters, null, driver);
@@ -149,6 +157,9 @@ namespace Jack.DataScience.Scrapping
                     case ActionTypeEnum.Break:
                         Debugger.Break();
                         break;
+                    case ActionTypeEnum.HeartBeat:
+                        parameters.HeartBeat(componentContext);
+                        break;
                     case ActionTypeEnum.Function:
                         shouldRunThen = parameters.SaveFunction(operation, functions);
                         break;
@@ -195,7 +206,7 @@ namespace Jack.DataScience.Scrapping
         {
             List<IWebElement> results = new List<IWebElement>();
             var options = componentContext.Resolve<AWSScrapeJobOptions>();
-            var parameters = operation.GetParameters(data);
+            var parameters = operation.GetParameters(data, driver);
             bool shouldRunThen = true;
             string stepInfo = $"({level}) -> {operation.Action}({string.Join(", ", parameters)}) {(string.IsNullOrWhiteSpace(operation.Label) ? "" : operation.Label)}";
             if (options.Verbose || !string.IsNullOrWhiteSpace(operation.Label)) Console.WriteLine($"{(operation.Disabled ? "[Disabled] " : "")}{stepInfo}");
@@ -222,7 +233,7 @@ namespace Jack.DataScience.Scrapping
                         shouldRunThen = SwitchBy(operation, parameters, parent, data, jobs, references, jsons, functions, driver, level, componentContext);
                         break;
                     case ActionTypeEnum.By:
-                        ByElements(parameters, parent, driver, results);
+                        ByElements(parameters, parent, driver, results, componentContext, operation);
                         break;
                     case ActionTypeEnum.Click:
                         {
@@ -244,6 +255,12 @@ namespace Jack.DataScience.Scrapping
                             parent.SendKeys(parameters[0]);
                             results.Add(parent);
                         }
+                        break;
+                    case ActionTypeEnum.ScreenShot:
+                        driver.ScreenShot(parameters, componentContext);
+                        break;
+                    case ActionTypeEnum.JS:
+                        driver.JS(operation.Driver ? null : new List<IWebElement>() { parent },  parameters);
                         break;
                     case ActionTypeEnum.Yield:
                         {
@@ -294,7 +311,7 @@ namespace Jack.DataScience.Scrapping
                         }
                         break;
                     case ActionTypeEnum.Put:
-                        Put(data, parameters, parent, driver);
+                        Put(data, parameters, operation.Driver ? null : parent, driver, results, options.Verbose);
                         break;
                     case ActionTypeEnum.Collect:
                         Collect(data, parameters, parent, driver);
@@ -353,6 +370,9 @@ namespace Jack.DataScience.Scrapping
                     case ActionTypeEnum.Break:
                         Debugger.Break();
                         break;
+                    case ActionTypeEnum.HeartBeat:
+                        parameters.HeartBeat(componentContext);
+                        break;
                     case ActionTypeEnum.Function:
                         shouldRunThen = parameters.SaveFunction(operation, functions);
                         break;
@@ -388,6 +408,11 @@ namespace Jack.DataScience.Scrapping
         private static void GoTo(this IWebDriver driver, List<string> parameters)
         {
             driver.Url = parameters[0];
+            var timeout = 30;
+            if(parameters.Count > 1)
+            {
+                timeout = int.Parse(parameters[1]);
+            }
             driver.Navigate();
         }
 
@@ -397,7 +422,36 @@ namespace Jack.DataScience.Scrapping
             driver.WindowScrollTo(x, y);
         }
 
-        private static void ByElements(this List<string> parameters, IWebElement parent, IWebDriver driver, List<IWebElement> results)
+        private static void ScreenShot(this IWebDriver driver, List<string> parameters, IComponentContext componentContext)
+        {
+            var screenshot = driver as ITakesScreenshot;
+            if (screenshot != null)
+            {
+                var data = screenshot.GetScreenshot().AsByteArray;
+                var path = parameters[0];
+                path.SaveBytes(data, componentContext);
+            }
+        }
+
+        private static void JS(this IWebDriver driver, IEnumerable<IWebElement> elements,  List<string> parameters)
+        {
+            if (elements !=null && elements.Any())
+            {
+                foreach (var js in parameters)
+                {
+                    driver.ExecuteJs(js, elements.ToArray());
+                }
+            }
+            else
+            {
+                foreach (var js in parameters)
+                {
+                    driver.ExecuteJs(js, new object[] { });
+                }
+            }
+        }
+
+        private static void ByElements(this List<string> parameters, IWebElement parent, IWebDriver driver, List<IWebElement> results, IComponentContext componentContext, BrowserOperation operation)
         {
             if (parameters.Count >= 2)
             {
@@ -413,6 +467,11 @@ namespace Jack.DataScience.Scrapping
                 {
                     var elements = parent.FindElements(by);
                     results.AddRange(elements);
+                }
+                var options = componentContext.Resolve<AWSScrapeJobOptions>();
+                if (options.Verbose || !string.IsNullOrWhiteSpace(operation.Label))
+                {
+                    Console.WriteLine($">> By: {results.Count} Elements Found.");
                 }
             }
         }
@@ -660,6 +719,11 @@ namespace Jack.DataScience.Scrapping
                 found = found.TextFilter(filter, driver).ToList();
                 int count = found.Count;
                 int j = 0;
+                var options = componentContext.Resolve<AWSScrapeJobOptions>();
+                if (options.Verbose)
+                {
+                    Console.WriteLine($">> SwitchBy: {count} Elements Found.");
+                }
                 for (int i = 4; i < parameters.Count; i++)
                 {
                     var condition = parameters[i].ParseCondition();
@@ -683,6 +747,46 @@ namespace Jack.DataScience.Scrapping
                 throw new ScrapingException($"{nameof(ActionTypeEnum.SwitchBy)} must have 4 or more parameters. It currently has {parameters.Count}.");
             }
             return false;
+        }
+
+        private static void HeartBeat(this List<string> parameters, IComponentContext componentContext)
+        {
+            HeartBeatAPI heartBeatAPI = null;
+            if(componentContext.TryResolve(out heartBeatAPI))
+            {
+                if(parameters.Count > 3)
+                {
+                    var instanceId = parameters[0];
+                    var job = parameters[1];
+                    var task = parameters[2];
+                    var payload = parameters[3];
+                    int rebootTimeout = 60 * 40;
+                    if(parameters.Count > 4) int.TryParse(parameters[4], out rebootTimeout);
+                    string message = null;
+                    if(parameters.Count > 5) message =  parameters[5];
+                    string log = null;
+                    if(parameters.Count > 6) log = parameters[6];
+                    heartBeatAPI.HeartBeat(new HeartBeatSignal()
+                    {
+                        InstanceId = instanceId,
+                        Job = job,
+                        RebootTimeout = rebootTimeout,
+                        LastSignalTimestamp = DateTime.UtcNow,
+                        Task = task,
+                        Payload = payload,
+                        Message = message,
+                        Log = log,
+                    }).Wait();
+                }
+                else
+                {
+                    Console.WriteLine($"HeartBeat Has Less than 4 Parameters: {string.Join(", ", parameters)}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"HeartBeat API Not Found.");
+            }
         }
         private static bool SaveFunction(this List<string> parameters, BrowserOperation operation, Dictionary<string, BrowserOperation> functions)
         {
@@ -740,8 +844,9 @@ namespace Jack.DataScience.Scrapping
             return false;
         }
 
+        private static Regex CountRegex = new Regex("\\?(xpath|css|id|class)=([\\w\\W]+)", RegexOptions.IgnoreCase);
 
-        private static void Put(Dictionary<string, string> data, List<string> parameters, IWebElement element, IWebDriver driver)
+        private static void Put(Dictionary<string, string> data, List<string> parameters, IWebElement element, IWebDriver driver, List<IWebElement> results, bool verbose)
         {
             var key = parameters[0];
             var type = parameters[1];
@@ -754,6 +859,21 @@ namespace Jack.DataScience.Scrapping
             else if (type.StartsWith("=")) // allow set value to the dictionary
             {
                 value = type.Substring(1);
+            }
+            else if (CountRegex.IsMatch(type))
+            {
+                var match = CountRegex.Match(type);
+                var selectorType = match.Groups[1].Value.ToLower();
+                var selector = match.Groups[2].Value;
+                By by = selectorType.Selector(selector);
+                if (element == null)
+                {
+                    value = driver.FindElements(by).Count.ToString();
+                }
+                else
+                {
+                    value = element.FindElements(by).Count.ToString();
+                }
             }
             else
             {
@@ -771,16 +891,29 @@ namespace Jack.DataScience.Scrapping
                 }
             }
             var separator = ",";
-            if (parameters.Count >= 3)
+            if (parameters.Count > 2)
             {
                 separator = parameters[2];
             }
 
-            if (parameters.Count >= 4)
+            if (parameters.Count > 3)
             {
                 var pattern = parameters[3];
+                string matchedValue = "";
+                int skip = 0;
+                int take = int.MaxValue;
 
-                var matchedValue = string.Join(separator, Regex.Matches(value, pattern).OfType<Match>().Select(m =>
+                if (parameters.Count > 4)
+                {
+                    int.TryParse(parameters[4], out skip);
+                }
+                if (parameters.Count > 5)
+                {
+                    int.TryParse(parameters[5], out take);
+                }
+
+                matchedValue = string.Join(separator, Regex.Matches(value, pattern).OfType<Match>()
+                    .Skip(skip).Take(take).Select(m =>
                 {
                     if (m.Groups.Count > 1)
                     {
@@ -791,6 +924,7 @@ namespace Jack.DataScience.Scrapping
                         return m.Value;
                     }
                 }));
+
 
                 if (data.ContainsKey(key))
                 {
@@ -812,6 +946,8 @@ namespace Jack.DataScience.Scrapping
                     data.Add(key, value);
                 }
             }
+            if (verbose) Console.WriteLine($"Put: {key} -> {data[key]}");
+            if(element != null) results.Add(element);
         }
         private static void Collect(this Dictionary<string, string> data, List<string> parameters, IWebElement element, IWebDriver driver)
         {
@@ -1585,16 +1721,16 @@ namespace Jack.DataScience.Scrapping
             return results; 
         }
 
-        public static List<string> GetParameters(this BrowserOperation operation, Dictionary<string, string> data)
+        public static List<string> GetParameters(this BrowserOperation operation, Dictionary<string, string> data, IWebDriver driver)
         {
             if (operation.Parameters == null) return new List<string>();
-            return operation.Parameters.Select(parameter => parameter.ApplyTemplateData(data)).ToList();
+            return operation.Parameters.Select(parameter => parameter.ApplyTemplateData(data, driver)).ToList();
         }
 
         private static Regex replaceTemplateKey = new Regex("<#@([^@]+)@#>");
-        private static Regex replaceSystemKey = new Regex(@"<#@(\w+)\(([\w-\.,;#@%\$]+)\)@#>");
+        private static Regex replaceSystemKey = new Regex(@"<#@(\w+)\(([\w-\.,;#@%\$]*)\)@#>");
 
-        private static string ApplyTemplateData(this string value, Dictionary<string, string> data)
+        private static string ApplyTemplateData(this string value, Dictionary<string, string> data, IWebDriver driver)
         {
             value = replaceSystemKey
                 .Replace(value, (match) =>
@@ -1604,6 +1740,10 @@ namespace Jack.DataScience.Scrapping
                 {
                     case "date":
                         return DateTime.UtcNow.ToString(match.Groups[2].Value);
+                    case "url":
+                        return driver.Url;
+                    case "env":
+                        return Environment.GetEnvironmentVariable(match.Groups[2].Value);
                 }
                 return "";
             });

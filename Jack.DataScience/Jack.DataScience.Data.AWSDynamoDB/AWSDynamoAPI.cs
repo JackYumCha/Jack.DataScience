@@ -36,15 +36,17 @@ namespace Jack.DataScience.Data.AWSDynamoDB
 
         public JsonSerializerSettings JsonSerializerSettings { get => jsonSerializerSettings; }
 
+        private string UseTableName(string tableName) => string.IsNullOrWhiteSpace(tableName) ? awsDynamoDBOptions.TableName : tableName;
         /// <summary>
         /// read item from the table
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public async Task<T> ReadItem<T>(string key) where T: class, new()
+        public async Task<T> ReadItem<T>(string key, string tableName = null) where T: class, new()
         {
-            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
             var type = typeof(T);
             var properties = type.GetProperties();
 
@@ -59,9 +61,10 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             return document.ParseDocument<T>(jsonSerializerSettings);
         }
 
-        public async Task<T> ReadItem<T>(Dictionary<string, object> keys) where T : class, new()
+        public async Task<T> ReadItem<T>(Dictionary<string, object> keys, string tableName = null) where T : class, new()
         {
-            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
             var type = typeof(T);
             var properties = type.GetProperties();
 
@@ -74,7 +77,7 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             var attributeKeys = keys.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsDBEntry(jsonSerializerSettings));
 
             var document = await table.GetItemAsync(attributeKeys, config);
-
+            if (document == null) return null;
             return document.ParseDocument<T>(jsonSerializerSettings);
         }
 
@@ -84,16 +87,29 @@ namespace Jack.DataScience.Data.AWSDynamoDB
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public async Task WriteItem<T>(T obj) where T : class, new()
+        public async Task WriteItem<T>(T obj, string tableName = null) where T : class, new()
         {
-            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
             var document = obj.BuildDocument(jsonSerializerSettings);
             await table.PutItemAsync(document);
         }
 
-        public async Task UpsertItem<T>(T obj, IEnumerable<string> keys) where T : class, new()
+        public async Task DeleteItem(Dictionary<string, object> keys, string tableName = null)
         {
-            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            tableName = UseTableName(tableName);
+            var attributeKeys = keys.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsAttributeValue());
+            await amazonDynamoDBClient.DeleteItemAsync(new DeleteItemRequest()
+            {
+                Key = attributeKeys,
+                TableName = tableName
+            });
+        }
+
+        public async Task UpsertItem<T>(T obj, IEnumerable<string> keys, string tableName = null) where T : class, new()
+        {
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
             var type = typeof(T);
             var properties = type.GetProperties();
             var attributeKeys = new Dictionary<string, DynamoDBEntry>();
@@ -119,9 +135,10 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             }
         }
 
-        public async Task<bool> Exists<T>(T obj, IEnumerable<string> keys) where T : class, new()
+        public async Task<bool> Exists<T>(T obj, IEnumerable<string> keys, string tableName = null) where T : class, new()
         {
-            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
             var type = typeof(T);
             var properties = type.GetProperties();
             var attributeKeys = new Dictionary<string, DynamoDBEntry>();
@@ -138,18 +155,38 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             return found != null;
         }
 
-        public async Task<List<T>> Query<T>(string indexName, QueryOperator op, List<object> values, int limit = 0) where T: class, new()
+        public async Task<List<T>> Query<T>(string indexName, QueryOperator op, List<object> values, int limit = 0, string tableName = null) where T: class, new()
         {
-            var table = Table.LoadTable(amazonDynamoDBClient, awsDynamoDBOptions.TableName);
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
             var attributeValues = values.Select(value => value.AsAttributeValue()).ToList();
             var filter = new QueryFilter(indexName, op, attributeValues);
             var request = new QueryRequest()
             {
                 KeyConditions = filter.ToConditions(),
-                TableName = awsDynamoDBOptions.TableName,
+                TableName = tableName,
             };
             if (limit > 0) request.Limit = limit;
             var response = await amazonDynamoDBClient.QueryAsync(request);
+            return response
+                .Items
+                .Select(item => item.ParseDocument<T>(jsonSerializerSettings))
+                .ToList();
+        }
+
+        public async Task<List<T>> Scan<T>(string indexName, QueryOperator op, List<object> values, int limit = 0, string tableName = null) where T : class, new()
+        {
+            tableName = UseTableName(tableName);
+            var table = Table.LoadTable(amazonDynamoDBClient, tableName);
+            var attributeValues = values.Select(value => value.AsAttributeValue()).ToList();
+            var filter = new QueryFilter(indexName, op, attributeValues);
+            var request = new ScanRequest()
+            {
+                ScanFilter = filter.ToConditions(),
+                TableName = tableName,
+            };
+            if (limit > 0) request.Limit = limit;
+            var response = await amazonDynamoDBClient.ScanAsync(request);
             return response
                 .Items
                 .Select(item => item.ParseDocument<T>(jsonSerializerSettings))

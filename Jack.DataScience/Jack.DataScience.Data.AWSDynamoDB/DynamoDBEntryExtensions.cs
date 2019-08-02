@@ -73,17 +73,17 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             else if (type == intType)
             {
                 int r = 0;
-                int.TryParse(value.S, out r);
+                int.TryParse(value.N, out r);
                 return r;
             }
             else if (type == boolType)
             {
-                return value.B;
+                return value.BOOL;
             }
             else if (type == longType)
             {
                 long r = 0;
-                long.TryParse(value.S, out r);
+                long.TryParse(value.N, out r);
                 return r;
             }
             else if (type == dateTimeType)
@@ -95,13 +95,13 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             else if (type == doubleType)
             {
                 double r = 0;
-                double.TryParse(value.S, out r);
+                double.TryParse(value.N, out r);
                 return r;
             }
             else if (type == floatType)
             {
                 float r = 0;
-                float.TryParse(value.S, out r);
+                float.TryParse(value.N, out r);
                 return r;
             }
             else if (type == listOfStringType)
@@ -197,21 +197,26 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             {
                 if (property.PropertyType.IsEnum)
                 {
-                    property.SetValue(obj, Enum.Parse(property.PropertyType, document[property.Name].S));
+                    if(document.ContainsKey(property.Name))
+                        property.SetValue(obj, Enum.Parse(property.PropertyType, document[property.Name].S));
                 }
                 else if (property.PropertyType == typeof(string))
                 {
-                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
+                    if (document.ContainsKey(property.Name))
+                        property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
                 }
                 else if (property.PropertyType.IsClass)
                 {
-                    var json = document[property.Name].AsType(typeof(string)) as string;
-
-                    property.SetValue(obj, JsonConvert.DeserializeObject(json, property.PropertyType, jsonSerializerSettings));
+                    if (document.ContainsKey(property.Name))
+                    {
+                        var json = document[property.Name].AsType(typeof(string)) as string;
+                        property.SetValue(obj, JsonConvert.DeserializeObject(json, property.PropertyType, jsonSerializerSettings));
+                    }
                 }
                 else
                 {
-                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
+                    if (document.ContainsKey(property.Name))
+                        property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
                 }
             }
             return obj;
@@ -226,21 +231,26 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             {
                 if (property.PropertyType.IsEnum)
                 {
-                    property.SetValue(obj, Enum.Parse(property.PropertyType, document[property.Name].AsString()));
+                    if (document.ContainsKey(property.Name))
+                        property.SetValue(obj, Enum.Parse(property.PropertyType, document[property.Name].AsString()));
                 }
                 else if (property.PropertyType == typeof(string))
                 {
-                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
+                    if (document.ContainsKey(property.Name))
+                        property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
                 }
                 else if (property.PropertyType.IsClass)
                 {
-                    var json = document[property.Name].AsType(typeof(string)) as string;
-
-                    property.SetValue(obj, JsonConvert.DeserializeObject(json, property.PropertyType, jsonSerializerSettings));
+                    if (document.ContainsKey(property.Name))
+                    {
+                        var json = document[property.Name].AsType(typeof(string)) as string;
+                        property.SetValue(obj, JsonConvert.DeserializeObject(json, property.PropertyType, jsonSerializerSettings));
+                    }
                 }
                 else
                 {
-                    property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
+                    if (document.ContainsKey(property.Name))
+                        property.SetValue(obj, document[property.Name].AsType(property.PropertyType));
                 }
             }
             return obj;

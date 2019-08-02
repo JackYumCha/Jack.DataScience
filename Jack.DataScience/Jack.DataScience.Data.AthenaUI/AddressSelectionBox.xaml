@@ -1,0 +1,20 @@
+﻿<Window x:Class="Jack.DataScience.Data.AthenaUI.AddressSelectionBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Jack.DataScience.Data.AthenaUI"
+        mc:Ignorable="d"
+        Title="Address Input Box" Height="80" Width="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" Name="tbInput"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="OK" MinWidth="80" Click="DialogOK"/>
+            <Button Content="Cancel" MinWidth="80" Click="DialogCancel"/>
+        </StackPanel>
+    </Grid>
+</Window>

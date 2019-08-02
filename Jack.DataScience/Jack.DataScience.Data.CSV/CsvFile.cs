@@ -87,5 +87,33 @@ namespace Jack.DataScience.Data.CSV
                 }
             }
         }
+
+        public static void Dump(string filename, IEnumerable<List<string>> rows, IEnumerable<string> columns)
+        {
+            using (var stream = File.OpenWrite(filename))
+            {
+                using (var writer = new StreamWriter(stream))
+                {
+                    using (var csv = new CsvWriter(writer))
+                    {
+                        foreach(var column in columns)
+                        {
+                            csv.WriteField(column);
+                        }
+                        csv.NextRecord();
+                        foreach(var row in rows)
+                        {
+                            foreach(var value in row)
+                            {
+                                csv.WriteField(value);
+                            }
+                            csv.NextRecord();
+                        }
+                        csv.Flush();
+                        writer.Flush();
+                    }
+                }
+            }
+        }
     }
 }

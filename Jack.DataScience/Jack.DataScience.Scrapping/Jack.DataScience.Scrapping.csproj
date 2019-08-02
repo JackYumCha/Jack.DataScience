@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -10,8 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Jack.DataScience.Cloud.HeartBeat\Jack.DataScience.Cloud.HeartBeat.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Compute.AWSEC2\Jack.DataScience.Compute.AWSEC2.csproj" />
     <ProjectReference Include="..\Jack.DataScience.ConsoleExtensions\Jack.DataScience.ConsoleExtensions.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.AWSDynamoDB\Jack.DataScience.Data.AWSDynamoDB.csproj" />
     <ProjectReference Include="..\Jack.DataScience.MQ.AWSSQS\Jack.DataScience.MQ.AWSSQS.csproj" />

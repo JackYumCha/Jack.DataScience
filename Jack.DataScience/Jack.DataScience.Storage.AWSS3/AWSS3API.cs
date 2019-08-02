@@ -190,6 +190,36 @@ namespace Jack.DataScience.Storage.AWSS3
             return objects;
         }
 
+        public async Task<List<string>> ListFiles(string prefix, string delimiter = "/", string bucket = null)
+        {
+            List<string> objects = new List<string>();
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            using (AmazonS3Client client = CreateClient())
+            {
+                var exists = await AmazonS3Util.DoesS3BucketExistAsync(client, bucketName);
+                if (exists)
+                {
+                    string continuationToken = null;
+                    int prefixLength = prefix.Length;
+                    do
+                    {
+                        var response = await client.ListObjectsV2Async(new ListObjectsV2Request()
+                        {
+                            BucketName = bucketName,
+                            ContinuationToken = continuationToken,
+                            Delimiter = delimiter,
+                            Prefix = prefix
+                        });
+                        continuationToken = response.NextContinuationToken;
+                        objects.AddRange(response.S3Objects.Select(o => o.Key.Substring(prefixLength)));
+                    }
+                    while (continuationToken != null);
+                }
+            }
+            return objects;
+        }
+
         public async Task<List<S3Object>> ListAllObjectsInBucket(string bucket = null, string prefix = null)
         {
             List<S3Object> objects = new List<S3Object>();

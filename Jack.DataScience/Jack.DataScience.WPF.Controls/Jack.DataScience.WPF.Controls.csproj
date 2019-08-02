@@ -63,6 +63,8 @@
     <Compile Include="ButtonUp.xaml.cs">
       <DependentUpon>ButtonUp.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ElementHelper.cs" />
+    <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -78,6 +80,7 @@
     </Compile>
     <Compile Include="StringListConverter.cs" />
     <Compile Include="TabControlEx.cs" />
+    <Compile Include="TreeHelper.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

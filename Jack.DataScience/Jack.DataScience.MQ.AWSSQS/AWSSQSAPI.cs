@@ -73,7 +73,8 @@ namespace Jack.DataScience.MQ.AWSSQS
             if (url == null) url = awsSQSOptions.Url;
             var getQueueAttributesResponse = await amazonSQSClient.GetQueueAttributesAsync(new GetQueueAttributesRequest()
             {
-                QueueUrl = url
+                QueueUrl = url,
+                AttributeNames = { "ApproximateNumberOfMessages" }
             });
             return getQueueAttributesResponse.ApproximateNumberOfMessages;
         }

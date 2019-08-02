@@ -1,4 +1,4 @@
-﻿using Jack.DataScience.Console;
+﻿using Jack.DataScience.ConsoleExtensions;
 using Jack.DataScience.Storage.AWSS3;
 using System;
 using System.IO;
@@ -31,23 +31,25 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy.CLI
             cloudFrontDeployOptions.ArtifactPath = $"{Directory.GetCurrentDirectory()}/{path}";
             cloudFrontDeployOptions.CloudFrontDistributionId = args.GetParameter("--cloudfront-distribution-id");
             cloudFrontDeployOptions.DefaultDeleteSafetyCheck = args.GetParameter("--s3-delete-check");
+            cloudFrontDeployOptions.Private = args.HasParameter("--private");
+            cloudFrontDeployOptions.S3BasePath = args.GetParameter("--s3-base-path");
 
-            System.Console.ForegroundColor = ConsoleColor.Green;
-            System.Console.Write($"Artifact: ");
-            System.Console.ForegroundColor = ConsoleColor.Yellow;
-            System.Console.WriteLine(cloudFrontDeployOptions.ArtifactPath);
-            System.Console.ForegroundColor = ConsoleColor.Green;
-            System.Console.Write($"Distribution ID: ");
-            System.Console.ForegroundColor = ConsoleColor.Yellow;
-            System.Console.WriteLine(cloudFrontDeployOptions.CloudFrontDistributionId);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"Artifact: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(cloudFrontDeployOptions.ArtifactPath);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"Distribution ID: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(cloudFrontDeployOptions.CloudFrontDistributionId);
 
-            System.Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.White;
 
             CloudFrontDeployAPI cloudFrontDeployAPI = new CloudFrontDeployAPI(cloudFrontDeployOptions);
 
             var result = cloudFrontDeployAPI.Deploy().GetAwaiter().GetResult();
 
-            System.Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

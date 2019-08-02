@@ -28,7 +28,36 @@ namespace Jack.DataScience.Data.AWSAthena
             basicAWSCredentials = new BasicAWSCredentials(awsAthenaOptions.Key, awsAthenaOptions.Secret);
             amazonAthenaClient = new AmazonAthenaClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsAthenaOptions.Region));
         }
+        public async Task<string> LoadPartitionIfNotExists(string tableName, string keyFieldAssignment, string s3Location)
+        {
+            if (awsAthenaOptions.SQSOptions != null)
+            {
+                AWSSQSAPI awsSQSAPI = new AWSSQSAPI(awsAthenaOptions.SQSOptions);
+                var request = new StartQueryExecutionRequest()
+                {
+                    QueryString = $@"ALTER TABLE {tableName} ADD IF NOT EXISTS PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
+                    ResultConfiguration = new ResultConfiguration()
+                    {
+                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                    }
+                };
+                await awsSQSAPI.SendMessage(JsonConvert.SerializeObject(request));
+                return $"SQS-{awsAthenaOptions.SQSOptions.Url}";
+            }
+            else
+            {
+                var queryInfo = await amazonAthenaClient.StartQueryExecutionAsync(new StartQueryExecutionRequest()
+                {
+                    QueryString = $@"ALTER TABLE {tableName} ADD IF NOT EXISTS PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
+                    ResultConfiguration = new ResultConfiguration()
+                    {
+                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                    }
+                });
 
+                return queryInfo.QueryExecutionId;
+            }
+        }
         public async Task<string> LoadPartition(string tableName, string keyFieldAssignment, string s3Location)
         {
             /*
@@ -101,9 +130,17 @@ namespace Jack.DataScience.Data.AWSAthena
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Exception on Load Partition: {ex.Message}");
-                            Console.WriteLine(ex.Source);
-                            Console.WriteLine(ex.StackTrace);
+                            if(ex.Message != null && ex.Message.Contains("Partition already exists"))
+                            {
+                                Console.WriteLine($"Partition already exists on Athena Load Partition.");
+                                await awsSQSAPI.DeleteMessage(message.ReceiptHandle);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Exception on Load Partition: {ex.Message}");
+                                Console.WriteLine(ex.Source);
+                                Console.WriteLine(ex.StackTrace);
+                            }
                         }
                         
                         result += 1;
@@ -286,6 +323,30 @@ namespace Jack.DataScience.Data.AWSAthena
                 }
             }
             while (request.NextToken != null);
+        }
+
+        public async Task<AthenaQueryFlatResult> GetFlatResult(GetQueryResultsRequest request)
+        {
+            bool columnsRead = false;
+            var data = new List<List<string>>();
+            var result = new AthenaQueryFlatResult()
+            {
+                Data = data
+            };
+            do
+            {
+                var response = await ReadOneResult(request);
+                if (!columnsRead)
+                {
+                    result.Columns = response.ResultSet.ResultSetMetadata.ColumnInfo.Select(c => c.Name).ToList();
+                }
+                foreach (var row in response.ResultSet.Rows)
+                {
+                    data.Add(row.Data.Select(c => c.VarCharValue).ToList());
+                }
+            }
+            while (request.NextToken != null);
+            return result;
         }
 
         public async Task<string> StartQuery(string query)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.Batch;
@@ -29,7 +30,40 @@ namespace Jack.DataScience.Compute.AWSBatch
                 JobQueue = queueARN,
                 Parameters = parameters
             });
-            return true;   
+            return true;
+        }
+
+        public async Task<List<string>> ListJobs(string queueARN)
+        {
+            var response = await amazonBatchClient.ListJobsAsync(new ListJobsRequest()
+            {
+                JobQueue = queueARN
+            });
+
+            return response.JobSummaryList.Select(j => j.JobId).ToList();
+        }
+
+        public async Task<bool> CancelJobs(IEnumerable<string> jobIDs, string reason = "cancel")
+        {
+            foreach(var jobID in jobIDs)
+            {
+                await amazonBatchClient.CancelJobAsync(new CancelJobRequest()
+                {
+                    JobId = jobID,
+                    Reason = reason
+                });
+            }
+            return true;
+        }
+
+        public async Task<bool> CancelJob(string jobID, string reason = "cancel")
+        {
+            await amazonBatchClient.CancelJobAsync(new CancelJobRequest()
+            {
+                JobId = jobID,
+                Reason = reason
+            });
+            return true;
         }
     }
 }

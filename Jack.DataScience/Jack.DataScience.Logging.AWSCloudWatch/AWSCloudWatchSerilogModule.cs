@@ -22,22 +22,29 @@ namespace Jack.DataScience.Logging.AWSCloudWatch
         {
             builder.Register(context =>
             {
+                var awsCloudWatchOptions = context.Resolve<AWSCloudWatchOptions>();
+                BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCloudWatchOptions.Key, awsCloudWatchOptions.Secret);
+                return new AmazonCloudWatchLogsClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsCloudWatchOptions.Region));
+            });
+
+            builder.Register<ILogger>(context =>
+            {
                 var options = context.Resolve<CloudWatchSinkOptions>();
                 options.Period = TimeSpan.FromSeconds(10);
                 options.LogStreamNameProvider = new DefaultLogStreamProvider();
                 options.TextFormatter = new JsonFormatter();
-                var awsCloudWatchOptions = context.Resolve<AWSCloudWatchOptions>();
-                BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCloudWatchOptions.Key, awsCloudWatchOptions.Secret);
-                var client = new AmazonCloudWatchLogsClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsCloudWatchOptions.Region));
-
+                var client = context.Resolve<AmazonCloudWatchLogsClient>();
                 Log.Logger = new LoggerConfiguration()
                     .WriteTo.ColoredConsole(LogEventLevel.Verbose)
                     .WriteTo.AmazonCloudWatch(options, client)
                     .CreateLogger();
+                return Log.Logger;
+            });
 
-                ILogger logger = Log.Logger;
-
-                return new GenericLogger()
+            builder.Register(context =>
+            {
+                var logger =  context.Resolve<ILogger>();
+                var genericLogger = new GenericLogger()
                 {
                     Info = value => logger.Information(value),
                     Verbose = value => logger.Verbose(value),
@@ -45,7 +52,10 @@ namespace Jack.DataScience.Logging.AWSCloudWatch
                     Warn = value => logger.Warning(value),
                     Log = value => logger.Debug(value),
                 };
+                Common.Logging.Console.Logger = genericLogger;
+                return genericLogger;
             });
+
         }
     }
 }

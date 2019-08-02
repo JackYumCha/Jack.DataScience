@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jack.DataScience.Compute.AWSEC2\Jack.DataScience.Compute.AWSEC2.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.AWSDynamoDB\Jack.DataScience.Data.AWSDynamoDB.csproj" />
+  </ItemGroup>
+
+</Project>

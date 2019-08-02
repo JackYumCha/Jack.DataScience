@@ -19,5 +19,12 @@ namespace Jack.DataScience.ConsoleExtensions
             }
             return null;
         }
+
+        public static bool HasParameter(this string[] args, string key, params string[] aliases)
+        {
+            List<string> keys = new List<string>() { key };
+            keys.AddRange(aliases);
+            return args.Any(arg => keys.Any(k => k == arg));
+        }
     }
 }

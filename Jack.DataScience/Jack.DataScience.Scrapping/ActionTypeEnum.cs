@@ -15,6 +15,8 @@ namespace Jack.DataScience.Scrapping
         ScrollIntoView,
         ScrollTo,
         SendKeys,
+        ScreenShot, // [Path(local|s3)]
+        JS,
 
         Wait, // {time}, [On|Show|Off], [CSS|XPath|Id|Class], {selector}
         LoopWhen, // {count}, [CSS|XPath|Id|Class], {selector}, [<|<=|=|>=|>], {number}, [[Attribute]|Inter|Outer] Regex
@@ -39,7 +41,7 @@ namespace Jack.DataScience.Scrapping
         /// <summary>
         /// Get attribute value
         /// </summary>
-        Put, // {key}, [Text|Inner|Outer|[Attribute-Name]|=value] {?separator} {?regex} 
+        Put, // {key}, [Text|Inner|Outer|[Attribute-Name]|=value] {?separator} {?regex} {?skip-match} {?take-match}
         Collect, // {key}, [Text|Inner|Outer|[Attribute-Name]|=value] {?separator} {?regex} 
         SwitchBy, // [CSS|XPath|Id|Class], {selector}, [None|Text|[Attribute-Name]|Inner|Outer] {regex} {condition:1} {condition:2} //<0 >=0 =2
         SplitOne, // {key}, {separator}, {target}
@@ -65,6 +67,8 @@ namespace Jack.DataScience.Scrapping
         LogJson,
         LogJsonWhere,
         Break,
+
+        HeartBeat, // {instanceId} {job} {task} {payload} {rebootTimeout} {message} {log}
 
         // declare a set of scripts as function for invoke
         Function, // {function-name}

@@ -13,9 +13,13 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy
         private readonly AWSCloudFrontAPI awsCloudFrontAPI;
         public CloudFrontDeployAPI(CloudFrontDeployOptions cloudFrontDeployOptions)
         {
+            if (cloudFrontDeployOptions.S3BasePath == null) cloudFrontDeployOptions.S3BasePath = "";
             this.cloudFrontDeployOptions = cloudFrontDeployOptions;
             awsS3API = new AWSS3API(cloudFrontDeployOptions.AWSS3Options);
-            awsCloudFrontAPI = new AWSCloudFrontAPI(cloudFrontDeployOptions.AWSCloudFrontOptions);
+            if(!string.IsNullOrWhiteSpace(cloudFrontDeployOptions.CloudFrontDistributionId))
+            {
+                awsCloudFrontAPI = new AWSCloudFrontAPI(cloudFrontDeployOptions.AWSCloudFrontOptions);
+            }
         }
 
         public async Task<bool> Deploy()
@@ -31,11 +35,11 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy
             }
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"Check for File: {checkHTMLArtifactFile}");
+            Console.WriteLine($"Check for File: {cloudFrontDeployOptions.S3BasePath}{checkHTMLArtifactFile}");
             // avoid deleting the wrong bucket
-            if (await awsS3API.FileExists(checkHTMLArtifactFile))
+            if (await awsS3API.FileExists($"{cloudFrontDeployOptions.S3BasePath}{checkHTMLArtifactFile}"))
             {
-                var allObjects = await awsS3API.ListAllObjectsInBucket();
+                var allObjects = await awsS3API.ListAllObjectsInBucket(prefix: cloudFrontDeployOptions.S3BasePath);
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 foreach(var obj in allObjects)
                 {
@@ -50,14 +54,24 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy
             {
                 using (var fileStream = File.OpenRead($"{artifactRoot.FullName}/{file}"))
                 {
-                    await awsS3API.UploadAsPublic(file, fileStream);
-                    Console.WriteLine($"Uploaded {file}");
+                    if (cloudFrontDeployOptions.Private)
+                    {
+                        await awsS3API.Upload($"{cloudFrontDeployOptions.S3BasePath}{file}", fileStream);
+                    }
+                    else
+                    {
+                        await awsS3API.UploadAsPublic($"{cloudFrontDeployOptions.S3BasePath}{file}", fileStream);
+                    }
+                    
+                    Console.WriteLine($"Uploaded {cloudFrontDeployOptions.S3BasePath}{file}");
                 }
             }
-
-            var invalidationId = await awsCloudFrontAPI.CreateInvalidation(cloudFrontDeployOptions.CloudFrontDistributionId);
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine($"CloudFront Invalidation ID: {invalidationId}");
+            if (!string.IsNullOrWhiteSpace(cloudFrontDeployOptions.CloudFrontDistributionId))
+            {
+                var invalidationId = await awsCloudFrontAPI.CreateInvalidation(cloudFrontDeployOptions.CloudFrontDistributionId);
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine($"CloudFront Invalidation ID: {invalidationId}");
+            }
             return true;
         }
 

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Jack.DataScience.ConsoleExtensions\Jack.DataScience.ConsoleExtensions.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Http.AWSCloudFront\Jack.DataScience.Http.AWSCloudFront.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj" />
   </ItemGroup>
