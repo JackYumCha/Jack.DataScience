@@ -64,6 +64,7 @@
       <DependentUpon>ButtonUp.xaml</DependentUpon>
     </Compile>
     <Compile Include="ElementHelper.cs" />
+    <Compile Include="EnumItemsSource.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

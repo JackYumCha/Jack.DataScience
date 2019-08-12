@@ -8,8 +8,9 @@ namespace Jack.DataScience.Data.AthenaClient
     {
         String,
         Integer,
-        Float,
-        PartitionKey, // will be populated from partitions
+        Double,
+        Boolean,
+        QueryResult, // will be populated from partitions
         SpecialFormat, // yyyy-mm-dd format for date defined by regex
     }
 }

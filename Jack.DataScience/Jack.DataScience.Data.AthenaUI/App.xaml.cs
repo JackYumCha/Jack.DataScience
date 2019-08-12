@@ -23,11 +23,12 @@ namespace Jack.DataScience.Data.AthenaUI
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             AutoFacContainer autoFacContainer = new AutoFacContainer(environment);
-            autoFacContainer.RegisterOptions<AWSAthenaOptions>();
-            autoFacContainer.RegisterOptions<AWSS3Options>();
-            autoFacContainer.RegisterOptions<AthenaClientOptions>();
-            autoFacContainer.ContainerBuilder.RegisterModule<AWSAthenaModule>();
-            autoFacContainer.ContainerBuilder.RegisterModule<AWSS3Module>();
+            autoFacContainer.RegisterOptions<EncryptedOptions>();
+            //autoFacContainer.RegisterOptions<AWSAthenaOptions>();
+            //autoFacContainer.RegisterOptions<AWSS3Options>();
+            //autoFacContainer.RegisterOptions<AthenaClientOptions>();
+            //autoFacContainer.ContainerBuilder.RegisterModule<AWSAthenaModule>();
+            //autoFacContainer.ContainerBuilder.RegisterModule<AWSS3Module>();
             Services = autoFacContainer.ContainerBuilder.Build();
             base.OnStartup(e);
         }

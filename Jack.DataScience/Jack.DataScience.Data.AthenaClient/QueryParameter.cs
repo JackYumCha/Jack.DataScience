@@ -6,7 +6,12 @@ using System.Text;
 namespace Jack.DataScience.Data.AthenaClient
 {
     public class QueryParameter: INotifyPropertyChanged
-    {
+    { 
+        public QueryParameter()
+        {
+            _BindingValue = new ValueViewModel<string>(this);
+        }
+
         private string _Key;
 
         public string Key
@@ -33,6 +38,46 @@ namespace Jack.DataScience.Data.AthenaClient
                 {
                     _Type = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Type)));
+                    switch (_Type)
+                    {
+                        case QueryParameterTypeEnum.String:
+                            _BindingValue = new ValueViewModel<string>(this);
+                            break;
+                        case QueryParameterTypeEnum.Double:
+                            double doubleValue;
+                            if (!double.TryParse(_Value, out doubleValue))
+                            {
+                                _Value = 0d.ToString();
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                            }
+                            _BindingValue = new ValueViewModel<double>(this);
+                            break;
+                        case QueryParameterTypeEnum.Integer:
+                            long longValue;
+                            if (!long.TryParse(_Value, out longValue))
+                            {
+                                _Value = 0L.ToString();
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                            }
+                            _BindingValue = new ValueViewModel<long>(this);
+                            break;
+                        case QueryParameterTypeEnum.Boolean:
+                            bool boolValue;
+                            if (!bool.TryParse(_Value, out boolValue))
+                            {
+                                _Value = false.ToString().ToLower();
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                            }
+                            _BindingValue = new ValueViewModel<bool>(this);
+                            break;
+                        case QueryParameterTypeEnum.SpecialFormat:
+                            _BindingValue = new ValueViewModel<string>(this);
+                            break;
+                        case QueryParameterTypeEnum.QueryResult:
+                            _BindingValue = new ValueViewModel<string>(this);
+                            break;
+                    }
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BindingValue)));
                 }
             }
         }
@@ -62,10 +107,16 @@ namespace Jack.DataScience.Data.AthenaClient
                 {
                     _Value = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                    _BindingValue?.OnValueChange(nameof(ValueViewModel<object>.Value));
                 }
             }
         }
 
+        private ValueViewModel _BindingValue;
+        public ValueViewModel BindingValue
+        {
+            get => _BindingValue;
+        }
 
         private string _RegexPattern;
 
@@ -108,11 +159,17 @@ namespace Jack.DataScience.Data.AthenaClient
                 {
                     _Values = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Values)));
+                    _BindingValue?.OnValueChange(nameof(ValueViewModel<object>.Values));
                 }
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public void OnValueChange(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
 

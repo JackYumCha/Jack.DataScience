@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Jack.DataScience.Data.AthenaUI"
         mc:Ignorable="d"
-        Title="Address Input Box" Height="80" Width="600">
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Title="Address Input Box" Height="88" Width="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/>
-            <RowDefinition Height="24"/>
+            <RowDefinition Height="24*"/>
         </Grid.RowDefinitions>
         <TextBox Grid.Row="0" Name="tbInput"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">

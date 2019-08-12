@@ -1,7 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Jack.DataScience.Data.AthenaUI"
-                    xmlns:dswpf="clr-namespace:Jack.DataScience.WPF.Controls;assembly=Jack.DataScience.WPF.Controls">
+                    xmlns:dswpf="clr-namespace:Jack.DataScience.WPF.Controls;assembly=Jack.DataScience.WPF.Controls"
+                    xmlns:client="clr-namespace:Jack.DataScience.Data.AthenaClient;assembly=Jack.DataScience.Data.AthenaClient"
+                    >
     <Style x:Key="imageButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="White"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -12,6 +14,38 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Width" Value="24"/>
     </Style>
+    <dswpf:EnumItemsSource x:Key="queryParameterTypes" Type="{x:Type client:QueryParameterTypeEnum}"/>
+    <Style x:Key="contentSelectorStyle" TargetType="ContentControl">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=Type}" Value="String">
+                <DataTrigger.Setters>
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate DataType="">
+                                
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger.Setters>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=Type}" Value="Integer">
+
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=Type}" Value="Float">
+
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=Type}" Value="Boolean">
+
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=Type}" Value="QueryResult">
+
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=Type}" Value="SpecialFormat">
+
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    
     <dswpf:InverseBooleanConverter x:Key="inverseBoolConverter"/>
     <VisualBrush x:Key="brushFolder">
         <VisualBrush.Visual>

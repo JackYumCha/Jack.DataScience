@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Jack.DataScience.Data.AthenaUI"
         xmlns:client="clr-namespace:Jack.DataScience.Data.AthenaClient;assembly=Jack.DataScience.Data.AthenaClient"
+        xmlns:dswpf="clr-namespace:Jack.DataScience.WPF.Controls;assembly=Jack.DataScience.WPF.Controls"
         mc:Ignorable="d"
         Title="Data Science Data Exporter" Height="450" Width="800">
     <Grid>
@@ -81,125 +82,232 @@
             </TreeView>
         </Grid>
         <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Gray"/>
-        <TabControl Grid.Column="2" Name="tabQueries">
-            <TabControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type client:FormatedQuery}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="20"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock FontSize="18" Text="{Binding Path=Name}"/>
-                        <Button Grid.Column="1" Width="22" Height="20" BorderThickness="0" Background="Transparent" Click="CloseQueryView">
-                            <Rectangle Width="16" Height="16" Fill="{StaticResource brushClear}" />
-                        </Button>
-                    </Grid>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate DataType="{x:Type client:FormatedQuery}">
-                    <Grid Name="gridQuery">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="24"/>
-                            <RowDefinition Height="25*"/>
-                            <RowDefinition Height="25*"/>
-                            <RowDefinition Height="24"/>
-                            <RowDefinition Height="25*"/>
-                            <RowDefinition Height="24"/>
-                            <RowDefinition Height="20*"/>
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70*"/>
+                <RowDefinition Height="4"/>
+                <RowDefinition Height="30*"/>
+            </Grid.RowDefinitions>
+            <TabControl Grid.Row="0" Name="tabQueries">
+                <TabControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type client:FormatedQuery}">
+                        <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="20"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Name" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            <TextBlock FontSize="18" Text="{Binding Path=Name}"/>
+                            <Button Grid.Column="1" Width="22" Height="20" BorderThickness="0" Background="Transparent" Click="CloseQueryView">
+                                <Rectangle Width="16" Height="16" Fill="{StaticResource brushClear}" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate DataType="{x:Type client:FormatedQuery}">
+                        <Grid Name="gridQuery" Loaded="FormatedQueryTemplateLoaded">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="25*"/>
+                                <RowDefinition Height="25*"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="25*"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="20*"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Name" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                      TextChanged="QueryChanged"
                                      HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
-                            <CheckBox Grid.Column="2" Content="Can Edit" IsChecked="{Binding Path=Editable}"/>
-                        </Grid>
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="SQL" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" Text="{Binding Path=Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                <CheckBox Grid.Column="2" Content="Can Edit" Checked="ChangeToEditable" Unchecked="ChangeToNotEditable" VerticalAlignment="Center" IsChecked="{Binding Path=Editable}"/>
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="SQL" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding Path=Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                      TextChanged="QueryChanged" AcceptsReturn="True" AcceptsTab="True"
+                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsReadOnly="{Binding Path=Editable, Converter={StaticResource inverseBoolConverter}}"/>
+                            </Grid>
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="SQL" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding Path=SQL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     AcceptsReturn="True" AcceptsTab="True"  IsReadOnly="True"
                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                        </Grid>
-                        <Grid Grid.Row="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="SQL" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" Text="{Binding Path=SQL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                     TextChanged="QueryChanged" AcceptsReturn="True" AcceptsTab="True"
-                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                        </Grid>
-                        <Grid Grid.Row="3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Query Parameters"/>
-                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                <Button Grid.Column="0" Style="{StaticResource datagridButtonStyle}" ToolTip="Add Query Parameter" Click="AddQueryParameter">
-                                    <Rectangle Width="20" Height="20" Fill="{StaticResource brushAdd}"/>
-                                </Button>
-                                <Button Grid.Column="0" Style="{StaticResource datagridButtonStyle}" ToolTip="Move Parameter Upwards" Click="MoveParameterUpwards">
-                                    <Rectangle Width="20" Height="20" Fill="{StaticResource brushUpArrow}"/>
-                                </Button>
-                                <Button Grid.Column="0" Style="{StaticResource datagridButtonStyle}" ToolTip="Move Parameter Downwards" Click="MoveParameterDownwards">
-                                    <Rectangle Width="20" Height="20" Fill="{StaticResource brushDownArrow}"/>
-                                </Button>
-                                <Grid Width="48"/>
-                                <Button Grid.Column="6" Style="{StaticResource datagridButtonStyle}" ToolTip="Remove Query Parameter" Click="DeleteQueryParameter">
-                                    <Rectangle Width="20" Height="20" Fill="{StaticResource brushClear}"/>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                        <DataGrid Name="dgParameters" Grid.Row="4" AutoGenerateColumns="False" 
+                            </Grid>
+                            <Grid Grid.Row="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Query Parameters"/>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button Grid.Column="0" Style="{StaticResource datagridButtonStyle}" ToolTip="Add Query Parameter" Click="AddQueryParameter" 
+                                        IsEnabled="{Binding Path=Editable}">
+                                        <Rectangle Width="20" Height="20" Fill="{StaticResource brushAdd}"/>
+                                    </Button>
+                                    <Button Grid.Column="0" Style="{StaticResource datagridButtonStyle}" ToolTip="Move Parameter Upwards" Click="MoveParameterUpwards"
+                                        IsEnabled="{Binding Path=Editable}">
+                                        <Rectangle Width="20" Height="20" Fill="{StaticResource brushUpArrow}"/>
+                                    </Button>
+                                    <Button Grid.Column="0" Style="{StaticResource datagridButtonStyle}" ToolTip="Move Parameter Downwards" Click="MoveParameterDownwards"
+                                        IsEnabled="{Binding Path=Editable}">
+                                        <Rectangle Width="20" Height="20" Fill="{StaticResource brushDownArrow}"/>
+                                    </Button>
+                                    <Grid Width="48"/>
+                                    <Button Grid.Column="6" Style="{StaticResource datagridButtonStyle}" ToolTip="Remove Query Parameter" Click="DeleteQueryParameter"
+                                        IsEnabled="{Binding Path=Editable}">
+                                        <Rectangle Width="20" Height="20" Fill="{StaticResource brushClear}"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                            <DataGrid Name="dgParameters" Grid.Row="4" AutoGenerateColumns="False" 
                                               CanUserAddRows="False"
                                               CanUserResizeColumns="True"
                                               CanUserReorderColumns="False"
                                               CanUserResizeRows="False"
                                               CanUserDeleteRows="False"
-                                              IsReadOnly="{Binding Path=Editable, Converter={StaticResource inverseBoolConverter}}"
                                               ItemsSource="{Binding Path=Parameters}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Key" Binding="{Binding Path=Key}"/>
-                                <DataGridTextColumn Header="Type" Binding="{Binding Path=Type}"/>
-                                <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}"/>
-                                <DataGridTextColumn Header="Regex" Binding="{Binding Path=RegexPattern}"/>
-                                <DataGridTextColumn Header="SQL" Binding="{Binding Path=AthenaQuery}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        <Grid Grid.Row="5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Default Export Path"/>
-                            <TextBox Grid.Column="1" Text="{Binding Path=DefaultExportPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                            <Button Grid.Column="2" ToolTip="Export CSV As File" Style="{StaticResource datagridButtonStyle}" Click="ExecuteAndDownload">
-                                <Rectangle Width="16" Height="16" Fill="{StaticResource brushDownloadAs}" />
-                            </Button>                            
-                            <Button Grid.Column="3" ToolTip="Export CSV to Default Path" Style="{StaticResource datagridButtonStyle}" Click="ExecuteAndDownload">
-                                <Rectangle Width="16" Height="16" Fill="{StaticResource brushDownload}" />
-                            </Button>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Key" Binding="{Binding Path=Key}"/>
+                                    <DataGridComboBoxColumn Header="Type" SelectedItemBinding="{Binding Path=Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{StaticResource queryParameterTypes}"/>
+                                    <DataGridTemplateColumn Header="Value">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate DataType="{x:Type client:QueryParameter}">
+                                                <ContentControl Name="editor" Content="{Binding Path=BindingValue}" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=Type}" Value="String">
+                                                        <Setter TargetName="editor" Property="ContentTemplate">
+                                                            <Setter.Value>
+                                                                <DataTemplate>
+                                                                    <TextBox Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="ParameterValueChanged"/>
+                                                                </DataTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=Type}" Value="Boolean">
+                                                        <Setter TargetName="editor" Property="ContentTemplate">
+                                                            <Setter.Value>
+                                                                <DataTemplate>
+                                                                    <CheckBox IsChecked="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                                          Content="{Binding Path=Value, Mode=OneWay}" Checked="ParameterValueChanged" Unchecked="ParameterValueChanged"/>
+                                                                </DataTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=Type}" Value="Integer">
+                                                        <Setter TargetName="editor" Property="ContentTemplate">
+                                                            <Setter.Value>
+                                                                <DataTemplate>
+                                                                    <TextBox PreviewKeyDown="OnlyDigits" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         TextChanged="ParameterValueChanged"/>
+                                                                </DataTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=Type}" Value="Double">
+                                                        <Setter TargetName="editor" Property="ContentTemplate">
+                                                            <Setter.Value>
+                                                                <DataTemplate>
+                                                                    <TextBox PreviewKeyDown="OnlyDigitsAndDot" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         TextChanged="ParameterValueChanged"/>
+                                                                </DataTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=Type}" Value="QueryResult">
+                                                        <Setter TargetName="editor" Property="ContentTemplate">
+                                                            <Setter.Value>
+                                                                <DataTemplate>
+                                                                    <ComboBox Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Path=Values}"
+                                                                          IsEditable="True" IsTextSearchEnabled="True" IsTextSearchCaseSensitive="False" 
+                                                                          SelectionChanged="ParameterValueChanged" DropDownClosed="ParameterValueChanged"/>
+                                                                </DataTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Regex" Binding="{Binding Path=RegexPattern}"/>
+                                    <DataGridTemplateColumn Header="Values SQL">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=AthenaQuery}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                        <DataGridTemplateColumn.CellEditingTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding Path=AthenaQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellEditingTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Run">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Execute" Click="GenerateValues"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Grid Grid.Row="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Default Export Path"/>
+                                <TextBox Grid.Column="1" Text="{Binding Path=DefaultExportPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                <Button Grid.Column="2" ToolTip="Export CSV As File" Style="{StaticResource datagridButtonStyle}" Click="ExecuteAndDownloadAs">
+                                    <Rectangle Width="16" Height="16" Fill="{StaticResource brushDownloadAs}" />
+                                </Button>
+                                <Button Grid.Column="3" ToolTip="Export CSV to Default Path" Style="{StaticResource datagridButtonStyle}" Click="ExecuteAndDownload">
+                                    <Rectangle Width="16" Height="16" Fill="{StaticResource brushDownload}" />
+                                </Button>
+                            </Grid>
+                            <!-- the text box to show the query result -->
+                            <TextBox Grid.Row="6" AcceptsReturn="True" AcceptsTab="True" Text="{Binding Path=Description}"/>
                         </Grid>
-                        <!-- the text box to show the query result -->
-                        <TextBox Grid.Row="6" Name="tbQueryResult" AcceptsReturn="True" AcceptsTab="True"/>
-                    </Grid>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+            <GridSplitter Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <DataGrid Grid.Row="2" Name="dgJobList" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True"
+                      CanUserReorderColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Job Id" Binding="{Binding JobId}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Query" Binding="{Binding Query}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="End Time" Binding="{Binding EndTime}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Note" Binding="{Binding Note}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="File Size" Binding="{Binding FileSize}" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Open File">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Open File" Click="OpenDownloadedFile"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        
     </Grid>
 </Window>

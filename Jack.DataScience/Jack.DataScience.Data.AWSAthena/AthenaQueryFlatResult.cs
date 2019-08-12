@@ -8,5 +8,6 @@ namespace Jack.DataScience.Data.AWSAthena
     {
         public List<string> Columns { get; set; }
         public List<List<string>> Data { get; set; }
+        public string Note { get; set; }
     }
 }

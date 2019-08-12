@@ -325,10 +325,11 @@ namespace Jack.DataScience.Data.AWSAthena
             while (request.NextToken != null);
         }
 
-        public async Task<AthenaQueryFlatResult> GetFlatResult(GetQueryResultsRequest request)
+        public async Task<AthenaQueryFlatResult> GetFlatResult(GetQueryResultsRequest request, int rowsLimit = 1000000)
         {
             bool columnsRead = false;
             var data = new List<List<string>>();
+            bool firstRowRemoved = false;
             var result = new AthenaQueryFlatResult()
             {
                 Data = data
@@ -339,10 +340,25 @@ namespace Jack.DataScience.Data.AWSAthena
                 if (!columnsRead)
                 {
                     result.Columns = response.ResultSet.ResultSetMetadata.ColumnInfo.Select(c => c.Name).ToList();
+                    columnsRead = true;
                 }
                 foreach (var row in response.ResultSet.Rows)
                 {
                     data.Add(row.Data.Select(c => c.VarCharValue).ToList());
+                }
+                if (!firstRowRemoved)
+                {
+                    data.RemoveAt(0);
+                    firstRowRemoved = true;
+                }
+
+                if(data.Count > rowsLimit)
+                {
+                    if(request.NextToken != null)
+                    {
+                        result.Note = $"Query results were trancated at {data.Count} rows. Please try reduce the query size or aggregate in SQL before exporting.";
+                    }
+                    return result;
                 }
             }
             while (request.NextToken != null);

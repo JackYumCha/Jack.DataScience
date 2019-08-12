@@ -20,7 +20,6 @@ namespace Jack.DataScience.Common
             }
             configBuilder.AddJsonFile(appsettingsFile);
             Configuration = configBuilder.Build();
-
             ContainerBuilder = new ContainerBuilder();
         }
 

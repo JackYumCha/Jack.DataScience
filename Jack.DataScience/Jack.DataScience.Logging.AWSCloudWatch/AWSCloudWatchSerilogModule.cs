@@ -20,6 +20,8 @@ namespace Jack.DataScience.Logging.AWSCloudWatch
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<AWSCloudWatchAPI>();
+
             builder.Register(context =>
             {
                 var awsCloudWatchOptions = context.Resolve<AWSCloudWatchOptions>();
@@ -55,6 +57,7 @@ namespace Jack.DataScience.Logging.AWSCloudWatch
                 Common.Logging.Console.Logger = genericLogger;
                 return genericLogger;
             });
+
 
         }
     }
