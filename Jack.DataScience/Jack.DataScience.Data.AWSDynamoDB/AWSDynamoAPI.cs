@@ -167,11 +167,24 @@ namespace Jack.DataScience.Data.AWSDynamoDB
                 TableName = tableName,
             };
             if (limit > 0) request.Limit = limit;
-            var response = await amazonDynamoDBClient.QueryAsync(request);
-            return response
-                .Items
-                .Select(item => item.ParseDocument<T>(jsonSerializerSettings))
-                .ToList();
+
+            Dictionary<string, AttributeValue> lastEvaluatedKey = null;
+
+            List<T> results = new List<T>();
+
+            do
+            {
+                request.ExclusiveStartKey = lastEvaluatedKey;
+                var response = await amazonDynamoDBClient.QueryAsync(request);
+                results.AddRange(response
+                    .Items
+                    .Select(item => item.ParseDocument<T>(jsonSerializerSettings))
+                );
+                lastEvaluatedKey = response.LastEvaluatedKey;
+
+            } while (lastEvaluatedKey != null && lastEvaluatedKey.Any());
+
+            return results;
         }
 
         public async Task<List<T>> Scan<T>(string indexName, QueryOperator op, List<object> values, int limit = 0, string tableName = null) where T : class, new()
