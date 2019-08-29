@@ -123,6 +123,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.Athen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.LogWrapper", "Jack.DataScience.LogWrapper\Jack.DataScience.LogWrapper.csproj", "{55978972-92DF-4C40-9281-A491B6B8608B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.ProcessExtensions", "Jack.DataScience.ProcessExtensions\Jack.DataScience.ProcessExtensions.csproj", "{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Rx", "Jack.DataScience.Rx\Jack.DataScience.Rx.csproj", "{AD304FDA-91B8-481B-ABF9-AA7B670226FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -369,6 +373,14 @@ Global
 		{55978972-92DF-4C40-9281-A491B6B8608B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55978972-92DF-4C40-9281-A491B6B8608B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55978972-92DF-4C40-9281-A491B6B8608B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
