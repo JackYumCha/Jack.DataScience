@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using Jack.DataScience.Data.AWSAthena;
 using Amazon.Athena.Model;
 using Jack.DataScience.Storage.AWSS3;
+using System.Text.RegularExpressions;
 
 namespace Jack.DataScience.Data.AWSAthenaEtl
 {
     public static class AthenaQueryExtensions
     {
+        private static Regex rgxDateOffset = new Regex(@"\{date\(([+-]?\d+)\)\}");
+
         public static async Task GetAthenaQueryResultSampleByDate(this EtlSettings etlSettings, int lines)
         {
             var athena = etlSettings.AthenaQuerySource;
@@ -22,6 +25,11 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             var today = DateTime.Now;
             var date = today.AddDays(-athena.DaysAgo);
             query = query.Replace("{date}", date.ToString(athena.DateFormat));
+            query = rgxDateOffset.Replace(query, m =>
+            {
+                var offset = int.Parse(m.Groups[1].Value);
+                return date.AddDays(offset).ToString(athena.DateFormat);
+            });
             query += $"\nlimit {lines}";
             var getResultRequest = await athenaApi.ExecuteQuery(query);
             var response = await athenaApi.ReadOneResult(getResultRequest);
@@ -130,8 +138,9 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
         }
 
+        
 
-        public static async Task<List<string>> TransferAthenaQueryResultByDate(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI)
+        public static async Task<List<string>> TransferAthenaQueryResultByDate(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI, DateTime? useDate = null)
         {
             var result = new List<string>();
             var athena = etlSettings.AthenaQuerySource;
@@ -139,9 +148,15 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             var athenaApi = etlSettings.CreateSourceAthenaAPI();
 
             var query = athena.AthenaSQL;
-            var today = DateTime.Now;
+            var today = DateTime.UtcNow;
+            if (useDate.HasValue) today = useDate.Value;
             var date = today.AddDays(-athena.DaysAgo);
             query = query.Replace("{date}", date.ToString(athena.DateFormat));
+            query = rgxDateOffset.Replace(query, m =>
+            {
+                var offset = int.Parse(m.Groups[1].Value);
+                return date.AddDays(offset).ToString(athena.DateFormat);
+            });
             var dateKey = date.ToString("yyyyMMdd");
 
             // var response = await athenaApi.ExecuteQuery(query);

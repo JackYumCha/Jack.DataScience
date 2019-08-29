@@ -15,7 +15,7 @@ namespace Jack.DataScience.Data.CSV
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    using(var csv = new CsvReader(reader, configuration))
+                    using(var csv = configuration == null ? new CsvReader(reader) : new CsvReader(reader, configuration))
                     {
                         return csv.GetRecords<T>().ToList();
                     }

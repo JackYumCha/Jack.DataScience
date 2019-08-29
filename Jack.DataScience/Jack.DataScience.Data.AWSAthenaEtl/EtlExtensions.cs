@@ -138,7 +138,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
 
 
 
-        public static async Task<List<string>> TransferData(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI, GenericLogger logger = null)
+        public static async Task<List<string>> TransferData(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI, GenericLogger logger = null, DateTime? useDate = null)
         {
             var result = new List<string>();
 
@@ -243,12 +243,12 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                     break;
                 case EtlSourceEnum.GoogleAnalytics:
                     {
-                        result = await etlSettings.TransferBigQueryResultByDate(awsAthenaAPI);
+                        result = await etlSettings.TransferBigQueryResultByDate(awsAthenaAPI, useDate);
                     }
                     break;
                 case EtlSourceEnum.AmazonAthena:
                     {
-                        result = await etlSettings.TransferAthenaQueryResultByDate(awsAthenaAPI);
+                        result = await etlSettings.TransferAthenaQueryResultByDate(awsAthenaAPI, useDate);
                     }
                     break;
             }

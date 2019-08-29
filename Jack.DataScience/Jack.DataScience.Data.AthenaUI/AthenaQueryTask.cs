@@ -114,7 +114,6 @@ namespace Jack.DataScience.Data.AthenaUI
         }
 
         private string _FileSize;
-
         public string FileSize
         {
             get => _FileSize;

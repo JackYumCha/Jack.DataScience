@@ -25,7 +25,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         /// </summary>
         /// <param name="etlSettings"></param>
         /// <returns></returns>
-        public static async Task<List<string>> TransferBigQueryResultByDate(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI)
+        public static async Task<List<string>> TransferBigQueryResultByDate(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI, DateTime? useDate = null)
         {
             var result = new List<string>();
 
@@ -37,9 +37,10 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             BigQueryClient client = BigQueryClient.Create(ga.GoogleAnalyticsProjectId);
 
             string sql = ga.BigQuerySQL;
-
-            string dateQueryKey = DateTime.Now.AddDays(-ga.DaysAgo).ToString(ga.DateFormat);
-            string dateKey = DateTime.Now.AddDays(-ga.DaysAgo).ToString("yyyyMMdd");
+            var today = DateTime.UtcNow;
+            if (useDate.HasValue) today = useDate.Value;
+            string dateQueryKey = today.AddDays(-ga.DaysAgo).ToString(ga.DateFormat);
+            string dateKey = today.AddDays(-ga.DaysAgo).ToString("yyyyMMdd");
 
             sql = sql.Replace("{date}", dateKey);
 
