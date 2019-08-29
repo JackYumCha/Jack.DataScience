@@ -1,0 +1,13 @@
+.dockerignore
+.env
+.git
+.gitignore
+.vs
+.vscode
+# */bin
+*/obj
+**/.toolstarget
+ui
+*.Tests
+*.cmd
+*.dockerfile
