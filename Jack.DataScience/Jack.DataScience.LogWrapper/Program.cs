@@ -2,10 +2,11 @@
 using Jack.DataScience.Common;
 using Jack.DataScience.ConsoleExtensions;
 using Jack.DataScience.Data.MongoDB;
+using Jack.DataScience.ProcessExtensions;
 using MongoDB.Driver;
 using System;
-using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 
 namespace Jack.DataScience.LogWrapper
@@ -33,7 +34,7 @@ namespace Jack.DataScience.LogWrapper
             var useGuid = args.HasParameter("--use-guid");
             if (useTime) collectionName += $"_{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}";
             if (useGuid) collectionName += $"_{Guid.NewGuid().ToString().Replace("-", "")}";
-            collectionLogMessage = mongoContext.MongoDatabase.GetCollection<LogMessage>(collectionName);
+            IMongoCollection<LogMessage> collectionLogMessage = mongoContext.MongoDatabase.GetCollection<LogMessage>(collectionName);
             collectionLogMessage.InsertOne(new LogMessage()
             {
                 Timestamp = DateTime.UtcNow,
@@ -41,22 +42,40 @@ namespace Jack.DataScience.LogWrapper
                 Message = $"Process Start: {options.Command} {(options.Arguments == null ? "" : string.Join(" ", options.Arguments))}"
             });
 
-            ProcessStartInfo psi = new ProcessStartInfo()
-            {
-                FileName = options.Command,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
+            ProcessExecutor processExecutor = new ProcessExecutor(options.Command);
+            processExecutor.AddArguments(options.Arguments);
 
-            if(options.Arguments != null)
-                options.Arguments.ForEach(value => psi.ArgumentList.Add(value));
+            processExecutor.StandardOutput
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Subscribe(
+                line =>
+                {
+                    Console.WriteLine(line);
+                    collectionLogMessage.InsertOne(new LogMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        LogLevel = "Log",
+                        Message = line
+                    });
+                });
 
-            var process = Process.Start(psi);
-            process.OutputDataReceived += OutputReceived;
-            process.ErrorDataReceived += ErrorReceived;
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            process.WaitForExit();
+            processExecutor.StandardError
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Subscribe(
+                line =>
+                {
+                    Console.Error.WriteLine(line);
+                    collectionLogMessage.InsertOne(new LogMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        LogLevel = "Error",
+                        Message = line
+                    });
+                });
+
+            processExecutor.Execute();
+
+            processExecutor.Dispose();
 
             collectionLogMessage.InsertOne(new LogMessage()
             {
@@ -66,30 +85,6 @@ namespace Jack.DataScience.LogWrapper
             });
 
             Thread.Sleep(2000);
-        }
-
-        private static IMongoCollection<LogMessage> collectionLogMessage;
-
-        public static void OutputReceived(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-            collectionLogMessage.InsertOne(new LogMessage()
-            {
-                Timestamp = DateTime.UtcNow,
-                LogLevel = "Log",
-                Message = e.Data
-            });
-        }
-
-        public static void ErrorReceived(object sender, DataReceivedEventArgs e)
-        {
-            Console.Error.WriteLine(e.Data);
-            collectionLogMessage.InsertOne(new LogMessage()
-            {
-                Timestamp = DateTime.UtcNow,
-                LogLevel = "Error",
-                Message = e.Data
-            });
         }
     }
 }
