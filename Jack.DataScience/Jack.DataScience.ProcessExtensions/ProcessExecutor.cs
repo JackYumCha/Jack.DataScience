@@ -25,6 +25,8 @@ namespace Jack.DataScience.ProcessExtensions
             processStartInfo.FileName = path;
         }
 
+        public ProcessStartInfo StartInfo { get => processStartInfo; }
+
         public Process RunningProcess { get; private set; }
 
         public Subject<string> StandardOutput { get; private set; } = new Subject<string>();
@@ -40,6 +42,18 @@ namespace Jack.DataScience.ProcessExtensions
         {
             processStartInfo.Arguments += name + " ";
             processStartInfo.Arguments += argument + " ";
+        }
+
+        public void AddArgument(string name, int argument)
+        {
+            processStartInfo.Arguments += name + " ";
+            processStartInfo.Arguments += argument.ToString() + " ";
+        }
+
+        public void AddArgument(string name, double argument)
+        {
+            processStartInfo.Arguments += name + " ";
+            processStartInfo.Arguments += argument.ToString() + " ";
         }
 
         public void AddArguments(IEnumerable<string> arguments)
