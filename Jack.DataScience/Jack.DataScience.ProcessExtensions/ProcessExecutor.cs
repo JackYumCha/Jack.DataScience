@@ -53,6 +53,8 @@ namespace Jack.DataScience.ProcessExtensions
             if (RunningProcess != null) RunningProcess.Dispose();
             if (StandardOutputSubscription != null) StandardOutputSubscription.Dispose();
             if (StandardErrorSubscription != null) StandardErrorSubscription.Dispose();
+            StandardOutput.Dispose();
+            StandardError.Dispose();
         }
 
         public void Execute()
