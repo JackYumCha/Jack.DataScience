@@ -2,7 +2,7 @@
   "profiles": {
     "Jack.DataScience.LogWrapper": {
       "commandName": "Project",
-      "commandLineArgs": "--dot-net-log wrap"
+      "commandLineArgs": "--dot-net-log wrap --use-time --use-guid"
     }
   }
 }

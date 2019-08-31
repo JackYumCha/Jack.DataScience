@@ -121,11 +121,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Data.Athen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.AthenaUI", "Jack.DataScience.Data.AthenaUI\Jack.DataScience.Data.AthenaUI.csproj", "{9AE8737B-73F9-4BA2-8832-033CEA453368}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.LogWrapper", "Jack.DataScience.LogWrapper\Jack.DataScience.LogWrapper.csproj", "{55978972-92DF-4C40-9281-A491B6B8608B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.LogWrapper", "Jack.DataScience.LogWrapper\Jack.DataScience.LogWrapper.csproj", "{55978972-92DF-4C40-9281-A491B6B8608B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.ProcessExtensions", "Jack.DataScience.ProcessExtensions\Jack.DataScience.ProcessExtensions.csproj", "{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.ProcessExtensions", "Jack.DataScience.ProcessExtensions\Jack.DataScience.ProcessExtensions.csproj", "{243DCDF7-1A6C-4EBB-B186-2911E3DB0E4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Rx", "Jack.DataScience.Rx\Jack.DataScience.Rx.csproj", "{AD304FDA-91B8-481B-ABF9-AA7B670226FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Rx", "Jack.DataScience.Rx\Jack.DataScience.Rx.csproj", "{AD304FDA-91B8-481B-ABF9-AA7B670226FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.DiscreteMath", "Jack.DataScience.DiscreteMath\Jack.DataScience.DiscreteMath.csproj", "{DBD72970-E8B1-410F-948F-B2E684DF188C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -381,6 +383,10 @@ Global
 		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD304FDA-91B8-481B-ABF9-AA7B670226FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBD72970-E8B1-410F-948F-B2E684DF188C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBD72970-E8B1-410F-948F-B2E684DF188C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBD72970-E8B1-410F-948F-B2E684DF188C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBD72970-E8B1-410F-948F-B2E684DF188C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
