@@ -125,7 +125,7 @@ namespace Jack.DataScience.LogWrapper
             {
                 Timestamp = DateTime.UtcNow,
                 LogLevel = "Error",
-                Message = line,
+                Message = message,
                 Value = bsonDocument,
             });
         }
