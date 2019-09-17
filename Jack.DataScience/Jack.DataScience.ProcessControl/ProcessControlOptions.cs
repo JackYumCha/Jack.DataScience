@@ -6,7 +6,10 @@ namespace Jack.DataScience.ProcessControl
 {
     public class ProcessControlOptions
     {
-        public List<string> ProcessesToStart { get; set; }
+        /// <summary>
+        /// Processes and Arguments
+        /// </summary>
+        public List<ProcessMonitorOptions> ProcessesToStart { get; set; }
         public List<string> ProcessesToKillOnError { get; set; }
         public int Retry { get; set; }
     }

@@ -32,7 +32,7 @@ namespace Jack.DataScience.ProcessExtensions
         public Subject<string> StandardOutput { get; private set; } = new Subject<string>();
 
         public Subject<string> StandardError { get; private set; } = new Subject<string>();
-
+        public Subject<int> OnExit { get; private set; } = new Subject<int>();
         public void AddArgument(string name)
         {
             processStartInfo.Arguments += name + " ";
@@ -69,6 +69,7 @@ namespace Jack.DataScience.ProcessExtensions
             if (StandardErrorSubscription != null) StandardErrorSubscription.Dispose();
             StandardOutput.Dispose();
             StandardError.Dispose();
+            OnExit.Dispose();
         }
 
         public void Execute()
@@ -76,6 +77,7 @@ namespace Jack.DataScience.ProcessExtensions
             if (RunningProcess != null) return;
             StartProcess();
             RunningProcess.WaitForExit();
+            OnExit.OnNext(RunningProcess.ExitCode);
         }
 
         public Task ExecuteAsync()
@@ -85,6 +87,7 @@ namespace Jack.DataScience.ProcessExtensions
             runningTask = new Task(() =>
             {
                 RunningProcess.WaitForExit();
+                OnExit.OnNext(RunningProcess.ExitCode);
             });
             runningTask.Start();
             return runningTask;
@@ -107,6 +110,15 @@ namespace Jack.DataScience.ProcessExtensions
                 .Subscribe(value => StandardError.OnNext(value));
             RunningProcess.BeginOutputReadLine();
             RunningProcess.BeginErrorReadLine();
+        }
+
+        public void TryKill()
+        {
+            try
+            {
+                RunningProcess.Kill();
+            }
+            catch(Exception ex) { }
         }
     }
 }
