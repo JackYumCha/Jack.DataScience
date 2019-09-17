@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,5 +10,6 @@ namespace Jack.DataScience.LogWrapper
         public DateTime Timestamp { get; set; }
         public string LogLevel { get; set; }
         public string Message { get; set; }
+        public BsonDocument Value { get; set; }
     }
 }

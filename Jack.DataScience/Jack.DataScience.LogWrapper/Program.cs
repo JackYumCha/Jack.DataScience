@@ -3,8 +3,12 @@ using Jack.DataScience.Common;
 using Jack.DataScience.ConsoleExtensions;
 using Jack.DataScience.Data.MongoDB;
 using Jack.DataScience.ProcessExtensions;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -15,6 +19,8 @@ namespace Jack.DataScience.LogWrapper
     {
         static void Main(string[] args)
         {
+            
+
             var DotNetLog = args.GetParameter("--dot-net-log");
             if (DotNetLog == null) DotNetLog = Environment.GetEnvironmentVariable("DOTNETLOG");
             AutoFacContainer autoFacContainer = new AutoFacContainer(DotNetLog);
@@ -34,6 +40,22 @@ namespace Jack.DataScience.LogWrapper
             var useGuid = args.HasParameter("--use-guid");
             if (useTime) collectionName += $"_{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}";
             if (useGuid) collectionName += $"_{Guid.NewGuid().ToString().Replace("-", "")}";
+            if(!mongoContext.ListCollections().Any(name => name == collectionName))
+            {
+                if (options.Capped)
+                {
+                    mongoContext.MongoDatabase.CreateCollection(collectionName, new CreateCollectionOptions()
+                    {
+                        Capped = true,
+                        MaxDocuments = options.MaxDocuments,
+                        MaxSize = options.MaxSize
+                    });
+                }
+                else
+                {
+                    mongoContext.MongoDatabase.CreateCollection(collectionName);
+                }
+            }
             IMongoCollection<LogMessage> collectionLogMessage = mongoContext.MongoDatabase.GetCollection<LogMessage>(collectionName);
             collectionLogMessage.InsertOne(new LogMessage()
             {
@@ -51,12 +73,7 @@ namespace Jack.DataScience.LogWrapper
                 line =>
                 {
                     Console.WriteLine(line);
-                    collectionLogMessage.InsertOne(new LogMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        LogLevel = "Log",
-                        Message = line
-                    });
+                    InsertLog(collectionLogMessage, "Log", line);
                 });
 
             processExecutor.StandardError
@@ -65,12 +82,7 @@ namespace Jack.DataScience.LogWrapper
                 line =>
                 {
                     Console.Error.WriteLine(line);
-                    collectionLogMessage.InsertOne(new LogMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        LogLevel = "Error",
-                        Message = line
-                    });
+                    InsertLog(collectionLogMessage, "Error", line);
                 });
 
             processExecutor.Execute();
@@ -85,6 +97,37 @@ namespace Jack.DataScience.LogWrapper
             });
 
             Thread.Sleep(2000);
+        }
+
+        static string jsonLogMessageMatch = "{\"JsonLogType\":\"[JsonLogType]\",";
+        public static void InsertLog(IMongoCollection<LogMessage> collection, string type, string line)
+        {
+            string message = "";
+            BsonDocument bsonDocument = null;
+            if (line.StartsWith(jsonLogMessageMatch))
+            {
+                JsonLogMessage log = JsonConvert.DeserializeObject<JsonLogMessage>(line);
+                message = log.Message;
+                if(!string.IsNullOrWhiteSpace(log.Json))
+                {
+                    try
+                    {
+                        bsonDocument = BsonSerializer.Deserialize<BsonDocument>(log.Json);
+                    }
+                    catch(Exception ex) { }
+                }
+            }
+            else
+            {
+                message = line;
+            }
+            collection.InsertOne(new LogMessage()
+            {
+                Timestamp = DateTime.UtcNow,
+                LogLevel = "Error",
+                Message = message,
+                Value = bsonDocument,
+            });
         }
     }
 }

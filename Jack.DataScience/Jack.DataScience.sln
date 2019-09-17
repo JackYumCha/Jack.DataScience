@@ -127,6 +127,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.ProcessExt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Rx", "Jack.DataScience.Rx\Jack.DataScience.Rx.csproj", "{AD304FDA-91B8-481B-ABF9-AA7B670226FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.DiscreteMath", "Jack.DataScience.DiscreteMath\Jack.DataScience.DiscreteMath.csproj", "{DBD72970-E8B1-410F-948F-B2E684DF188C}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.ProcessControl", "Jack.DataScience.ProcessControl\Jack.DataScience.ProcessControl.csproj", "{B33B7B37-B63B-432C-9446-1DC148A51B5C}"
 EndProject
 Global
