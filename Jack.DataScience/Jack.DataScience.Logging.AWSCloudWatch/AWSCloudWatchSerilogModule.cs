@@ -33,7 +33,7 @@ namespace Jack.DataScience.Logging.AWSCloudWatch
             {
                 var options = context.Resolve<CloudWatchSinkOptions>();
                 options.Period = TimeSpan.FromSeconds(10);
-                options.LogStreamNameProvider = new DefaultLogStreamProvider();
+                options.LogStreamNameProvider = new EC2LogStreamNameProvider(); // new DefaultLogStreamProvider();
                 options.TextFormatter = new JsonFormatter();
                 var client = context.Resolve<AmazonCloudWatchLogsClient>();
                 Log.Logger = new LoggerConfiguration()

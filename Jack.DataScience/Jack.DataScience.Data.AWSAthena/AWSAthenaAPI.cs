@@ -582,7 +582,9 @@ namespace Jack.DataScience.Data.AWSAthena
             for (int i = 0; i < columnInfos.Count; i++)
             {
                 var column = columnInfos[i];
-                var property = propertyInfos[column.Name.ToLower()];
+                var propertyName = column.Name.ToLower();
+                if (!propertyInfos.ContainsKey(propertyName)) continue;
+                var property = propertyInfos[propertyName];
                 if(row.Data.Count < columnInfos.Count && row.Data.Count ==1)
                 {
                     var splitted = row.Data[0].VarCharValue.Split(new char[] { '\t' }).Select(item => Regex.Replace(item, @"\s+$", "")).ToList();

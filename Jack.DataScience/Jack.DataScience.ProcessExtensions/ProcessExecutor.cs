@@ -84,8 +84,6 @@ namespace Jack.DataScience.ProcessExtensions
             StartProcess();
             runningTask = new Task(() =>
             {
-                RunningProcess.BeginOutputReadLine();
-                RunningProcess.BeginErrorReadLine();
                 RunningProcess.WaitForExit();
             });
             runningTask.Start();
