@@ -14,7 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Console = Jack.DataScience.Common.Logging.Console;
+//using Console = Jack.DataScience.Common.Logging.Console;
 using Jack.DataScience.Compute.AWSEC2;
 using System.Threading;
 

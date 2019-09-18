@@ -12,5 +12,6 @@ namespace Jack.DataScience.ProcessControl
         public List<ProcessMonitorOptions> ProcessesToStart { get; set; }
         public List<string> ProcessesToKillOnError { get; set; }
         public int Retry { get; set; }
+        public int Interval { get; set; }
     }
 }

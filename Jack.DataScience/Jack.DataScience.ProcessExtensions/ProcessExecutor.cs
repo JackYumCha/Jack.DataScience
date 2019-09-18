@@ -116,7 +116,8 @@ namespace Jack.DataScience.ProcessExtensions
         {
             try
             {
-                RunningProcess.Kill();
+                if (!RunningProcess.HasExited)
+                    RunningProcess.Kill();
             }
             catch(Exception ex) { }
         }

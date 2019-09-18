@@ -3,16 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Jack.DataScience.ProcessControl
 {
-    public class ProcessControlAPI
+    public class ProcessControlAPI: IDisposable
     {
         private readonly ProcessControlOptions processControlOptions;
         private List<IDisposable> Subscriptions = new List<IDisposable>();
         private List<ProcessExecutor> processExecutors = new List<ProcessExecutor>();
+        private Dictionary<string, StreamTimeoutChecker> streamTimeoutCheckers = new Dictionary<string, StreamTimeoutChecker>();
         public ProcessControlAPI(ProcessControlOptions processControlOptions)
         {
             this.processControlOptions = processControlOptions;
@@ -21,11 +23,41 @@ namespace Jack.DataScience.ProcessControl
         public Subject<string> StandardOutput { get; private set; } = new Subject<string>();
         public Subject<string> StandardError { get; private set; } = new Subject<string>();
 
+        private int JobCompleted;
+
+        public Task Start()
+        {
+            Task task = new Task(() =>
+            {
+                BeginWatch();
+                while (Thread.VolatileRead(ref JobCompleted) == 0)
+                {
+                    Thread.Sleep(processControlOptions.Interval);
+                    CheckTimeout();
+                }
+            });
+            task.Start();
+            return task;
+        }
+
+        private void CheckTimeout()
+        {
+            foreach(var checker in streamTimeoutCheckers.Values.ToArray())
+            {
+                StandardOutput.OnNext($"[{nameof(CheckTimeout)}]{checker.StreamName}: {checker.Stopwatch.Elapsed.TotalSeconds.ToString("0.00")}");
+                if (checker.Stopwatch.Elapsed.TotalSeconds > checker.Timeout)
+                {
+                    OnExit(checker.StreamName, 408);
+                    break;
+                }
+            }
+        }
 
         public void OnExit(string streamName, int exitCode)
         {
             StandardError.OnNext($"[{nameof(OnExit)}] Process '{streamName}' exited with Code {exitCode};");
             StandardOutput.OnNext($"[{nameof(OnExit)}] Kill Processes");
+            streamTimeoutCheckers.Clear();
             Subscriptions.ForEach(x => x.Dispose());
             Subscriptions.Clear();
             processExecutors.ForEach(p => p.TryKill());
@@ -36,17 +68,21 @@ namespace Jack.DataScience.ProcessControl
                 StandardOutput.OnNext($"[{nameof(OnExit)}] Retry now.");
                 BeginWatch();
             }
+            else
+            {
+                KillProcesses();
+                JobCompleted = 1;
+            }
         }
 
         public void BeginWatch()
         {
-            
             KillProcesses();
             StandardOutput.OnNext($"[{nameof(BeginWatch)}] Starting Processes.");
             var executors = processControlOptions.ProcessesToStart.Select(monitorOptions =>
             {
-                ProcessExecutor processExecutor = new ProcessExecutor(monitorOptions.ProcessPath);
-                processExecutor.AddArguments(monitorOptions.Arguments);
+                ProcessExecutor processExecutor = new ProcessExecutor(monitorOptions.ProcessPath.PopulateKeys());
+                processExecutor.AddArguments(monitorOptions.Arguments.Select(argument => argument.PopulateKeys()));
                 return new
                 {
                     processExecutor,
@@ -56,11 +92,34 @@ namespace Jack.DataScience.ProcessControl
             foreach(var executor in executors)
             {
                 Subscriptions.Add(executor.processExecutor.StandardOutput
-                    .Subscribe((string value) => StandardOutput.OnNext($"{executor.monitorOptions.StreamName}: {value}")));
+                    .Subscribe((string value) =>
+                    {
+                        if(executor.monitorOptions.HeartBeatKeys.Any(key => !string.IsNullOrEmpty(value) && value.Contains(key))) {
+                            // heart beat is consumed internally
+                            streamTimeoutCheckers[executor.monitorOptions.StreamName].Stopwatch.Restart();
+                        }
+                        else
+                        {
+                            streamTimeoutCheckers[executor.monitorOptions.StreamName].Stopwatch.Restart();
+                            StandardOutput.OnNext($"{executor.monitorOptions.StreamName}: {value}");
+                        }
+                    }));
                 Subscriptions.Add(executor.processExecutor.StandardError
-                    .Subscribe((string value) => StandardError.OnNext($"{executor.monitorOptions.StreamName}: {value}")));
+                    .Subscribe((string value) =>
+                    {
+                        streamTimeoutCheckers[executor.monitorOptions.StreamName].Stopwatch.Restart();
+                        StandardError.OnNext($"{executor.monitorOptions.StreamName}: {value}");
+                    }));
                 Subscriptions.Add(executor.processExecutor.OnExit.Subscribe((int code) => OnExit(executor.monitorOptions.StreamName, code)));
                 processExecutors.Add(executor.processExecutor);
+                StreamTimeoutChecker checker = new StreamTimeoutChecker()
+                {
+                    StreamName = executor.monitorOptions.StreamName,
+                    Timeout = executor.monitorOptions.Timeout,
+                    Stopwatch = new Stopwatch()
+                };
+                checker.Stopwatch.Start();
+                streamTimeoutCheckers.Add(checker.StreamName, checker);
                 executor.processExecutor.ExecuteAsync();
             }
             StandardOutput.OnNext($"[{nameof(BeginWatch)}] {executors.Length} Processes Started.");
@@ -83,15 +142,23 @@ namespace Jack.DataScience.ProcessControl
                     }
                 }
             }
-            StandardOutput.OnNext($"[{nameof(KillProcesses)}] {processDict.Count} Processes Found.");
+            StandardOutput.OnNext($"[{nameof(KillProcesses)}] {processDict.Count} Processes Found: {string.Join(", ", processDict.Values.Select(p => p.ProcessName))}");
             foreach (var process in processDict.Values)
             {
                 try
                 {
-                    process.Kill();
+                    if(!process.HasExited)
+                        process.Kill();
                 }
                 catch (Exception ex) { }
             }
+        }
+
+        public void Dispose()
+        {
+            streamTimeoutCheckers.Clear();
+            Subscriptions.ForEach(x => x.Dispose());
+            KillProcesses();
         }
     }
 }

@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using ExpectedConditions = SeleniumExtras.WaitHelpers.ExpectedConditions;
-using Console = Jack.DataScience.Common.Logging.Console;
+//using Console = Jack.DataScience.Common.Logging.Console;
 using Jack.DataScience.Cloud.HeartBeat;
 
 namespace Jack.DataScience.Scrapping

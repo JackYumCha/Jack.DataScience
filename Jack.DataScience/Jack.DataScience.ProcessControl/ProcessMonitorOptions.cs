@@ -9,5 +9,7 @@ namespace Jack.DataScience.ProcessControl
         public string ProcessPath { get; set; }
         public List<string> Arguments { get; set; }
         public string StreamName { get; set; }
+        public int Timeout { get; set; }
+        public List<string> HeartBeatKeys { get; set; }
     }
 }

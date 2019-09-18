@@ -201,7 +201,7 @@ namespace Jack.DataScience.Cloud.HeartBeat
 
             Console.WriteLine($"Instances Not Updating > 1.5 Hour: { string.Join(", ", expired.OrderBy(s => s.LastSignalTimestamp).Select(s => $"{s.InstanceId}({(now - s.LastSignalTimestamp.ToUniversalTime()).TotalMinutes.ToString("0")}min)"))}");
             
-
+ 
             found.GroupBy(s => s.Log)
                 .ToList()
                 .ForEach(g =>
@@ -228,6 +228,56 @@ namespace Jack.DataScience.Cloud.HeartBeat
                 });
  
         }
-        
+        public async Task KillOver90Min()
+        {
+            //var heartBeat = services.Resolve<HeartBeatAPI>();
+
+            var dynamo = DynamoDB;
+
+            var found = await dynamo.Scan<HeartBeatSignal>(nameof(HeartBeatSignal.Job), QueryOperator.Equal, new List<object>() { "ScrapeEngine" });
+
+            Console.WriteLine($"Time: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} Instances in Dynamo: {found.Count}");
+            var now = DateTime.UtcNow;
+
+            //Console.WriteLine($"ec2 is instance: {(ec2 != null)}");
+            var reservations = await ec2.DescribeAllInstances();
+
+            reservations
+                .Where(instance => instance != null && instance.Instances != null).ToList();
+
+            //Console.WriteLine($"Number of Reservations: {reservations.Count}");
+
+            var instances = reservations
+                .SelectMany(instance => instance.Instances)
+                .Where(instance => instance.State != null && instance.Tags != null)
+                .ToList();
+
+            //Console.WriteLine($"Number of Instances: {instances.Count}");
+
+            var engines = instances
+                .Where(instance => instance != null && instance.State != null && instance.State.Code == 16 && instance.Tags != null && instance.Tags.Any(tag => tag != null && tag.Key == "Name" && !string.IsNullOrWhiteSpace(tag.Value) && tag.Value.ToLower().Contains("scrape-engine")))
+                .ToList();
+
+            Console.WriteLine($"Number of EC2 Engines: {engines.Count}");
+
+            var engineIds = engines.Select(engine => engine.InstanceId).ToList();
+
+            var enginesNotInFound = engineIds.Except(found.Select(record => record.InstanceId)).ToList();
+
+            Console.WriteLine($"Instances Not In HeartBeat: { string.Join(", ", enginesNotInFound)}");
+            var expired = found.Where(s => 90d < (now - s.LastSignalTimestamp.ToUniversalTime()).TotalMinutes).ToList();
+
+            Console.WriteLine($"Killing Instances Not Updating > 1.5 Hour: { string.Join(", ", expired.OrderBy(s => s.LastSignalTimestamp).Select(s => $"{s.InstanceId}({(now - s.LastSignalTimestamp.ToUniversalTime()).TotalMinutes.ToString("0")}min)"))}");
+
+            await ec2.TerminateByIds(expired.Select(hb => hb.InstanceId).ToList());
+            foreach(var heartBeat in expired)
+            {
+                await dynamo.DeleteItem(new Dictionary<string, object>()
+                {
+                    {nameof(heartBeat.InstanceId), heartBeat.InstanceId },
+                    {nameof(heartBeat.Job), heartBeat.Job },
+                });
+            }
+        }
     }
 }
