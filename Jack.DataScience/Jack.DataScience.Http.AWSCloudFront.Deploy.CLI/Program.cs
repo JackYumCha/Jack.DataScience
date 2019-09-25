@@ -2,6 +2,7 @@
 using Jack.DataScience.Storage.AWSS3;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Jack.DataScience.Http.AWSCloudFront.Deploy.CLI
 {
@@ -33,6 +34,9 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy.CLI
             cloudFrontDeployOptions.DefaultDeleteSafetyCheck = args.GetParameter("--s3-delete-check");
             cloudFrontDeployOptions.Private = args.HasParameter("--private");
             cloudFrontDeployOptions.S3BasePath = args.GetParameter("--s3-base-path");
+            cloudFrontDeployOptions.LocalFilePatterns = args.GetParameters("--local-file-pattern")
+                .Where(pattern => !string.IsNullOrWhiteSpace(pattern))
+                .ToList();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write($"Artifact: ");

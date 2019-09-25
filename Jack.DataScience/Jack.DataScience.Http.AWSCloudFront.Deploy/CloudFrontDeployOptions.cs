@@ -14,5 +14,6 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy
         public string DefaultDeleteSafetyCheck { get; set; }
         public string S3BasePath { get; set; }
         public bool Private { get; set; }
+        public List<string> LocalFilePatterns { get; set; }
     }
 }

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Jack.DataScience.Http.AWSCloudFront.Deploy
@@ -50,7 +52,8 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy
 
             // upload all files
             Console.ForegroundColor = ConsoleColor.Green;
-            foreach (var file in ListAllFilesInDirectory(artifactRoot))
+            foreach (var file in ListAllFilesInDirectory(artifactRoot, cloudFrontDeployOptions.LocalFilePatterns
+                .Select(value => new Regex(value))))
             {
                 using (var fileStream = File.OpenRead($"{artifactRoot.FullName}/{file}"))
                 {
@@ -75,19 +78,18 @@ namespace Jack.DataScience.Http.AWSCloudFront.Deploy
             return true;
         }
 
-        private IEnumerable<string> ListAllFilesInDirectory(DirectoryInfo directoryInfo)
+        private IEnumerable<string> ListAllFilesInDirectory(DirectoryInfo directoryInfo, IEnumerable<Regex> patterns)
         {
-            foreach(var file in directoryInfo.GetFiles())
+            foreach (var file in directoryInfo.GetFiles())
             {
-                yield return file.Name;
+                if (!patterns.Any() || patterns.Any(rgx => rgx.IsMatch(file.Name)))
+                    yield return file.Name;
             }
+
             foreach(var directory in directoryInfo.GetDirectories())
-            {
-                foreach(var file in ListAllFilesInDirectory(directory))
-                {
+                foreach (var file in ListAllFilesInDirectory(directory, patterns))
                     yield return $"{directory.Name}/{file}";
-                }
-            }
         }
+ 
     }
 }

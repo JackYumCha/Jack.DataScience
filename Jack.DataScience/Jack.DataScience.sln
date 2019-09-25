@@ -131,6 +131,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.DiscreteMa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.ProcessControl", "Jack.DataScience.ProcessControl\Jack.DataScience.ProcessControl.csproj", "{B33B7B37-B63B-432C-9446-1DC148A51B5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.InterLanguage.Arrow", "Jack.DataScience.InterLanguage.Arrow\Jack.DataScience.InterLanguage.Arrow.csproj", "{35565FB1-B6DD-474E-8596-37831D62EC82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -393,6 +395,10 @@ Global
 		{B33B7B37-B63B-432C-9446-1DC148A51B5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B33B7B37-B63B-432C-9446-1DC148A51B5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B33B7B37-B63B-432C-9446-1DC148A51B5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35565FB1-B6DD-474E-8596-37831D62EC82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35565FB1-B6DD-474E-8596-37831D62EC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35565FB1-B6DD-474E-8596-37831D62EC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35565FB1-B6DD-474E-8596-37831D62EC82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
