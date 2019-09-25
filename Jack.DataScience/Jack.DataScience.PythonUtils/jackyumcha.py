@@ -68,8 +68,6 @@ class FileExtensions:
 
 
 class TensorFlowExtensions:
-    #tf_saver = tf.train.Saver()
-
     @staticmethod
     def GetAvailableGPUs():
         local_device_protos = device_lib.list_local_devices()
@@ -211,7 +209,7 @@ class ConsoleArguments:
     def GetBoolArgument(key: str):
         for i in range(0, len(sys.argv) - 1):
             if(sys.argv[i] == key):
-                return bool(sys.argv[i + 1])
+                return sys.argv[i + 1].lower() == 'true'
         return None
     @staticmethod
     def HasArgument(key: str):
@@ -238,4 +236,8 @@ class ConsoleArguments:
             elif attr_type is float:
                 setattr(host, attr, ConsoleArguments.GetFloatArgument(argument_name))
             elif attr_type is bool:
-                setattr(host, attr, ConsoleArguments.GetBoolArgument(argument_name))
+                arg = ConsoleArguments.GetBoolArgument(argument_name)
+                if arg == None:
+                    setattr(host, attr, ConsoleArguments.HasArgument(argument_name))
+                else:
+                    setattr(host, attr, arg)
