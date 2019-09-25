@@ -4,6 +4,8 @@ import os.path
 import sys
 import base64
 import time
+import inspect
+import re
 from tensorflow.python.client import device_lib
 
 import typing
@@ -220,3 +222,20 @@ class ConsoleArguments:
     @staticmethod
     def ReadKey(message: str = 'press any key to continue...'):
         input(message)
+    @staticmethod
+    def AttributesFromArguments(host: object, func: typing.Callable, argument_prefix: str):
+        lambdaCode =  re.search(r'lambda\s*\:\s*\[([\w\.\s\,]+)\]',inspect.getsource(func)).group(1)
+        attributes = re.findall(r'[\w\-]+\.([\w\-]+)', lambdaCode)
+        for attr in attributes:
+            attr_type = type(getattr(host, attr))
+            argument_name = argument_prefix + attr
+            if not ConsoleArguments.HasArgument(argument_name):
+                continue
+            if attr_type is str:
+                setattr(host, attr, ConsoleArguments.GetArgument(argument_name))
+            elif attr_type is int:
+                setattr(host, attr, ConsoleArguments.GetIntArgument(argument_name))
+            elif attr_type is float:
+                setattr(host, attr, ConsoleArguments.GetFloatArgument(argument_name))
+            elif attr_type is bool:
+                setattr(host, attr, ConsoleArguments.GetBoolArgument(argument_name))
