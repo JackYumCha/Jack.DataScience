@@ -13,7 +13,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         S3BucketCheck,
         S3BucketEvent,
         GoogleAnalytics,
-        AmazonAthena
+        AmazonAthena,
+        AmazonAthenaPipes
     }
 
     [AngularType]

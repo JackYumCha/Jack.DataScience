@@ -15,3 +15,23 @@ select
     select * from tableS
 
 -- }
+
+
+-- if (
+
+    select true as OK
+-- )
+
+-- {
+    select * from tableS
+
+-- }
+
+-- elseif (
+select false as OK
+-- )
+
+-- {
+    select * from tableS
+
+-- }

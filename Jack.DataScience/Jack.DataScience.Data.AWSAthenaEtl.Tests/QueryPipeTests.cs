@@ -12,16 +12,28 @@ namespace Jack.DataScience.Data.AWSAthenaEtl.Tests
         [Fact(DisplayName = "Parse Queries")]
         public void ParseQuereis()
         {
-            for(int i = 1; i < 4; i++)
+            for(int i = 1; i < 6; i++)
             {
+
+                AthenaParserLogger athenaParserLogger = new AthenaParserLogger();
                 Debug.WriteLine($"****** Begin File {i} ******");
                 var filename = $"{AppContext.BaseDirectory}/query{i}.sql";
                 Debug.WriteLine($"File {i}: {filename}");
                 var query = File.ReadAllText(filename);
-                var pipes = query.ParseAthenaPipes();
-                var tree = JsonConvert.SerializeObject(pipes, Formatting.Indented);
-                Debug.WriteLine(tree);
-                Debug.WriteLine($"****** End File {i} ******");
+                try
+                {
+                    var pipes = query.ParseAthenaPipes(athenaParserLogger);
+                    Debug.WriteLine($"****** End File {i} ******");
+                    Debug.WriteLine($"****** Json File {i} ******");
+                    var tree = JsonConvert.SerializeObject(pipes, Formatting.Indented);
+                    Debug.WriteLine($"****** Parsed File {i} ******");
+                    Debug.WriteLine(pipes.ToQueryString().StripEmptyLines());
+                }
+                catch(Exception ex)
+                {
+                    Debug.WriteLine(athenaParserLogger.ToString());
+                    Debug.Write(ex.Message);
+                }
             }
         }
     }

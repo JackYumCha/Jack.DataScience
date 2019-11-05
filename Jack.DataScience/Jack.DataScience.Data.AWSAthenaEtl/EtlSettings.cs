@@ -20,6 +20,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public S3BucketEventSetting S3EventSource { get; set; }
         public GoogleAnalyticsBigQuerySetting GoogleAnalyticsQuerySource { get; set; }
         public AthenaQuerySetting AthenaQuerySource { get; set; }
+        public AthenaQueryPipesSetting AthenaQueryPipesSource { get; set; }
         public EtlFileType FileType { get; set; }
         public CsvSourceOptoins CsvSourceOptoins { get; set; }
         public bool HasHeader { get; set; }
@@ -31,6 +32,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public string TargetS3Prefix { get; set; }
         public int NumberOfItemsPerParquet { get; set; }
         public DataSample Sample { get; set; }
+        
     }
 
     [AngularType]
@@ -152,6 +154,32 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public string AthenaSQL { get; set; }
         public string DateFormat { get; set; } = "'yyyyMMdd'";
         public int DaysAgo { get; set; }
+    }
+
+    [AngularType]
+    public class AthenaQueryPipesSetting
+    {
+        public string Key { get; set; }
+        public string Secret { get; set; }
+        public string Region { get; set; }
+        public string DefaultOutputLocation { get; set; }
+        public string AthenaSQL { get; set; }
+        public string AthenaDefinitionSQL { get; set; }
+        public string DateFormat { get; set; } = "'yyyyMMdd'";
+        public int DaysAgo { get; set; }
+        public string ParseErrors { get; set; }
+        /// <summary>
+        /// this is the parsed query if parsed successfully
+        /// </summary>
+        public string ParsedQuery { get; set; }
+        public List<QueryCache> Caches { get; set; }
+    }
+
+    [AngularType]
+    public class QueryCache
+    {
+        public string TableName { get; set; }
+        public string S3Location { get; set; }
     }
 
     /// <summary>

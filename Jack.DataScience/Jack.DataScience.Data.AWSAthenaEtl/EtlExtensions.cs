@@ -124,6 +124,12 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                         await etlSettings.GetAthenaQueryResultSampleByDate(lines);
                     }
                     break;
+                case EtlSourceEnum.AmazonAthenaPipes:
+                    {
+                        // need to compile the query
+                        await etlSettings.ParseAthenaQueryPipes();
+                    }
+                    break;
             }
 
             // make the sample data smaller

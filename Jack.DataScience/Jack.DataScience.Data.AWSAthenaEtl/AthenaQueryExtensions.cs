@@ -278,5 +278,72 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 Region = athena.Region
             });
         }
+
+        /// <summary>
+        /// compile the pipes and run the definition query
+        /// </summary>
+        /// <param name="etlSettings"></param>
+        /// <returns></returns>
+        public static async Task ParseAthenaQueryPipes(this EtlSettings etlSettings)
+        {
+            if (etlSettings.SourceType != EtlSourceEnum.AmazonAthenaPipes) return;
+
+            var pipesSource = etlSettings.AthenaQueryPipesSource;
+            AthenaParserLogger parserLogger = new AthenaParserLogger();
+
+            try
+            {
+                var parsed = pipesSource.AthenaSQL.ParseAthenaPipes(parserLogger);
+                pipesSource.ParseErrors = "";
+                pipesSource.ParsedQuery = parsed.ToQueryString();
+            }
+            catch(Exception ex)
+            {
+                pipesSource.ParseErrors = parserLogger.ToString();
+                pipesSource.ParseErrors += "\n";
+                pipesSource.ParseErrors += ex.Message;
+                pipesSource.ParsedQuery = "";
+            }
+
+            // run if there is definition query
+            if(Regex.IsMatch(pipesSource.AthenaDefinitionSQL, @"\S+"))
+            {
+                var athenaApi = etlSettings.CreatePipesSourceAthenaAPI();
+                var getResultRequest = await athenaApi.ExecuteQuery(pipesSource.AthenaDefinitionSQL);
+                var response = await athenaApi.ReadOneResult(getResultRequest);
+                etlSettings.Mappings = response.ToFieldMapping();
+                // load data schema to the etlsetting schema
+
+                var sample = new DataSample()
+                {
+                    Rows = new List<DataRow>()
+                };
+
+                var data = response.ReadData();
+                foreach (var row in data)
+                {
+                    var dataRow = new DataRow()
+                    {
+                        Items = row.Select(item => item.ToString()).ToList()
+                    };
+                    sample.Rows.Add(dataRow);
+                }
+
+                etlSettings.Sample = sample;
+            }
+        }
+
+        public static AWSAthenaAPI CreatePipesSourceAthenaAPI(this EtlSettings etlSettings)
+        {
+            var athenaPipes = etlSettings.AthenaQueryPipesSource;
+            if (athenaPipes == null) throw new Exception("The ETL has an empty Athena source setting.");
+            return new AWSAthenaAPI(new AWSAthenaOptions()
+            {
+                Key = athenaPipes.Key,
+                Secret = athenaPipes.Secret,
+                DefaultOutputLocation = athenaPipes.DefaultOutputLocation,
+                Region = athenaPipes.Region
+            });
+        }
     }
 }

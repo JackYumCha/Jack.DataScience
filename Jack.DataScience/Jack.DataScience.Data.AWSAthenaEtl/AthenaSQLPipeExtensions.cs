@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Jack.DataScience.Data.AWSAthena;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Jack.DataScience.Data.AWSAthenaEtl
 {
@@ -13,37 +15,112 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
     {
 
 
-        private static Regex ControlFlowPattern = new Regex(@"^ *-{2,} *(while *\(?|for *\( *[\w_]+ *, *-?\d+ *, *-?\d+ *\) *\{?|for *\( *[\w_]+ *, *-?\d+ *, *-?\d+ *, *-?\d+ *\) *\{?|if *\(?|elseif *\(?|else *\{?|switch *\(?|case *\( *`[^`]+` *\) *\{?|case *\( *""[^""]+"" *\) *\{?|case *\( *'[^']+' *\) *\{?|case *\( *-?\d+ *\) *\{?|default *\{?|\) *\{|\} *\{|\{|\)|\}|\()");
+        private static Regex ControlFlowPattern = new Regex(@"^\s*-{2,}\s*(while\s*\(?|for\s*\(\s*[\w_]+\s*,\s*-?\d+\s*,\s*-?\d+\s*\)\s*\{?|for\s*\(\s*[\w_]+\s*,\s*-?\d+\s*,\s*-?\d+\s*,\s*-?\d+\s*\)\s*\{?|if\s*\(?|elseif\s*\(?|else\s*\{?|switch\s*\(?|case\s*\(\s*`[^`]+`\s*\)\s*\{?|case\s*\(\s*""[^""]+""\s*\)\s*\{?|case\s*\(\s*'[^']+'\s*\)\s*\{?|case\s*\(\s*-?\d+\s*\)\s*\{?|default\s*\{?|\)\s*\{|\}\s*\{|\{|\)|\}|\()");
 
-        private static Regex CommentLinePattern = new Regex("^ *--");
+        private static Regex CommentLinePattern = new Regex(@"^\s*--");
         private static Regex EmptyLinePattern = new Regex(@"^\s*$");
 
-        private static Regex WhileBlockPattern = new Regex(@"^ *-{2,} *while *(\(?)", RegexOptions.IgnoreCase);
-        private static Regex ForBlock1Pattern = new Regex(@"^ *-{2,} *for *\( *([\w_]+) *, *(-?\d+) *, *(-?\d+) *\) *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex ForBlock2Pattern = new Regex(@"^ *-{2,} *for *\( *([\w_]+) *, *(-?\d+) *, *(-?\d+) *, *(-?\d+) *\) *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex IfBlockPattern = new Regex(@"^ *-{2,} *if *(\(?)", RegexOptions.IgnoreCase);
-        private static Regex ElseIfBlockPattern = new Regex(@"^ *-{2,} *elseif *(\(?)", RegexOptions.IgnoreCase);
-        private static Regex ElseBlockPattern = new Regex(@"^ *-{2,} *else *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex SwitchBlockPattern = new Regex(@"^ *-{2,} *switch *(\(?)", RegexOptions.IgnoreCase);
-        private static Regex CaseBlock1Pattern = new Regex(@"^ *-{2,} *case *\( *`([^`]+)` *\) *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex CaseBlock2Pattern = new Regex(@"^ *-{2,} *case *\( *'([^']+)' *\) *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex CaseBlock3Pattern = new Regex(@"^ *-{2,} *case *\( *""([^""]+)"" *\) *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex CaseBlock4Pattern = new Regex(@"^ *-{2,} *case *\( *(-?\d+) *\) *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex DefaultBlockPattern = new Regex(@"^ *-{2,} *default *(\{?)", RegexOptions.IgnoreCase);
-        private static Regex EndEvaluationBlockPattern = new Regex(@"^ *-{2,} *\)", RegexOptions.IgnoreCase);
-        private static Regex EndExecutionBlockPattern = new Regex(@"^ *-{2,} *\}", RegexOptions.IgnoreCase);
-        private static Regex EndEvaluationBeginExecutionBlockPattern = new Regex(@"^ *-{2,} *\) *\{", RegexOptions.IgnoreCase);
-        private static Regex EndExecutionBeginExecutionBlockPattern = new Regex(@"^ *-{2,} *\} *\{", RegexOptions.IgnoreCase);
-        private static Regex BeginExecutionBlockPattern = new Regex(@"^ *-{2,} *\{", RegexOptions.IgnoreCase);
-        private static Regex BeginEvaluationBlockPattern = new Regex(@"^ *-{2,} *\(", RegexOptions.IgnoreCase);
+        private static Regex WhileBlockPattern = new Regex(@"^\s*-{2,}\s*while\s*(\(?)", RegexOptions.IgnoreCase);
+        private static Regex ForBlock1Pattern = new Regex(@"^\s*-{2,}\s*for\s*\(\s*([\w_]+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\)\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex ForBlock2Pattern = new Regex(@"^\s*-{2,}\s*for\s*\(\s*([\w_]+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\)\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex IfBlockPattern = new Regex(@"^\s*-{2,}\s*if\s*(\(?)", RegexOptions.IgnoreCase);
+        private static Regex ElseIfBlockPattern = new Regex(@"^\s*-{2,}\s*elseif\s*(\(?)", RegexOptions.IgnoreCase);
+        private static Regex ElseBlockPattern = new Regex(@"^\s*-{2,}\s*else\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex SwitchBlockPattern = new Regex(@"^\s*-{2,}\s*switch\s*(\(?)", RegexOptions.IgnoreCase);
+        private static Regex CaseBlock1Pattern = new Regex(@"^\s*-{2,}\s*case\s*\(\s*`([^`]+)`\s*\)\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex CaseBlock2Pattern = new Regex(@"^\s*-{2,}\s*case\s*\(\s*'([^']+)'\s*\)\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex CaseBlock3Pattern = new Regex(@"^\s*-{2,}\s*case\s*\(\s*""([^""]+)""\s*\)\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex CaseBlock4Pattern = new Regex(@"^\s*-{2,}\s*case\s*\(\s*(-?\d+)\s*\)\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex DefaultBlockPattern = new Regex(@"^\s*-{2,}\s*default\s*(\{?)", RegexOptions.IgnoreCase);
+        private static Regex EndEvaluationBlockPattern = new Regex(@"^\s*-{2,}\s*\)", RegexOptions.IgnoreCase);
+        private static Regex EndExecutionBlockPattern = new Regex(@"^\s*-{2,}\s*\}", RegexOptions.IgnoreCase);
+        private static Regex EndEvaluationBeginExecutionBlockPattern = new Regex(@"^\s*-{2,}\s*\)\s*\{", RegexOptions.IgnoreCase);
+        private static Regex EndExecutionBeginExecutionBlockPattern = new Regex(@"^\s*-{2,}\s*\}\s*\{", RegexOptions.IgnoreCase);
+        private static Regex BeginExecutionBlockPattern = new Regex(@"^\s*-{2,}\s*\{", RegexOptions.IgnoreCase);
+        private static Regex BeginEvaluationBlockPattern = new Regex(@"^\s*-{2,}\s*\(", RegexOptions.IgnoreCase);
 
-        public static ExecutionBlock ParseAthenaPipes(this string query)
+
+        public static async Task<ExecutionBlockResult> Execute(this AWSAthenaAPI awsAthenaAPI, AthenaControlBlock block)
+        {
+            throw new NotImplementedException();
+            if (block is QueryBlock)
+            {
+                // awsAthenaAPI.GetQueryResults()
+            }
+            else if (block is ExecutionBlock)
+            {
+                ExecutionBlockResult lastResult = null;
+                foreach (var item in (block as ExecutionBlock).Blocks)
+                {
+                    lastResult = await awsAthenaAPI.Execute(item);
+                }
+                return lastResult;
+            }
+            else if(block is EvaluationBlock)
+            {
+                ExecutionBlockResult lastResult = null;
+                foreach (var item in (block as EvaluationBlock).Blocks)
+                {
+                    lastResult = await awsAthenaAPI.Execute(item);
+                }
+                return lastResult;
+            }
+            else if (block is WhileBlock)
+            {
+
+            }
+            else if (block is ForBlock)
+            {
+
+            }
+            else if (block is IfBlock)
+            {
+
+            }
+            else if (block is IfConditionBlock)
+            {
+
+            }
+            else if (block is ElseIfConditionBlock)
+            {
+
+            }
+            else if (block is ElseBlock)
+            {
+
+            }
+            else if (block is SwitchBlock)
+            {
+
+            }
+            else if (block is CaseBlock)
+            {
+
+            }
+            else if (block is DefaultBlock)
+            {
+
+            }
+            else if(block is null)
+            {
+                // do nothing
+            }
+            else
+            {
+                throw new Exception("Unexpected Block Type");
+            }
+        }
+
+ 
+
+        public static ExecutionBlock ParseAthenaPipes(this string query, AthenaParserLogger Debug)
         {
             var parsedLines = query.ParseCommandLines();
 
             Debug.WriteLine($"Queries Parsed: {parsedLines.Count}");
 
             ExecutionBlock result = new ExecutionBlock();
+            result.Started = true;
             Stack<AthenaControlBlock> stack = new Stack<AthenaControlBlock>();
             stack.Push(result);
 
@@ -53,25 +130,46 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             {
                 if (line.IsControl)
                 {
-                    stack.ProcessControl(ref syntaxExpectation, line);
+                    stack.ProcessControl(ref syntaxExpectation, line, Debug);
                 }
                 else
                 {
                     // always put the QueryBlock in the current one of the stack
-                    stack.ProcessQuery(ref syntaxExpectation, line);
+                    stack.ProcessQuery(ref syntaxExpectation, line, Debug);
                 }
             }
 
+            stack.EndIfBlock(ref syntaxExpectation, parsedLines.LastOrDefault() ?? new QueryLine() { From = 1, To = 1, Value = "" }, Debug);
+            if (stack.Count > 1)
+            {
+                var current = stack.Peek();
+                throw new Exception($"Incompleted Block Detected: {current.GetType().Name}");
+            }
+            result.Completed = true;
             return result;
         }
 
-        private static void ProcessControl(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line)
+        private static AthenaControlBlock EndIfBlock(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserLogger Debug)
+        {
+            var current = stack.Peek();
+            while(current is IfBlock)
+            {
+                stack.Pop().DebugPopped(Debug);
+                Debug.WriteLine($"If Block Ends Here: {line.From} -> {line.Value}");
+                current = stack.Peek();
+            }
+            syntaxExpectation = stack.Expecting(Debug);
+            return stack.Peek();
+        }
+
+        private static void ProcessControl(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserLogger Debug)
         {
             Match match = null;
             var current = stack.Peek();
 
             if (WhileBlockPattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"While: {line.From} -> {line.Value}");
 
                 syntaxExpectation.ExpectsAnyFlowBlock(line);
@@ -87,6 +185,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (ForBlock1Pattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"For: {line.From} -> {line.Value}");
 
                 syntaxExpectation.ExpectsAnyFlowBlock(line);
@@ -106,6 +205,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (ForBlock2Pattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"For: {line.From} -> {line.Value}");
 
                 syntaxExpectation.ExpectsAnyFlowBlock(line);
@@ -126,6 +226,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (IfBlockPattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"If: {line.From} -> {line.Value}");
 
                 syntaxExpectation.ExpectsAnyFlowBlock(line);
@@ -136,13 +237,9 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 stack.Push(ifBlock.If);
                 stack.Push(ifBlock.If.Condition);
 
-                if(match.HasEvaluationStart(1))
-                    syntaxExpectation = SyntaxExpectationFlags.EvaluationBlockStart | SyntaxExpectationFlags.AnyFlowBlock;
-                else
-                {
-                    ifBlock.If.Condition.Started = true;
-                    syntaxExpectation = SyntaxExpectationFlags.AnyFlowBlock;
-                }
+                current.FillCurrentMultipleStatementsBlock(syntaxExpectation);
+
+                if (match.HasEvaluationStart(1)) ifBlock.If.Condition.Started = true;
             }
             else if (ElseIfBlockPattern.CanMatch(out match, line))
             {
@@ -154,13 +251,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 stack.Push(elseIfConditionBlock);
                 stack.Push(elseIfConditionBlock.Condition);
 
-                if (match.HasEvaluationStart(1))
-                    syntaxExpectation = SyntaxExpectationFlags.EvaluationBlockStart | SyntaxExpectationFlags.AnyFlowBlock;
-                else
-                {
-                    elseIfConditionBlock.Condition.Started = true;
-                    syntaxExpectation = SyntaxExpectationFlags.AnyFlowBlock;
-                }
+                if (match.HasEvaluationStart(1)) elseIfConditionBlock.Condition.Started = true;
             }
             else if (ElseBlockPattern.CanMatch(out match, line))
             {
@@ -176,6 +267,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (SwitchBlockPattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"Switch: {line.From} -> {line.Value}");
                 syntaxExpectation.ExpectsAnyFlowBlock(line);
                 SwitchBlock switchBlock = new SwitchBlock() { LineNumber = line.From };
@@ -183,10 +275,13 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 stack.Push(switchBlock);
                 stack.Push(switchBlock.Condition);
 
+                current.FillCurrentMultipleStatementsBlock(syntaxExpectation);
+
                 if (match.HasEvaluationStart(1)) switchBlock.Condition.Started = true;
             }
             else if (CaseBlock1Pattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"Case: {line.From} -> {line.Value}");
                 syntaxExpectation.ExpectsCaseOrDefaultBlock(line);
                 CaseBlock caseBlock = new CaseBlock() { LineNumber = line.From };
@@ -200,6 +295,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (CaseBlock2Pattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"Case: {line.From} -> {line.Value}");
                 syntaxExpectation.ExpectsCaseOrDefaultBlock(line);
                 CaseBlock caseBlock = new CaseBlock() { LineNumber = line.From };
@@ -213,6 +309,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (CaseBlock3Pattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"Case: {line.From} -> {line.Value}");
                 syntaxExpectation.ExpectsCaseOrDefaultBlock(line);
                 CaseBlock caseBlock = new CaseBlock() { LineNumber = line.From };
@@ -226,6 +323,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (CaseBlock4Pattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"Case: {line.From} -> {line.Value}");
                 syntaxExpectation.ExpectsCaseOrDefaultBlock(line);
                 CaseBlock caseBlock = new CaseBlock() { LineNumber = line.From };
@@ -239,6 +337,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (DefaultBlockPattern.CanMatch(out match, line))
             {
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 Debug.WriteLine($"Default: {line.From} -> {line.Value}");
                 syntaxExpectation.ExpectsCaseOrDefaultBlock(line);
                 DefaultBlock defaultBlock = new DefaultBlock() { LineNumber = line.From };
@@ -257,7 +356,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (BeginExecutionBlockPattern.CanMatch(out match, line))
             {
-                
+                current = stack.EndIfBlock(ref syntaxExpectation, line, Debug);
                 syntaxExpectation.ExpectsExecutionStart(line, current);
                 if(current is ExecutionBlock)
                 {
@@ -308,7 +407,42 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                     throw new Exception($"Expected Execution Start at line {line.From}: {line.Value}");
                 }
             }
-            else if (EndEvaluationBlockPattern.CanMatch(out match, line))
+            else if (EndEvaluationBeginExecutionBlockPattern.CanMatch(out match, line))
+            {
+                syntaxExpectation.ExpectsEvaluationEnd(line, current);
+                current.As<EvaluationBlock>().Completed = true;
+                stack.Pop().DebugPopped(Debug);
+                var parent = stack.Peek(); // who can have evaluation? While, If, ElseIf, Switch
+                if (parent is WhileBlock)
+                {
+                    Debug.WriteLine($"End While Evaluation and Start Block: {line.From} -> {line.Value}");
+                    parent.As<WhileBlock>().Block.Started = true;
+                    stack.Push(parent.As<WhileBlock>().Block);
+                }
+                else if (parent is IfConditionBlock)
+                {
+                    Debug.WriteLine($"End If Evaluation and Start Block: {line.From} -> {line.Value}");
+                    parent.As<IfConditionBlock>().Block.Started = true;
+                    stack.Push(parent.As<IfConditionBlock>().Block);
+                }
+                else if (parent is ElseIfConditionBlock)
+                {
+                    Debug.WriteLine($"End ElseIf Evaluation and Start Block: {line.From} -> {line.Value}");
+                    parent.As<ElseIfConditionBlock>().Block.Started = true;
+                    stack.Push(parent.As<ElseIfConditionBlock>().Block);
+                }
+                else if (parent is SwitchBlock)
+                {
+                    // no push, just use itself
+                    parent.As<SwitchBlock>().Started = true;
+                    Debug.WriteLine($"End Switch Evaluation and Start Block: {line.From} -> {line.Value}");
+                }
+                else
+                {
+                    throw new Exception($"Expected Evaluation End and Execution Start at line {line.From}: {line.Value}");
+                }
+            }
+            else if (EndEvaluationBlockPattern.CanMatch(out match, line)) // this must be before EndExecutionBlockPattern
             {
                 syntaxExpectation.ExpectsEvaluationEnd(line, current);
                 current.As<EvaluationBlock>().Completed = true;
@@ -343,37 +477,6 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                     throw new Exception($"Expected Evaluation End at line {line.From}: {line.Value}");
                 }
             }
-            else if (EndEvaluationBeginExecutionBlockPattern.CanMatch(out match, line))
-            {
-                syntaxExpectation.ExpectsEvaluationEnd(line, current);
-                current.As<EvaluationBlock>().Completed = true;
-                stack.Pop();
-                var parent = stack.Peek(); // who can have evaluation? While, If, ElseIf, Switch
-                if (parent is WhileBlock)
-                {
-                    Debug.WriteLine($"End While Evaluation and Start Block: {line.From} -> {line.Value}");
-                    stack.Push(parent.As<WhileBlock>().Block);
-                }
-                else if (parent is IfConditionBlock)
-                {
-                    Debug.WriteLine($"End If Evaluation and Start Block: {line.From} -> {line.Value}");
-                    stack.Push(parent.As<IfConditionBlock>().Block);
-                }
-                else if (parent is ElseIfConditionBlock)
-                {
-                    Debug.WriteLine($"End ElseIf Evaluation and Start Block: {line.From} -> {line.Value}");
-                    stack.Push(parent.As<ElseIfConditionBlock>().Block);
-                }
-                else if (parent is SwitchBlock)
-                {
-                    // no push, just use itself
-                    Debug.WriteLine($"End Switch Evaluation and Start Block: {line.From} -> {line.Value}");
-                }
-                else
-                {
-                    throw new Exception($"Expected Evaluation End and Execution Start at line {line.From}: {line.Value}");
-                }
-            }
             else if (EndExecutionBlockPattern.CanMatch(out match, line))
             {
                 syntaxExpectation.ExpectsExecutionEnd(line, current);
@@ -392,7 +495,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                     throw new Exception($"Expected Execution End at line {line.From}: {line.Value}");
                 }
             }
-            syntaxExpectation = stack.Expecting();
+            syntaxExpectation = stack.Expecting(Debug);
+            Debug.WriteLine($"Expecting: {DisplayExpectation(syntaxExpectation)}");
         }
 
         /// <summary>
@@ -400,7 +504,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         /// </summary>
         /// <param name="stack"></param>
         /// <returns></returns>
-        private static SyntaxExpectationFlags Expecting(this Stack<AthenaControlBlock> stack)
+        private static SyntaxExpectationFlags Expecting(this Stack<AthenaControlBlock> stack, AthenaParserLogger Debug)
         {
             var current = stack.Peek();
             if(current is EvaluationBlock)
@@ -408,8 +512,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<EvaluationBlock>();
                 if (block.Completed)
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else if (!block.Started)
                 {
@@ -429,8 +533,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<ExecutionBlock>();
                 if (block.Completed)
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else if (!block.Started)
                 {
@@ -442,7 +546,20 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 }
                 else
                 {
-                    return SyntaxExpectationFlags.AnyFlowBlock | SyntaxExpectationFlags.ExecutionBlockStart;
+                    return SyntaxExpectationFlags.AnyFlowBlock | SyntaxExpectationFlags.ExecutionBlockEnd;
+                }
+            }
+            else if (current is ForBlock)
+            {
+                var block = current.As<ForBlock>();
+                if (block.Block.Completed)
+                {
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
+                }
+                else
+                {
+                    throw new Exception("Unexpected Case");
                 }
             }
             else if(current is SwitchBlock)
@@ -450,8 +567,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<SwitchBlock>();
                 if (block.Completed)
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else if(!block.Started)
                 {
@@ -467,8 +584,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<CaseBlock>();
                 if (block.Block.Completed)
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else
                 {
@@ -480,8 +597,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<DefaultBlock>();
                 if (block.Block.Completed)
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else
                 {
@@ -506,8 +623,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<IfConditionBlock>();
                 if (block.Block.Completed) // should be when block is completed
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else if (block.Condition.Completed)
                 {
@@ -521,11 +638,11 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (current is ElseIfConditionBlock)
             {
-                var block = current.As<IfConditionBlock>();
+                var block = current.As<ElseIfConditionBlock>();
                 if (block.Block.Completed) // should be when block is completed
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else if (block.Condition.Completed)
                 {
@@ -539,11 +656,11 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             else if (current is ElseBlock)
             {
-                var block = current.As<IfConditionBlock>();
+                var block = current.As<ElseBlock>();
                 if (block.Block.Completed) // should be when block is completed
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else
                 {
@@ -555,8 +672,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 var block = current.As<WhileBlock>();
                 if (block.Block.Completed) // should be when block is completed
                 {
-                    stack.Pop();
-                    return stack.Expecting();
+                    stack.Pop().DebugPopped(Debug);
+                    return stack.Expecting(Debug);
                 }
                 else if (block.Condition.Completed)
                 {
@@ -572,6 +689,20 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             {
                 throw new Exception("Unexpected Case");
             }
+        }
+
+        private static Type typeSyntaxExpectationFlags = typeof(SyntaxExpectationFlags);
+        private static string DisplayExpectation(this SyntaxExpectationFlags value)
+        {
+            List<string> list = new List<string>();
+            foreach(var item in Enum.GetValues(typeSyntaxExpectationFlags))
+                if (value.Has((SyntaxExpectationFlags)item)) list.Add(Enum.GetName(typeSyntaxExpectationFlags, item));
+            return string.Join(", ", list);
+        }
+
+        private static void DebugPopped<T>(this T block, AthenaParserLogger Debug) where T: AthenaControlBlock
+        {
+            Debug.WriteLine($"Popped: {block.GetType().Name}");
         }
         /// <summary>
         /// fill the block when it is expecting the start but got filled by a block without start
@@ -651,7 +782,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 throw new Exception($"Unexpected Execution Start at line: {line.From}: {line.Value}");
         }
 
-        private static void ProcessQuery(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line)
+        private static void ProcessQuery(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserLogger Debug)
         {
             var current = stack.Peek();
             if((syntaxExpectation & SyntaxExpectationFlags.AnyFlowBlock) == 0 
@@ -663,32 +794,39 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             if((syntaxExpectation & SyntaxExpectationFlags.AnyFlowBlock) == SyntaxExpectationFlags.AnyFlowBlock)
             {
-                var block = current.As<IMultipleStatementsBlock>();
-                block.Blocks.Add(new QueryBlock() { Query = line.Value });
-                block.Filled = true;
-            }
-            else if (syntaxExpectation.Has(SyntaxExpectationFlags.EvaluationBlockStart))
-            {
-                var block = (current as IMultipleStatementsBlock);
-                block.Blocks.Add(new QueryBlock() { Query = line.Value });
-                block.Started = true;
-                block.Filled = true;
-                block.Completed = true;
-                syntaxExpectation = stack.Expecting();
-            }
-            else if (syntaxExpectation.Has(SyntaxExpectationFlags.ExecutionBlockStart))
-            {
-                var block = (current as IMultipleStatementsBlock);
-                block.Blocks.Add(new QueryBlock() { Query = line.Value });
-                block.Started = true;
-                block.Filled = true;
-                block.Completed = true;
+
+                if (syntaxExpectation.Has(SyntaxExpectationFlags.EvaluationBlockStart))
+                {
+                    var block = (current as IMultipleStatementsBlock);
+                    block.Blocks.Add(new QueryBlock() { Query = line.Value });
+                    block.Started = true;
+                    block.Filled = true;
+                    block.Completed = true;
+                    Debug.WriteLine($"Query [Fill Evaluation] ({line.From},{line.To}): {line.Value}");
+                }
+                else if (syntaxExpectation.Has(SyntaxExpectationFlags.ExecutionBlockStart))
+                {
+                    var block = (current as IMultipleStatementsBlock);
+                    block.Blocks.Add(new QueryBlock() { Query = line.Value });
+                    block.Started = true;
+                    block.Filled = true;
+                    block.Completed = true;
+                    Debug.WriteLine($"Query [Fill Execution] ({line.From},{line.To}): {line.Value}");
+                }
+                else
+                {
+                    var block = current.As<IMultipleStatementsBlock>();
+                    block.Blocks.Add(new QueryBlock() { Query = line.Value });
+                    block.Filled = true;
+                    Debug.WriteLine($"Query [Block] ({line.From},{line.To}): {line.Value}");
+                }
             }
             else
             {
                 throw new Exception($"Unexpected SQL Query for Block Type '{current.GetType().Name}'");
             }
-            syntaxExpectation = stack.Expecting();
+            syntaxExpectation = stack.Expecting(Debug);
+            Debug.WriteLine($"Expecting: {DisplayExpectation(syntaxExpectation)}");
         }
 
         public static List<QueryLine> ParseCommandLines(this string query)
@@ -784,6 +922,109 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         {
             return (value & flag) == 0;
         }
+
+        public static string ToQueryString<T>(this T block, int indent = 0) where T: AthenaControlBlock
+        {
+            StringBuilder stb = new StringBuilder();
+            if(block is EvaluationBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- (");
+                foreach(var item in (block as EvaluationBlock).Blocks) {
+                    stb.Append(item.ToQueryString(indent + 1));
+                }
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- )");
+            }
+            else if(block is ExecutionBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- {{");
+                foreach (var item in (block as ExecutionBlock).Blocks)
+                {
+                    stb.Append(item.ToQueryString(indent + 1));
+                }
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- }}");
+            }
+            else if(block is IfBlock)
+            {
+                stb.Append((block as IfBlock).If.ToQueryString(indent + 1));
+                foreach (var item in (block as IfBlock).ElseIfs)
+                {
+                    stb.Append(item.ToQueryString(indent + 1));
+                }
+                if ((block as IfBlock).Else is ElseBlock)
+                {
+                    stb.Append((block as IfBlock).Else.ToQueryString(indent + 1));
+                }
+            }
+            else if (block is IfConditionBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- If ");
+                stb.Append((block as IfConditionBlock).Condition.ToQueryString(indent));
+                stb.Append((block as IfConditionBlock).Block.ToQueryString(indent));
+            }
+            else if (block is ElseIfConditionBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- ElseIf ");
+                stb.Append((block as ElseIfConditionBlock).Condition.ToQueryString(indent));
+                stb.Append((block as ElseIfConditionBlock).Block.ToQueryString(indent));
+            }
+            else if (block is ElseBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- Else ");
+                stb.Append((block as ElseBlock).Block.ToQueryString(indent));
+            }
+            else if (block is WhileBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- While ");
+                stb.Append((block as WhileBlock).Condition.ToQueryString(indent));
+                stb.Append((block as WhileBlock).Block.ToQueryString(indent));
+            }
+            else if (block is SwitchBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- Switch ");
+                stb.Append((block as SwitchBlock).Condition.ToQueryString(indent));
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- {{");
+                foreach (var item in (block as SwitchBlock).Cases)
+                {
+                    stb.Append(item.ToQueryString(indent + 1));
+                }
+                if ((block as SwitchBlock).Default is DefaultBlock)
+                {
+                    stb.Append((block as SwitchBlock).Default.ToQueryString(indent + 1));
+                }
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- }}");
+            }
+            else if (block is CaseBlock)
+            {
+                var caseBlock = block as CaseBlock;
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- Case ({caseBlock.QueryValue()}) ");
+                stb.Append((block as CaseBlock).Block.ToQueryString(indent));
+            }
+            else if (block is DefaultBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- Default ");
+                stb.Append((block as DefaultBlock).Block.ToQueryString(indent));
+            }
+            else if (block is ForBlock)
+            {
+                stb.AppendLine($"{"".PadRight(indent * 2, ' ')}-- {(block as ForBlock).QueryExpression()} ");
+                stb.Append((block as ForBlock).Block.ToQueryString(indent));
+            }
+            else if (block is QueryBlock)
+            {
+                stb.AppendLine((block as QueryBlock).Query);
+            }
+            return stb.ToString();
+        }
+
+        private static Regex NoneExmptyLine = new Regex(@"\S+");
+        public static string StripEmptyLines(this string value)
+        {
+            return string.Join("\n", 
+                value
+                .Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(line => NoneExmptyLine.IsMatch(line))
+                );
+        }
     }
 
 
@@ -869,6 +1110,11 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         {
             Name = nameof(QueryBlock);
         }
+
+        public string ParsedQuery()
+        {
+
+        }
         public string Query { get; set; }
     }
 
@@ -923,6 +1169,10 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public long To { get; set; }
         public long Step { get; set; } = -1;
         public ExecutionBlock Block { get; set; } = new ExecutionBlock();
+        public string QueryExpression()
+        {
+            return $"For({Variable}, {From}, {To}, {Step})";
+        }
     }
     
     public class WhileBlock: AthenaControlFlowBlock, IConditionBlock
@@ -959,6 +1209,18 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public string StringValue { get; set; }
         public long IntegerValue { get; set; }
         public ExecutionBlock Block { get; set; } = new ExecutionBlock();
+        public string QueryValue()
+        {
+            switch (Type)
+            {
+                case CaseValueType.Integer:
+                    return IntegerValue.ToString();
+                case CaseValueType.String:
+                    return StringValue;
+                default:
+                    return "N/A";
+            }
+        }
     }
 
     public enum CaseValueType
@@ -997,5 +1259,40 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         SwitchCondition,
         CaseBlock,
         DefaultBlock,
+    }
+
+    public class AthenaParserLogger
+    {
+        private StringBuilder stringBuilder = new StringBuilder();
+        public void WriteLine(string value)
+        {
+            stringBuilder.AppendLine(value);
+        }
+
+        public void Write(string value)
+        {
+            stringBuilder.Append(value);
+        }
+
+        public override string ToString()
+        {
+            return stringBuilder.ToString();
+        }
+    }
+
+    public enum EvaluationResultType
+    {
+        Boolean,
+        Integer,
+        String,
+        Void
+    }
+
+    public class ExecutionBlockResult
+    {
+        public EvaluationResultType Type { get; set; }
+        public string StringValue { get; set; }
+        public long IntegerValue { get; set; }
+        public bool BooleanValue { get; set; }
     }
 }
