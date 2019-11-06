@@ -257,6 +257,11 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                         result = await etlSettings.TransferAthenaQueryResultByDate(awsAthenaAPI, useDate);
                     }
                     break;
+                case EtlSourceEnum.AmazonAthenaPipes:
+                    {
+                        await etlSettings.RunAthenaQueryPipes(useDate);
+                    }
+                    break;
             }
             return result;
         }

@@ -13,6 +13,7 @@ using Amazon.S3.Util;
 using Amazon.S3.Transfer;
 using Amazon;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace Jack.DataScience.Storage.AWSS3
 {
@@ -260,6 +261,24 @@ namespace Jack.DataScience.Storage.AWSS3
                     Key = key,
                     VersionId = versionId
                 });
+            }
+        }
+
+        public async Task Delete(IEnumerable<string> keys, string bucket = null, string versionId = null)
+        {
+            string bucketName = bucket;
+            if (bucketName == null) bucketName = awsS3Options.Bucket;
+            if (keys.Any())
+            {
+                using (AmazonS3Client client = CreateClient())
+                {
+                    var response = await client.DeleteObjectsAsync(new DeleteObjectsRequest()
+                    {
+                        BucketName = bucketName,
+                        Objects = keys.Select(key => new KeyVersion() { Key = key, VersionId = versionId }).ToList(),
+                        Quiet = true,
+                    });
+                }
             }
         }
 

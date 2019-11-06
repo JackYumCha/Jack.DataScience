@@ -40,70 +40,176 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         private static Regex BeginEvaluationBlockPattern = new Regex(@"^\s*-{2,}\s*\(", RegexOptions.IgnoreCase);
 
 
-        public static async Task<ExecutionBlockResult> Execute(this AWSAthenaAPI awsAthenaAPI, AthenaControlBlock block)
+        public static async Task ExecuteControlFlow(this EtlSettings etlSettings, AthenaControlBlock block, AthenaParserSetting parserSetting)
         {
-            throw new NotImplementedException();
+            if (etlSettings.SourceType != EtlSourceEnum.AmazonAthenaPipes) return;
+            var pipesSource = etlSettings.AthenaQueryPipesSource;
+
+            var athenaApi = etlSettings.CreatePipesSourceAthenaAPI();
+
+            foreach (var clearning in parserSetting.Clearings)
+            {
+                await etlSettings.ClearAthenaTable(clearning.Key, clearning.Value);
+            }
+
+            await athenaApi.Execute(block, new Dictionary<string, string>());
+
+            foreach (var table in parserSetting.DroppingTables)
+            {
+                await athenaApi.DropAthenaTable(table);
+            }
+        }
+
+
+        private static async Task<ExecutionBlockResult> Execute(this AWSAthenaAPI athena, AthenaControlBlock block, Dictionary<string, string> variables = null)
+        {
             if (block is QueryBlock)
             {
                 // awsAthenaAPI.GetQueryResults()
+                QueryBlock queryBlock = block as QueryBlock;
+                var query = queryBlock.Query.ApplyVariables(variables);
+                Console.WriteLine(query);
+                var results = await athena.GetQueryResults(query);
+                if (results.Any() && results.First().Any())
+                {
+                    var value = results.First().First();
+                    if(value is string)
+                    {
+                        return new ExecutionBlockResult() { Type = EvaluationResultType.String, StringValue = value as string };
+                    }
+                    else if(value is int)
+                    {
+                        return new ExecutionBlockResult() { Type = EvaluationResultType.Integer, IntegerValue = (long)(int)value };
+                    }
+                    else if(value is long)
+                    {
+                        return new ExecutionBlockResult() { Type = EvaluationResultType.Integer, IntegerValue = (long)value };
+                    }
+                    else if (value is bool)
+                    {
+                        return new ExecutionBlockResult() { Type = EvaluationResultType.Boolean, BooleanValue = (bool)value };
+                    }
+                    else
+                    {
+                        return new ExecutionBlockResult() { Type = EvaluationResultType.Void };
+                    }
+                }
+                else
+                {
+                    return new ExecutionBlockResult() { Type = EvaluationResultType.Void };
+                }
             }
             else if (block is ExecutionBlock)
             {
-                ExecutionBlockResult lastResult = null;
+                ExecutionBlockResult lastResult = ExecutionBlockResult.Void;
+                Console.WriteLine("(");
                 foreach (var item in (block as ExecutionBlock).Blocks)
                 {
-                    lastResult = await awsAthenaAPI.Execute(item);
+                    lastResult = await athena.Execute(item, variables);
                 }
+                Console.WriteLine(")");
                 return lastResult;
             }
-            else if(block is EvaluationBlock)
+            else if (block is EvaluationBlock)
             {
-                ExecutionBlockResult lastResult = null;
+                ExecutionBlockResult lastResult = ExecutionBlockResult.Void;
+                Console.WriteLine("{");
                 foreach (var item in (block as EvaluationBlock).Blocks)
                 {
-                    lastResult = await awsAthenaAPI.Execute(item);
+                    lastResult = await athena.Execute(item, variables);
                 }
+                Console.WriteLine("}");
                 return lastResult;
             }
             else if (block is WhileBlock)
             {
-
+                WhileBlock whileBlock = block as WhileBlock;
+                ExecutionBlockResult lastResult = ExecutionBlockResult.Void;
+                Console.WriteLine("While");
+                while ((await athena.Execute(whileBlock.Condition)).AsBoolean())
+                {
+                    lastResult = await athena.Execute(whileBlock.Block, variables);
+                }
+                return lastResult;
             }
             else if (block is ForBlock)
             {
-
+                ForBlock forBlock = block as ForBlock;
+                ExecutionBlockResult lastResult = ExecutionBlockResult.Void;
+                Console.WriteLine($"For({forBlock.Variable}, {forBlock.From}, {forBlock.To}, {forBlock.Step})");
+                for (long i = forBlock.From; i < forBlock.To; i += forBlock.Step)
+                {
+                    lastResult = await athena.Execute(forBlock.Block, variables.AddVariable(forBlock.Variable, i.ToString()));
+                }
+                return lastResult;
             }
             else if (block is IfBlock)
             {
-
-            }
-            else if (block is IfConditionBlock)
-            {
-
-            }
-            else if (block is ElseIfConditionBlock)
-            {
-
-            }
-            else if (block is ElseBlock)
-            {
-
+                IfBlock ifBlock = block as IfBlock;
+                ExecutionBlockResult lastResult = ExecutionBlockResult.Void;
+                Console.WriteLine("If");
+                if((await athena.Execute(ifBlock.If.Condition)).AsBoolean())
+                {
+                    return await athena.Execute(ifBlock.If.Block);
+                }
+                foreach(var elseIf in ifBlock.ElseIfs)
+                {
+                    Console.WriteLine("ElseIf");
+                    if ((await athena.Execute(elseIf.Condition)).AsBoolean())
+                    {
+                        return await athena.Execute(elseIf.Block);
+                    }
+                }
+                if(ifBlock.Else is ElseBlock)
+                {
+                    Console.WriteLine("Else");
+                    return await athena.Execute(ifBlock.Else.Block);
+                }
+                return lastResult;
             }
             else if (block is SwitchBlock)
             {
+                SwitchBlock switchBlock = block as SwitchBlock;
+                ExecutionBlockResult lastResult = ExecutionBlockResult.Void;
 
-            }
-            else if (block is CaseBlock)
-            {
+                Console.WriteLine("Switch");
+                var condition = await athena.Execute(switchBlock.Condition);
 
-            }
-            else if (block is DefaultBlock)
-            {
+                Console.WriteLine("{");
+                foreach (var caseBlock in switchBlock.Cases)
+                {
+                    switch (caseBlock.Type)
+                    {
+                        case CaseValueType.String:
+                            if(caseBlock.StringValue == condition.AsString())
+                            {
+                                Console.WriteLine($"Case {caseBlock.StringValue}:");
+                                return await athena.Execute(caseBlock.Block);
+                            }
+                            break;
+                        case CaseValueType.Integer:
+                            if (caseBlock.IntegerValue == condition.AsInteger())
+                            {
+                                Console.WriteLine($"Case {caseBlock.IntegerValue}:");
+                                return await athena.Execute(caseBlock.Block);
+                            }
+                            break;
+                    }
+                }
 
+                if(switchBlock.Default is DefaultBlock)
+                {
+                    Console.WriteLine("Default:");
+                    return await athena.Execute(switchBlock.Default.Block);
+                }
+
+                Console.WriteLine("}");
+                return lastResult;
             }
-            else if(block is null)
+            else if (block is null)
             {
                 // do nothing
+                return ExecutionBlockResult.Void;
             }
             else
             {
@@ -111,9 +217,31 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
         }
 
- 
 
-        public static ExecutionBlock ParseAthenaPipes(this string query, AthenaParserLogger Debug)
+        private static string ApplyVariables(this string query, Dictionary<string, string> variables)
+        {
+            if(variables is Dictionary<string, string>)
+            {
+                foreach(var kvp in variables)
+                {
+                    query = Regex.Replace(query, $@"variable\(\s*{kvp.Key}\s*\)", match => kvp.Value, RegexOptions.IgnoreCase);
+                }
+            }
+            return query;
+        }
+
+        private static Dictionary<string, string> AddVariable(this Dictionary<string, string> variables, string key, string value)
+        {
+            if (variables == null)
+                return new Dictionary<string, string>() { { key, value } };
+            else
+            {
+                var dict = variables.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                dict.Add(key, value);
+                return dict;
+            }
+        }
+        public static ExecutionBlock ParseAthenaPipes(this string query, AthenaParserSetting Debug)
         {
             var parsedLines = query.ParseCommandLines();
 
@@ -149,7 +277,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             return result;
         }
 
-        private static AthenaControlBlock EndIfBlock(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserLogger Debug)
+        private static AthenaControlBlock EndIfBlock(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserSetting Debug)
         {
             var current = stack.Peek();
             while(current is IfBlock)
@@ -162,7 +290,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             return stack.Peek();
         }
 
-        private static void ProcessControl(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserLogger Debug)
+        private static void ProcessControl(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserSetting Debug)
         {
             Match match = null;
             var current = stack.Peek();
@@ -504,7 +632,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         /// </summary>
         /// <param name="stack"></param>
         /// <returns></returns>
-        private static SyntaxExpectationFlags Expecting(this Stack<AthenaControlBlock> stack, AthenaParserLogger Debug)
+        private static SyntaxExpectationFlags Expecting(this Stack<AthenaControlBlock> stack, AthenaParserSetting Debug)
         {
             var current = stack.Peek();
             if(current is EvaluationBlock)
@@ -700,7 +828,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             return string.Join(", ", list);
         }
 
-        private static void DebugPopped<T>(this T block, AthenaParserLogger Debug) where T: AthenaControlBlock
+        private static void DebugPopped<T>(this T block, AthenaParserSetting Debug) where T: AthenaControlBlock
         {
             Debug.WriteLine($"Popped: {block.GetType().Name}");
         }
@@ -782,7 +910,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 throw new Exception($"Unexpected Execution Start at line: {line.From}: {line.Value}");
         }
 
-        private static void ProcessQuery(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserLogger Debug)
+        private static void ProcessQuery(this Stack<AthenaControlBlock> stack, ref SyntaxExpectationFlags syntaxExpectation, QueryLine line, AthenaParserSetting Debug)
         {
             var current = stack.Peek();
             if((syntaxExpectation & SyntaxExpectationFlags.AnyFlowBlock) == 0 
@@ -798,7 +926,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 if (syntaxExpectation.Has(SyntaxExpectationFlags.EvaluationBlockStart))
                 {
                     var block = (current as IMultipleStatementsBlock);
-                    block.Blocks.Add(new QueryBlock() { Query = line.Value });
+                    block.Blocks.Add(new QueryBlock() { Query = line.Value.ApplyCaches(Debug) });
                     block.Started = true;
                     block.Filled = true;
                     block.Completed = true;
@@ -807,7 +935,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 else if (syntaxExpectation.Has(SyntaxExpectationFlags.ExecutionBlockStart))
                 {
                     var block = (current as IMultipleStatementsBlock);
-                    block.Blocks.Add(new QueryBlock() { Query = line.Value });
+                    block.Blocks.Add(new QueryBlock() { Query = line.Value.ApplyCaches(Debug) });
                     block.Started = true;
                     block.Filled = true;
                     block.Completed = true;
@@ -816,7 +944,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 else
                 {
                     var block = current.As<IMultipleStatementsBlock>();
-                    block.Blocks.Add(new QueryBlock() { Query = line.Value });
+                    block.Blocks.Add(new QueryBlock() { Query = line.Value.ApplyCaches(Debug) });
                     block.Filled = true;
                     Debug.WriteLine($"Query [Block] ({line.From},{line.To}): {line.Value}");
                 }
@@ -827,6 +955,79 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
             syntaxExpectation = stack.Expecting(Debug);
             Debug.WriteLine($"Expecting: {DisplayExpectation(syntaxExpectation)}");
+        }
+
+        public static string ApplyCaches(this string value, AthenaParserSetting parserSetting)
+        {
+            var caches = parserSetting.Caches;
+            foreach (var key in caches.Keys)
+            {
+                var cache = caches[key];
+                Regex regexCTAS = new Regex($@"@{key}\((\w[\w_]*)\)\s*=", RegexOptions.IgnoreCase);
+                Regex regexRef = new Regex($@"@{key}\((\w[\w_]*)\)\s*=", RegexOptions.IgnoreCase);
+                value = regexCTAS.Replace(value, match => {
+                    var tableName = $"{cache.Database}.{match.Groups[1].Value}";
+                    var s3Path = $"{cache.S3Path}{parserSetting.Date.ToString(parserSetting.DateFormat)}/{match.Groups[1].Value}/";
+                    parserSetting.Clearings.Add(new KeyValuePair<string, string>(tableName, s3Path));
+                    return $@"Create Table {tableName} 
+-- Table will be dropped and cleared before CTAS query
+    With (
+    format = 'Parquet',
+    parquet_compression = 'SNAPPY',
+    external_location = '{s3Path}'
+    ) As ";
+                });
+                value = regexRef.Replace(value, match => $"{cache.Database}.{match.Groups[1].Value}");
+            }
+
+            Regex date = new Regex(@"date\(\s*\)");
+            Regex dateOffset = new Regex(@"date\(\s*(-?\d+)\s*\)");
+
+            value = date.Replace(value, match => $"{parserSetting.Date.ToString(parserSetting.DateFormat)}");
+            value = dateOffset.Replace(value, match => $"{parserSetting.Date.AddDays(int.Parse(match.Groups[1].Value)).ToString(parserSetting.DateFormat)}");
+
+            Regex export = new Regex(@"@export\(\s*\)", RegexOptions.IgnoreCase);
+            Regex exportPath = new Regex(@"@export\('(\w+\:\/\/[\w\/\(\)\-]+)'\s*,?\s*((\,?\s*[\w]+='[\w_ ]+')*)\s*\)", RegexOptions.IgnoreCase);
+
+            value = export.Replace(value, match =>
+            {
+                var tablePath = $"Ex{Guid.NewGuid().ToString().Replace("-", "")}";
+                var tempTable = $"{parserSetting.TempDatabase}.{tablePath}";
+                var path = $"{parserSetting.DefaultExportPath}{tablePath}/";
+                parserSetting.Clearings.Add(new KeyValuePair<string, string>(tempTable, path));
+                parserSetting.DroppingTables.Add(tempTable);
+                var CTAS = $@"Create Table {tempTable} 
+-- Etl Tool Will Run: DROP TABLE IF EXISTS {tempTable}
+    With (
+    format = 'Parquet',
+    parquet_compression = 'SNAPPY',
+    external_location = '{path}'
+    ) As";
+                return CTAS;
+            });
+
+            value = exportPath.Replace(value, match =>
+            {
+                var tablePath = $"Ex{Guid.NewGuid().ToString().Replace("-", "")}";
+                var tempTable = $"{parserSetting.TempDatabase}.{tablePath}";
+                var path = match.Groups[1].Value;
+                if (!path.EndsWith("/")) path += "/";
+                path += $"{tablePath}/";
+                parserSetting.Clearings.Add(new KeyValuePair<string, string>(tempTable, path));
+                parserSetting.DroppingTables.Add(tempTable);
+                parserSetting.Partitions.Add(new KeyValuePair<string, string>(match.Groups[2].Value, path));
+                var CTAS = $@"Create Table {tempTable} 
+-- Etl Tool Will Run: DROP TABLE IF EXISTS {tempTable}
+-- Etl Tool Will Run: ALTER TABLE {parserSetting.DefaultTableName} ADD IF NOT EXISTS ({match.Groups[2].Value}) LOCATION '{path}'
+    With (
+    format = 'Parquet',
+    parquet_compression = 'SNAPPY',
+    external_location = '{path}'
+    ) As";
+                return CTAS;
+            });
+
+            return value;
         }
 
         public static List<QueryLine> ParseCommandLines(this string query)
@@ -1113,7 +1314,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
 
         public string ParsedQuery()
         {
-
+            return "";
         }
         public string Query { get; set; }
     }
@@ -1261,7 +1462,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         DefaultBlock,
     }
 
-    public class AthenaParserLogger
+    public class AthenaParserSetting
     {
         private StringBuilder stringBuilder = new StringBuilder();
         public void WriteLine(string value)
@@ -1278,6 +1479,25 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         {
             return stringBuilder.ToString();
         }
+
+        public Dictionary<string, CacheSetting> Caches { get; set; } = new Dictionary<string, CacheSetting>();
+        public DateTime Date { get; set; }
+        public string DateFormat { get; set; }
+        public string DefaultTableName { get; set; }
+        public string DefaultExportPath { get; set; }
+        public List<KeyValuePair<string,string>> Partitions { get; set; } = new List<KeyValuePair<string, string>>();
+        public List<KeyValuePair<string, string>> Clearings { get; set; } = new List<KeyValuePair<string, string>>();
+
+        public string TempDatabase { get; set; }
+        public List<string> DroppingTables { get; set; } = new List<string>();
+        
+    }
+
+    public class CacheSetting
+    {
+        public string Key { get; set; }
+        public string Database { get; set; }
+        public string S3Path { get; set; }
     }
 
     public enum EvaluationResultType
@@ -1294,5 +1514,52 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public string StringValue { get; set; }
         public long IntegerValue { get; set; }
         public bool BooleanValue { get; set; }
+
+        public bool AsBoolean()
+        {
+            switch (Type)
+            {
+                case EvaluationResultType.Boolean:
+                    return BooleanValue;
+                case EvaluationResultType.Integer:
+                    return IntegerValue > 0L;
+                case EvaluationResultType.String:
+                    return !string.IsNullOrEmpty(StringValue);
+                default:
+                    return false;
+            }
+        }
+
+        public string AsString()
+        {
+            switch (Type)
+            {
+                case EvaluationResultType.Boolean:
+                    return BooleanValue.ToString();
+                case EvaluationResultType.Integer:
+                    return IntegerValue.ToString();
+                case EvaluationResultType.String:
+                    return StringValue ?? "";
+                default:
+                    return "";
+            }
+        }
+
+        public long AsInteger()
+        {
+            switch (Type)
+            {
+                case EvaluationResultType.Boolean:
+                    return BooleanValue ? 1L : 0L;
+                case EvaluationResultType.Integer:
+                    return IntegerValue;
+                case EvaluationResultType.String:
+                    return string.IsNullOrEmpty(StringValue) ? 0 : 1;
+                default:
+                    return 0;
+            }
+        }
+
+        public static ExecutionBlockResult Void = new ExecutionBlockResult() { Type = EvaluationResultType.Void };
     }
 }

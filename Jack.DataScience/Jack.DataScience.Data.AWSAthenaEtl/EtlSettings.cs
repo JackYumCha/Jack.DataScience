@@ -172,14 +172,8 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         /// this is the parsed query if parsed successfully
         /// </summary>
         public string ParsedQuery { get; set; }
-        public List<QueryCache> Caches { get; set; }
-    }
-
-    [AngularType]
-    public class QueryCache
-    {
-        public string TableName { get; set; }
-        public string S3Location { get; set; }
+        public string Caches { get; set; }
+        public string TempDatabase { get; set; }
     }
 
     /// <summary>
