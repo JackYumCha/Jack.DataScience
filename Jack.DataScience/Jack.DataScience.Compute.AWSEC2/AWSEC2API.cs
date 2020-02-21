@@ -14,12 +14,19 @@ namespace Jack.DataScience.Compute.AWSEC2
         private readonly AWSEC2Options awsEC2Options;
         private readonly BasicAWSCredentials basicAWSCredentials;
         private readonly AmazonEC2Client amazonEC2Client;
-
+        private readonly SessionAWSCredentials sessionAWSCredentials;
         public AWSEC2API(AWSEC2Options awsEC2Options)
         {
             this.awsEC2Options = awsEC2Options;
             basicAWSCredentials = new BasicAWSCredentials(awsEC2Options.Key, awsEC2Options.Secret);
             amazonEC2Client = new AmazonEC2Client(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsEC2Options.Region));
+        }
+        public AWSEC2API(SessionAWSCredentials sessionAWSCredentials)
+        {
+            this.sessionAWSCredentials = sessionAWSCredentials;
+            var credentials = sessionAWSCredentials.GetCredentials();
+            basicAWSCredentials = new BasicAWSCredentials(credentials.AccessKey, credentials.SecretKey);
+            amazonEC2Client = new AmazonEC2Client(sessionAWSCredentials);
         }
 
         public AWSEC2Options AWSEC2Options { get => awsEC2Options; }

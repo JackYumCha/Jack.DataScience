@@ -15,12 +15,23 @@ namespace Jack.DataScience.Compute.AWSLambda
         private readonly AWSLambdaOptions awsLambdaOptions;
         private readonly BasicAWSCredentials basicAWSCredentials;
         private readonly AmazonLambdaClient amazonLambdaClient;
+        private readonly SessionAWSCredentials sessionAWSCredentials;
+
         public AWSLambdaAPI(AWSLambdaOptions awsLambdaOptions)
         {
             this.awsLambdaOptions = awsLambdaOptions;
             basicAWSCredentials = new BasicAWSCredentials(awsLambdaOptions.Key, awsLambdaOptions.Secret);
             amazonLambdaClient = new AmazonLambdaClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsLambdaOptions.Region));
         }
+
+        public AWSLambdaAPI(SessionAWSCredentials sessionAWSCredentials)
+        {
+            this.sessionAWSCredentials = sessionAWSCredentials;
+            var credentials = sessionAWSCredentials.GetCredentials();
+            basicAWSCredentials = new BasicAWSCredentials(credentials.AccessKey, credentials.SecretKey);
+            amazonLambdaClient = new AmazonLambdaClient(sessionAWSCredentials);
+        }
+        
 
         public async Task Invoke(string name, object parameter)
         {

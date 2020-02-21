@@ -22,12 +22,40 @@ namespace Jack.DataScience.Data.AWSAthena
         private readonly AWSAthenaOptions awsAthenaOptions;
         private readonly BasicAWSCredentials basicAWSCredentials;
         private readonly AmazonAthenaClient amazonAthenaClient;
+        private readonly SessionAWSCredentials sessionAWSCredentials;
+
+        private string DefaultOutputLocation;
         public AWSAthenaAPI(AWSAthenaOptions awsAthenaOptions)
         {
             this.awsAthenaOptions = awsAthenaOptions;
             basicAWSCredentials = new BasicAWSCredentials(awsAthenaOptions.Key, awsAthenaOptions.Secret);
             amazonAthenaClient = new AmazonAthenaClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsAthenaOptions.Region));
+            DefaultOutputLocation = awsAthenaOptions.DefaultOutputLocation;
         }
+
+        public AWSAthenaAPI(BasicAWSCredentials basicAWSCredentials, RegionEndpoint regionEndpoint)
+        {
+            this.basicAWSCredentials = basicAWSCredentials;
+            amazonAthenaClient = new AmazonAthenaClient(basicAWSCredentials, regionEndpoint);
+            DefaultOutputLocation = Environment.GetEnvironmentVariable("AWSAthenaDefaultOutputLocation");
+        }
+
+        /// <summary>
+        /// provide support for resolving AthenaAPI from AWS environment
+        /// </summary>
+        /// <param name="sessionAWSCredentials"></param>
+        public AWSAthenaAPI(SessionAWSCredentials sessionAWSCredentials)
+        {
+            this.sessionAWSCredentials = sessionAWSCredentials;
+            var credentials = sessionAWSCredentials.GetCredentials();
+            basicAWSCredentials = new BasicAWSCredentials(credentials.AccessKey, credentials.SecretKey);
+            amazonAthenaClient = new AmazonAthenaClient(sessionAWSCredentials);
+            DefaultOutputLocation = Environment.GetEnvironmentVariable("AWSAthenaDefaultOutputLocation");
+        }
+
+        public AmazonAthenaClient AthenaClient { get => amazonAthenaClient; }
+        public string OutputLocation { get => DefaultOutputLocation; }
+
         public async Task<string> LoadPartitionIfNotExists(string tableName, string keyFieldAssignment, string s3Location)
         {
             if (awsAthenaOptions.SQSOptions != null)
@@ -38,7 +66,7 @@ namespace Jack.DataScience.Data.AWSAthena
                     QueryString = $@"ALTER TABLE {tableName} ADD IF NOT EXISTS PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
                     ResultConfiguration = new ResultConfiguration()
                     {
-                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                        OutputLocation = DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
                     }
                 };
                 await awsSQSAPI.SendMessage(JsonConvert.SerializeObject(request));
@@ -51,7 +79,7 @@ namespace Jack.DataScience.Data.AWSAthena
                     QueryString = $@"ALTER TABLE {tableName} ADD IF NOT EXISTS PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
                     ResultConfiguration = new ResultConfiguration()
                     {
-                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                        OutputLocation = DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
                     }
                 });
 
@@ -73,7 +101,7 @@ namespace Jack.DataScience.Data.AWSAthena
                     QueryString = $@"ALTER TABLE {tableName} ADD PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
                     ResultConfiguration = new ResultConfiguration()
                     {
-                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                        OutputLocation = DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
                     }
                 };
                 await awsSQSAPI.SendMessage(JsonConvert.SerializeObject(request));
@@ -86,7 +114,7 @@ namespace Jack.DataScience.Data.AWSAthena
                     QueryString = $@"ALTER TABLE {tableName} ADD PARTITION ({keyFieldAssignment}) LOCATION '{s3Location}'",
                     ResultConfiguration = new ResultConfiguration()
                     {
-                        OutputLocation = awsAthenaOptions.DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
+                        OutputLocation = DefaultOutputLocation //"s3://aws-athena-query-results-855250023996-ap-southeast-2/"
                     }
                 });
 
@@ -169,7 +197,7 @@ namespace Jack.DataScience.Data.AWSAthena
                 QueryString = query,
                 ResultConfiguration = new ResultConfiguration()
                 {
-                    OutputLocation = awsAthenaOptions.DefaultOutputLocation,
+                    OutputLocation = DefaultOutputLocation,
                 }
             });
 
@@ -372,7 +400,7 @@ namespace Jack.DataScience.Data.AWSAthena
                 QueryString = query,
                 ResultConfiguration = new ResultConfiguration()
                 {
-                    OutputLocation = awsAthenaOptions.DefaultOutputLocation,
+                    OutputLocation = DefaultOutputLocation,
                 }
             });
             return startResponse.QueryExecutionId;

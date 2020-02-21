@@ -14,7 +14,6 @@ namespace Jack.DataScience.Data.AWSAthenaEtl.Tests
         {
             for(int i = 1; i < 6; i++)
             {
-
                 AthenaParserSetting athenaParserLogger = new AthenaParserSetting();
                 Debug.WriteLine($"****** Begin File {i} ******");
                 var filename = $"{AppContext.BaseDirectory}/query{i}.sql";

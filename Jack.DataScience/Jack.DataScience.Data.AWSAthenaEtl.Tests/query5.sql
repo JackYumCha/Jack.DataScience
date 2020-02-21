@@ -30,11 +30,9 @@
                 cte as (select * from tableA)
                 select * from cte
             -- }
-
             select true as OK
         -- )
 		select x,y,z from coordinates
-
 -- }
 
 -- {

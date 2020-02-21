@@ -7,7 +7,6 @@
         cte as (select * from tableA)
         select * from cte
      -- }
-
      select true as OK
 -- )
 

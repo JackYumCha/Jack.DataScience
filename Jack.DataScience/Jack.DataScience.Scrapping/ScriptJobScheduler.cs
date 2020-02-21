@@ -211,7 +211,7 @@ namespace Jack.DataScience.Scrapping
             await SQS.Purge();
         }
 
-        private static async Task ScheduleJob(ScriptJob job, AWSDynamoAPI dynamoDB, AWSSQSAPI sqs, DateTime now)
+        public static async Task ScheduleJob(ScriptJob job, AWSDynamoAPI dynamoDB, AWSSQSAPI sqs, DateTime now)
         {
             job.LastSchedule = now;
             job.State = ScriptJobStateEnum.Runnable;

@@ -36,6 +36,11 @@ namespace Jack.DataScience.Scrapping
         /// following operations on the captured element (if captured)
         /// </summary>
         public List<BrowserOperation> Then { get; set; }
+
+        /// <summary>
+        /// Break if Debugger is attached.
+        /// </summary>
+        public bool Break { get; set; }
     }
 
 

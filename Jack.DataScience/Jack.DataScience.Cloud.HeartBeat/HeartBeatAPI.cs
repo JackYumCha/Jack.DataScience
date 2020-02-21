@@ -269,8 +269,35 @@ namespace Jack.DataScience.Cloud.HeartBeat
 
             Console.WriteLine($"Killing Instances Not Updating > 1.5 Hour: { string.Join(", ", expired.OrderBy(s => s.LastSignalTimestamp).Select(s => $"{s.InstanceId}({(now - s.LastSignalTimestamp.ToUniversalTime()).TotalMinutes.ToString("0")}min)"))}");
 
-            await ec2.TerminateByIds(expired.Select(hb => hb.InstanceId).ToList());
+            // terminate if any
+            if(expired.Any())
+            {
+                try
+                {
+                    await ec2.TerminateByIds(expired.Select(hb => hb.InstanceId).ToList());
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+            }
+
             foreach(var heartBeat in expired)
+            {
+                await dynamo.DeleteItem(new Dictionary<string, object>()
+                {
+                    {nameof(heartBeat.InstanceId), heartBeat.InstanceId },
+                    {nameof(heartBeat.Job), heartBeat.Job },
+                });
+            }
+
+            var engineIdsSet = new HashSet<string>();
+            foreach (var id in engineIds) engineIdsSet.Add(id);
+
+            var terminated = found.Where(hbs => !engineIds.Contains(hbs.InstanceId)).ToList();
+
+            Console.WriteLine($"Remove Terminated HeatBeats: {terminated.Count}");
+            foreach (var heartBeat in terminated)
             {
                 await dynamo.DeleteItem(new Dictionary<string, object>()
                 {

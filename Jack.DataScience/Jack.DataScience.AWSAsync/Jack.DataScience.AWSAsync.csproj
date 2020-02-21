@@ -5,12 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="3.3.31.19" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Jack.DataScience.AWSEnvironment\Jack.DataScience.AWSEnvironment.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj" />
   </ItemGroup>
 
 </Project>

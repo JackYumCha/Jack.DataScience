@@ -293,12 +293,12 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
 
             var pipesSource = etlSettings.AthenaQueryPipesSource;
             AthenaParserSetting parserLogger = new AthenaParserSetting();
-            parserLogger.DefaultExportPath = $"s3://{etlSettings.TargetS3BucketName}/{etlSettings.TargetS3Prefix}";
-            if (!parserLogger.DefaultExportPath.EndsWith("/")) parserLogger.DefaultExportPath += "/";
+            parserLogger.DefaultExportPath = $"s3://{etlSettings.TargetS3BucketName}/{etlSettings.TargetS3Prefix}".FixPathEnd();
             parserLogger.DefaultTableName = $"`{etlSettings.AthenaDatabaseName}`.`{etlSettings.AthenaTableName}`";
             parserLogger.Date = DateTime.UtcNow.AddDays(-pipesSource.DaysAgo);
             parserLogger.DateFormat = pipesSource.DateFormat;
             parserLogger.TempDatabase = pipesSource.TempDatabase;
+            parserLogger.TempTablePath = pipesSource.TempDataPath.FixPathEnd();
 
             pipesSource.ParseErrors = "";
 
@@ -361,38 +361,112 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
         }
 
-
+        /// <summary>
+        /// run the athena query pipes
+        /// </summary>
+        /// <param name="etlSettings"></param>
+        /// <param name="useDate"></param>
+        /// <returns></returns>
         public static async Task RunAthenaQueryPipes(this EtlSettings etlSettings, DateTime? useDate = null)
         {
             if (etlSettings.SourceType != EtlSourceEnum.AmazonAthenaPipes) return;
 
             var pipesSource = etlSettings.AthenaQueryPipesSource;
 
-            AthenaParserSetting parserLogger = new AthenaParserSetting();
-            parserLogger.DefaultExportPath = $"s3://{etlSettings.TargetS3BucketName}/{etlSettings.TargetS3Prefix}";
-            if (!parserLogger.DefaultExportPath.EndsWith("/")) parserLogger.DefaultExportPath += "/";
-            parserLogger.DefaultTableName = $"`{etlSettings.AthenaDatabaseName}`.`{etlSettings.AthenaTableName}`";
-            parserLogger.Date = useDate == null ? DateTime.UtcNow.AddDays(-pipesSource.DaysAgo) : useDate.Value.AddDays(-pipesSource.DaysAgo);
-            parserLogger.DateFormat = pipesSource.DateFormat;
-            parserLogger.TempDatabase = pipesSource.TempDatabase;
-
+            AthenaParserSetting parserSetting = new AthenaParserSetting();
+            parserSetting.DefaultExportPath = $"s3://{etlSettings.TargetS3BucketName}/{etlSettings.TargetS3Prefix}".FixPathEnd();
+            parserSetting.DefaultTableName = $"`{etlSettings.AthenaDatabaseName}`.`{etlSettings.AthenaTableName}`";
+            parserSetting.Date = useDate == null ? DateTime.UtcNow.AddDays(-pipesSource.DaysAgo) : useDate.Value.AddDays(-pipesSource.DaysAgo);
+            parserSetting.DateFormat = pipesSource.DateFormat;
+            parserSetting.TempDatabase = pipesSource.TempDatabase;
+            parserSetting.TempTablePath = pipesSource.TempDataPath.FixPathEnd();
 
             var caches = JsonConvert.DeserializeObject<List<CacheSetting>>(etlSettings.AthenaQueryPipesSource.Caches);
             foreach (var cache in caches)
             {
                 if (!cache.S3Path.EndsWith("/")) cache.S3Path += "/";
-                parserLogger.Caches.Add(cache.Key, cache);
+                parserSetting.Caches.Add(cache.Key, cache);
             }
 
-            var parsed = pipesSource.AthenaSQL.ParseAthenaPipes(parserLogger);
+            var parsed = pipesSource.AthenaSQL.ParseAthenaPipes(parserSetting);
 
-            await etlSettings.ExecuteControlFlow(parsed, parserLogger);
+            await etlSettings.ExecuteControlFlow(parsed, parserSetting);
 
             var athenaApi = etlSettings.CreatePipesSourceAthenaAPI();
-            foreach (var kvp in parserLogger.Partitions)
+            foreach (var kvp in parserSetting.Partitions)
             {
-                await athenaApi.LoadPartitionIfNotExists(parserLogger.DefaultTableName, kvp.Key, kvp.Value);
+                await athenaApi.LoadPartitionIfNotExists(parserSetting.DefaultTableName, kvp.Key, kvp.Value);
             }
+        }
+
+        public static StateMachineQueryContext BuildStateMachineQueryContext(this EtlSettings etlSettings, DateTime? useDate = null)
+        {
+            if (etlSettings.SourceType != EtlSourceEnum.AmazonAthenaPipes) return null;
+
+            var pipesSource = etlSettings.AthenaQueryPipesSource;
+
+            AthenaParserSetting parserSetting = new AthenaParserSetting();
+            parserSetting.DefaultExportPath = $"s3://{etlSettings.TargetS3BucketName}/{etlSettings.TargetS3Prefix}".FixPathEnd();
+            parserSetting.DefaultTableName = $"`{etlSettings.AthenaDatabaseName}`.`{etlSettings.AthenaTableName}`";
+            parserSetting.Date = useDate == null ? DateTime.UtcNow.AddDays(-pipesSource.DaysAgo) : useDate.Value.AddDays(-pipesSource.DaysAgo);
+            parserSetting.DateFormat = pipesSource.DateFormat;
+            parserSetting.TempDatabase = pipesSource.TempDatabase;
+            parserSetting.TempTablePath = pipesSource.TempDataPath.FixPathEnd();
+
+            var caches = JsonConvert.DeserializeObject<List<CacheSetting>>(etlSettings.AthenaQueryPipesSource.Caches);
+            foreach (var cache in caches)
+            {
+                if (!cache.S3Path.EndsWith("/")) cache.S3Path += "/";
+                parserSetting.Caches.Add(cache.Key, cache);
+            }
+
+            StateMachineQueryContext context = new StateMachineQueryContext();
+
+            context.raw = pipesSource.AthenaSQL;
+
+            context.settings = new StateMachineSettings()
+            {
+                DefaultExportPath = parserSetting.DefaultExportPath,
+                DefaultTableName = parserSetting.DefaultTableName,
+                Date = parserSetting.Date,
+                DateFormat = parserSetting.DateFormat,
+                TempDatabase = parserSetting.TempDatabase,
+                TempTablePath = parserSetting.TempTablePath,
+                Caches = parserSetting.Caches.Values.ToList(),
+                Clearings = parserSetting.Clearings.Select(kvp => new KeyValueEntry() { Key = kvp.Key, Value = kvp.Value }).ToList(),
+                Commands = parserSetting.Commands,
+                DroppingTables = parserSetting.DroppingTables,
+                Partitions = parserSetting.Partitions.Select(kvp => new KeyValueEntry() { Key = kvp.Key, Value = kvp.Value }).ToList(),
+                Variables = parserSetting.Variables.Select(kvp => new KeyValueEntry() { Key = kvp.Key, Value = kvp.Value }).ToList()
+            };
+
+            //var parsed = pipesSource.AthenaSQL.ParseAthenaPipes(parserSetting);
+
+            return context;
+
+            //var athenaApi = etlSettings.CreatePipesSourceAthenaAPI();
+            //foreach (var kvp in parserSetting.Partitions)
+            //{
+            //    await athenaApi.LoadPartitionIfNotExists(parserSetting.DefaultTableName, kvp.Key, kvp.Value);
+            //}
+        }
+
+        public static AthenaParserSetting BuildParserSetting(this StateMachineQueryContext context)
+        {
+            StateMachineSettings settings = context.settings;
+            AthenaParserSetting parserSetting = new AthenaParserSetting();
+            parserSetting.DefaultExportPath = settings.DefaultExportPath;
+            parserSetting.DefaultTableName = settings.DefaultTableName;
+            parserSetting.Date = settings.Date;
+            parserSetting.DateFormat = settings.DateFormat;
+            parserSetting.TempDatabase = settings.TempDatabase;
+            parserSetting.TempTablePath = settings.TempTablePath;
+            return parserSetting;
+        }
+
+        private static string FixPathEnd(this string value)
+        {
+            return value.EndsWith("/") ? value : value + "/";
         }
 
         public static AWSAthenaAPI CreatePipesSourceAthenaAPI(this EtlSettings etlSettings)
@@ -441,13 +515,90 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             }
         }
 
-        public static async Task DropAthenaTable(this AWSAthenaAPI athenaApi, string tableName)
+        public static async Task ClearAthenaTable(this AWSAthenaAPI athenaApi, AWSS3API awsS3Api, string tableName, string s3Path) 
         {
             Console.WriteLine($"DROP TABLE IF EXISTS {tableName}");
             var executionId = await athenaApi.StartQuery($"DROP TABLE IF EXISTS {tableName}");
             while (!await athenaApi.IsExecutionCompleted(executionId))
             {
                 Thread.Sleep(2000);
+            }
+            var s3Object = s3Path.ParseS3URI();
+            if (s3Object is S3Object)
+            {
+                Console.WriteLine($"Delete S3: {s3Path}");
+                var files = await awsS3Api.ListFiles(s3Object.Key, "/", s3Object.BucketName);
+                if (files.Any())
+                {
+                    await awsS3Api.Delete(files.Select(key => $"{s3Object.Key}{key}"), s3Object.BucketName);
+                }
+                Console.WriteLine($"{s3Path}: {files.Count} S3 Files Deleted");
+            }
+        }
+
+        public static async Task DropAthenaTable(this AWSAthenaAPI athenaApi, string tableName)
+        {
+            string query = $"DROP TABLE IF EXISTS {tableName}";
+            Console.WriteLine(query);
+            var executionId = await athenaApi.StartQuery(query);
+            while (!await athenaApi.IsExecutionCompleted(executionId))
+            {
+                Thread.Sleep(2000);
+            }
+        }
+
+        public static async Task ClearAthenaTables(this StateMachineQueryContext context, AWSAthenaAPI athenaApi, AWSS3API awsS3Api)
+        {
+            var parserSetting = context.BuildParserSetting();
+            var pipes = context.raw.ParseAthenaPipes(parserSetting);
+            foreach (var clearing in parserSetting.Clearings)
+            {
+                await athenaApi.ClearAthenaTable(awsS3Api, clearing.Key, clearing.Value);
+            }
+        }
+
+        public static async Task ClearTempTables(this StateMachineQueryContext context, AWSAthenaAPI athenaApi, AWSS3API awsS3Api)
+        {
+            foreach (var clearing in context.settings.Clearings)
+            {
+                await athenaApi.ClearAthenaTable(awsS3Api, clearing.Key, clearing.Value);
+            }
+            context.settings.Clearings.Clear();
+        }
+
+        public static async Task DropAthenaTables(this StateMachineQueryContext context, AWSAthenaAPI athenaApi)
+        {
+            foreach(var dropping in context.settings.DroppingTables)
+            {
+                await DropAthenaTable(athenaApi, dropping);
+            }
+        }
+
+        public static async Task LoadPartitions(this StateMachineQueryContext context, AWSAthenaAPI athenaApi)
+        {
+            //Console.WriteLine("LoadPartitions:");
+            foreach (var patition in context.settings.Partitions)
+            {
+                await LoadAthenaParition(athenaApi, context.settings.DefaultTableName, patition.Key, patition.Value);
+            }
+        }
+
+        public static async Task LoadAthenaParition(this AWSAthenaAPI athenaApi, string tableName, string key, string location)
+        {
+            string dropQuery = $"ALTER TABLE {tableName} DROP IF EXISTS PARTITION ({key})";
+            Console.WriteLine(dropQuery);
+            var dropExecutionId = await athenaApi.StartQuery(dropQuery);
+            while (!await athenaApi.IsExecutionCompleted(dropExecutionId))
+            {
+                Thread.Sleep(500);
+            }
+
+            string addQuery = $"ALTER TABLE {tableName} ADD IF NOT EXISTS PARTITION ({key}) LOCATION '{location}'";
+            Console.WriteLine(addQuery);
+            var addExecutionId = await athenaApi.StartQuery(addQuery);
+            while (!await athenaApi.IsExecutionCompleted(addExecutionId))
+            {
+                Thread.Sleep(500);
             }
         }
 

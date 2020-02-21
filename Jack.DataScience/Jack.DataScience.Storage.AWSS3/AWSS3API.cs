@@ -20,10 +20,29 @@ namespace Jack.DataScience.Storage.AWSS3
     public class AWSS3API
     {
         private readonly AWSS3Options awsS3Options;
-
+        private readonly SessionAWSCredentials sessionAWSCredentials;
         public AWSS3API(AWSS3Options awsS3Options)
         {
+            //Console.WriteLine("AWSS3API by AWSS3Options");
             this.awsS3Options = awsS3Options;
+        }
+
+        public AWSS3API(BasicAWSCredentials basicAWSCredentials, RegionEndpoint regionEndpoint)
+        {
+            //Console.WriteLine("AWSS3API by AWSS3Options");
+            var credentials = basicAWSCredentials.GetCredentials();
+            this.awsS3Options = new AWSS3Options()
+            {
+                Key = credentials.AccessKey,
+                Secret = credentials.SecretKey,
+                Region = regionEndpoint.SystemName
+            };
+        }
+
+        public AWSS3API(SessionAWSCredentials sessionAWSCredentials)
+        {
+            //Console.WriteLine("AWSS3API by SessionAWSCredentials");
+            this.sessionAWSCredentials = sessionAWSCredentials;
         }
 
         public AWSS3Options Options
@@ -31,8 +50,19 @@ namespace Jack.DataScience.Storage.AWSS3
             get => awsS3Options;
         }
 
-        public AmazonS3Client CreateClient() =>
-            new AmazonS3Client(new BasicAWSCredentials(awsS3Options.Key, awsS3Options.Secret), RegionEndpoint.GetBySystemName(awsS3Options.Region));
+        public SessionAWSCredentials SessionCredentials
+        {
+            get => sessionAWSCredentials;
+        }
+
+        public AmazonS3Client CreateClient()
+        {
+            if (awsS3Options != null)
+                return new AmazonS3Client(new BasicAWSCredentials(awsS3Options.Key, awsS3Options.Secret), RegionEndpoint.GetBySystemName(awsS3Options.Region));
+            else if (sessionAWSCredentials != null)
+                return new AmazonS3Client(sessionAWSCredentials);
+            return null;
+        }
 
 
         public async Task<bool> BucketExists(string name = null)
@@ -48,11 +78,14 @@ namespace Jack.DataScience.Storage.AWSS3
 
         public async Task<bool> FileExists(string key, string bucket = null)
         {
+            
             if (bucket == null) bucket = awsS3Options.Bucket;
             try
             {
                 using (AmazonS3Client client = CreateClient())
                 {
+                    //Console.WriteLine($"key: {key}, bucket: {bucket}");
+                    //Console.WriteLine($"session: key: {sessionAWSCredentials.GetCredentials().AccessKey}, token: {sessionAWSCredentials.GetCredentials().Token}");
                     await client.GetObjectMetadataAsync(new GetObjectMetadataRequest()
                     {
                         BucketName = bucket,
@@ -407,6 +440,45 @@ namespace Jack.DataScience.Storage.AWSS3
                     using (MemoryStream streamToUpload = new MemoryStream(stream.ToArray()))
                     {
                         await transferUtility.UploadAsync(streamToUpload, bucketName, key);
+                    }
+                }
+            }
+        }
+
+        public async Task UploadGZip(S3Object s3Object, byte[] data)
+        {
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (GZipStream gZipStream = new GZipStream(stream, CompressionLevel.Optimal))
+                    {
+                        gZipStream.Write(data, 0, data.Length);
+                    }
+                    using (MemoryStream streamToUpload = new MemoryStream(stream.ToArray()))
+                    {
+                        await transferUtility.UploadAsync(streamToUpload, s3Object.BucketName, s3Object.Key);
+                    }
+                }
+            }
+        }
+
+        public async Task<byte[]> DownloadGZip(S3Object s3Object)
+        {
+            using (AmazonS3Client client = CreateClient())
+            {
+                TransferUtility transferUtility = new TransferUtility(client);
+                byte[] buffer = new byte[4096];
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (Stream downloadStream = await transferUtility.OpenStreamAsync(s3Object.BucketName, s3Object.Key))
+                    {
+                        using (GZipStream gZipStream = new GZipStream(downloadStream, CompressionMode.Decompress))
+                        {
+                            await gZipStream.CopyToAsync(stream);
+                            return stream.ToArray();
+                        }
                     }
                 }
             }

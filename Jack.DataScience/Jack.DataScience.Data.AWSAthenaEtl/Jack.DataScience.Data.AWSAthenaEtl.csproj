@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Compute.AWSBatch\Jack.DataScience.Compute.AWSBatch.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Compute.AWSLambda\Jack.DataScience.Compute.AWSLambda.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.AWSAthena\Jack.DataScience.Data.AWSAthena.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.CSV\Jack.DataScience.Data.CSV.csproj" />
@@ -17,6 +19,7 @@
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3.Extensions\Jack.DataScience.Storage.AWSS3.Extensions.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.SFTP\Jack.DataScience.Storage.SFTP.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.StringCompression\Jack.DataScience.StringCompression.csproj" />
     <ProjectReference Include="..\MvcAngular.Generator.Lambda\MvcAngular.Generator.Lambda.csproj" />
   </ItemGroup>
 

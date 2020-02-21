@@ -1,0 +1,10 @@
+[
+    {"Key": "year", "Database": "ctascache_year", "S3Path": "s3://athena-ctas-cache-855250023996/year"},
+    {"Key": "quarter", "Database": "ctascache_quarter", "S3Path": "s3://athena-ctas-cache-855250023996/quarter"},
+    {"Key": "month", "Database": "ctascache_month", "S3Path": "s3://athena-ctas-cache-855250023996/month"},
+    {"Key": "fortnight", "Database": "ctascache_fortnight", "S3Path": "s3://athena-ctas-cache-855250023996/fortnight"},
+    {"Key": "week", "Database": "ctascache_week", "S3Path": "s3://athena-ctas-cache-855250023996/week"},
+    {"Key": "3days", "Database": "ctascache_3days", "S3Path": "s3://athena-ctas-cache-855250023996/3days"},
+    {"Key": "2days", "Database": "ctascache_2days", "S3Path": "s3://athena-ctas-cache-855250023996/2days"},
+    {"Key": "day", "Database": "ctascache_day", "S3Path": "s3://athena-ctas-cache-855250023996/day"}
+]

@@ -5,11 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="3.3.31.19" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.104.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jack.DataScience.AWSEnvironment\Jack.DataScience.AWSEnvironment.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
   </ItemGroup>
 

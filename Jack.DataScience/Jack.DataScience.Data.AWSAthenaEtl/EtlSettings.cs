@@ -174,6 +174,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public string ParsedQuery { get; set; }
         public string Caches { get; set; }
         public string TempDatabase { get; set; }
+        public string TempDataPath { get; set; }
     }
 
     /// <summary>

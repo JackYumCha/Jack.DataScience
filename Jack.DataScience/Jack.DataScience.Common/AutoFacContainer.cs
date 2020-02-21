@@ -14,11 +14,15 @@ namespace Jack.DataScience.Common
         {
             var configBuilder = new ConfigurationBuilder();
             var appsettingsFile = $"{AppContext.BaseDirectory}/appsettings{(string.IsNullOrWhiteSpace(environment) ? "" : $".{environment}")}.json";
-            if (!File.Exists(appsettingsFile))
+            if (File.Exists(appsettingsFile))
             {
-                throw new Exception($"appsettings file was not found at: {appsettingsFile}");
+                //throw new Exception($"appsettings file was not found at: {appsettingsFile}");
+                configBuilder.AddJsonFile(appsettingsFile);
             }
-            configBuilder.AddJsonFile(appsettingsFile);
+            else
+            {
+                Console.WriteLine($"WARNING: appsettings file was not found at: {appsettingsFile}");
+            }            
             Configuration = configBuilder.Build();
             ContainerBuilder = new ContainerBuilder();
         }

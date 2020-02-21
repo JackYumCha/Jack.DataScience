@@ -66,10 +66,25 @@ namespace Jack.DataScience.Scrapping
                         break;
                     case ActionTypeEnum.Click:
                         throw new ScrapingException($"{nameof(ActionTypeEnum.Click)} is not avaliable on {nameof(IWebDriver)}.");
+                    case ActionTypeEnum.TryClick:
+                        Console.WriteLine($"{nameof(ActionTypeEnum.TryClick)} is not avaliable on {nameof(IWebDriver)}.");
+                        break;
+                    case ActionTypeEnum.JsClick:
+                        Console.WriteLine($"{nameof(ActionTypeEnum.JsClick)} is not avaliable on {nameof(IWebDriver)}.");
+                        break;
+                    case ActionTypeEnum.OnClickFailed:
+                        Console.WriteLine($"{nameof(ActionTypeEnum.OnClickFailed)} is not avaliable on {nameof(IWebDriver)}.");
+                        break;
+                    case ActionTypeEnum.OnJsClickFailed:
+                        Console.WriteLine($"{nameof(ActionTypeEnum.OnJsClickFailed)} is not avaliable on {nameof(IWebDriver)}.");
+                        break;
                     case ActionTypeEnum.ScrollIntoView:
                         throw new ScrapingException($"{nameof(ActionTypeEnum.ScrollIntoView)} is not avaliable on {nameof(IWebDriver)}.");
                     case ActionTypeEnum.ScrollTo:
                         driver.ScrollTo(parameters);
+                        break;
+                    case ActionTypeEnum.ScrollBy:
+                        driver.ScrollBy(parameters);
                         break;
                     case ActionTypeEnum.SendKeys:
                         throw new ScrapingException($"{nameof(ActionTypeEnum.SendKeys)} is not avaliable on {nameof(IWebDriver)}.");
@@ -241,6 +256,18 @@ namespace Jack.DataScience.Scrapping
                             results.Add(parent);
                         }
                         break;
+                    case ActionTypeEnum.TryClick:
+                        parent.TryClick(results);
+                        break;
+                    case ActionTypeEnum.JsClick:
+                        parent.JsClick(driver, results);
+                        break;
+                    case ActionTypeEnum.OnClickFailed:
+                        parent.OnClickFailed(results);
+                        break;
+                    case ActionTypeEnum.OnJsClickFailed:
+                        parent.OnJsClickFailed(driver, results);
+                        break;
                     case ActionTypeEnum.ScrollIntoView:
                         {
                             parent.ScrollIntoView(driver);
@@ -249,6 +276,9 @@ namespace Jack.DataScience.Scrapping
                         break;
                     case ActionTypeEnum.ScrollTo:
                         driver.ScrollTo(parameters);
+                        break;
+                    case ActionTypeEnum.ScrollBy:
+                        driver.ScrollBy(parameters);
                         break;
                     case ActionTypeEnum.SendKeys:
                         {
@@ -422,6 +452,12 @@ namespace Jack.DataScience.Scrapping
             driver.WindowScrollTo(x, y);
         }
 
+        private static void ScrollBy(this IWebDriver driver, List<string> parameters)
+        {
+            string x = parameters[0], y = parameters[1];
+            driver.WindowScrollBy(x, y);
+        }
+
         private static void ScreenShot(this IWebDriver driver, List<string> parameters, IComponentContext componentContext)
         {
             var screenshot = driver as ITakesScreenshot;
@@ -474,6 +510,7 @@ namespace Jack.DataScience.Scrapping
                     Console.WriteLine($">> By: {results.Count} Elements Found.");
                 }
             }
+            if (Debugger.IsAttached && operation.Break) Debugger.Break();
         }
 
         private static By Selector(this string selectorType, string selector)
@@ -578,6 +615,7 @@ namespace Jack.DataScience.Scrapping
                 bool shouldLoop = true;
                 while (shouldLoop && count > 0)
                 {
+                    if (Debugger.IsAttached && operation.Break) Debugger.Break();
                     var found = parent == null ? driver.FindElements(by).ToList() : parent.FindElements(by).ToList();
                     found = found.TextFilter(filter, driver).ToList();
                     shouldLoop = condition.Test(found.Count);
@@ -613,6 +651,7 @@ namespace Jack.DataScience.Scrapping
             {
                 throw new ScrapingException($"{nameof(ActionTypeEnum.LoopWhen)} must have 4 parameters. It currently has {parameters.Count}.");
             }
+            if (Debugger.IsAttached && operation.Break) Debugger.Break();
             return false;
         }
 
@@ -684,12 +723,14 @@ namespace Jack.DataScience.Scrapping
                         }
                     }
                     count--;
+                    if (Debugger.IsAttached && operation.Break) Debugger.Break();
                 } while (!shouldNotLoop && count > 0);
             }
             else
             {
                 throw new ScrapingException($"{nameof(ActionTypeEnum.LoopUntil)} must have 4 parameters. It currently has {parameters.Count}.");
             }
+            if (Debugger.IsAttached && operation.Break) Debugger.Break();
             return false;
         }
 
@@ -715,17 +756,18 @@ namespace Jack.DataScience.Scrapping
                 filter = textFilter.BuildFilter(pattern);
 
                 By by = selectorType.Selector(selector);
-                var found = parent == null ? driver.FindElements(by).ToList() : parent.FindElements(by).ToList();
+                var found = (operation.Driver || parent == null) ? driver.FindElements(by).ToList() : parent.FindElements(by).ToList();
                 found = found.TextFilter(filter, driver).ToList();
                 int count = found.Count;
                 int j = 0;
                 var options = componentContext.Resolve<AWSScrapeJobOptions>();
-                if (options.Verbose)
+                if (options.Verbose || !string.IsNullOrWhiteSpace(operation.Label))
                 {
                     Console.WriteLine($">> SwitchBy: {count} Elements Found.");
                 }
                 for (int i = 4; i < parameters.Count; i++)
                 {
+                    if (Debugger.IsAttached && operation.Break) Debugger.Break();
                     var condition = parameters[i].ParseCondition();
                     if (condition.Test(count))
                     {
@@ -746,6 +788,7 @@ namespace Jack.DataScience.Scrapping
             {
                 throw new ScrapingException($"{nameof(ActionTypeEnum.SwitchBy)} must have 4 or more parameters. It currently has {parameters.Count}.");
             }
+            if (Debugger.IsAttached && operation.Break) Debugger.Break();
             return false;
         }
 
@@ -1577,6 +1620,52 @@ namespace Jack.DataScience.Scrapping
             }
         }
 
+        public static void TryClick(this IWebElement element, List<IWebElement> results)
+        {
+            try
+            {
+                element.Click();
+                results.Add(element);
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine($"Try Click Failed: {ex.Message}");
+            }
+        }
+
+        public static string JsClick(this IWebElement element, IWebDriver driver, List<IWebElement> results)
+        {
+            IJavaScriptExecutor js = driver as IJavaScriptExecutor;
+            return js.ExecuteScript($"arguments[0].click();", new object[] { element }) as string;
+        }
+
+        public static void OnClickFailed(this IWebElement element, List<IWebElement> results)
+        {
+            try
+            {
+                element.Click();
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine($"Try Click Failed: {ex.Message}");
+                results.Add(element);
+            }
+        }
+
+        public static string OnJsClickFailed(this IWebElement element, IWebDriver driver, List<IWebElement> results)
+        {
+            try
+            {
+                IJavaScriptExecutor js = driver as IJavaScriptExecutor;
+                return js.ExecuteScript($"arguments[0].click();", new object[] { element }) as string;
+            }
+            catch(Exception ex)
+            {
+                results.Add(element);
+                return null;
+            }
+        }
+
         public static string WindowScrollTo(this IWebDriver driver, string x, string y)
         {
             IJavaScriptExecutor js = driver as IJavaScriptExecutor;
@@ -1599,6 +1688,18 @@ namespace Jack.DataScience.Scrapping
         {
             IJavaScriptExecutor js = driver as IJavaScriptExecutor;
             return js.ExecuteScript("return arguments[0].outerHTML;", new object[] { element }) as string;
+        }
+
+        public static string WindowScrollBy(this IWebDriver driver, string x, string y)
+        {
+            var script = $@"var supportPageOffset = window.pageXOffset !== undefined;
+var isCSS1Compat = ((document.compatMode || """") === ""CSS1Compat"");
+var x = supportPageOffset ? window.pageXOffset : isCSS1Compat ? document.documentElement.scrollLeft : document.body.scrollLeft;
+var y = supportPageOffset ? window.pageYOffset : isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
+window.scrollTo(x + {x}, y + {y});
+";
+            IJavaScriptExecutor js = driver as IJavaScriptExecutor;
+            return js.ExecuteScript(script, new object[] { }) as string;
         }
 
         public static string ExecuteJs(this IWebDriver driver, string javascript, object[] parameters)

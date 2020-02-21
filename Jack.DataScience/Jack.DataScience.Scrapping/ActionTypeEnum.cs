@@ -12,8 +12,13 @@ namespace Jack.DataScience.Scrapping
 
         // operations
         Click,
+        TryClick,
+        JsClick,
+        OnClickFailed,
+        OnJsClickFailed,
         ScrollIntoView,
         ScrollTo,
+        ScrollBy,
         SendKeys,
         ScreenShot, // [Path(local|s3)]
         JS,
