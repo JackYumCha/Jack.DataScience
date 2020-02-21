@@ -36,7 +36,7 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             }
         }
 
-        public static async Task<List<T>> ReadCsv<T>(this AWSS3API awsS3, string key, string bucket = null, Configuration configuration = null) where T:class
+        public static async Task<List<T>> ReadCsv<T>(this AWSS3API awsS3, string key, string bucket = null, CsvConfiguration configuration = null) where T:class
         {
             using (Stream readStream = await awsS3.OpenReadAsync(key, bucket))
             {
