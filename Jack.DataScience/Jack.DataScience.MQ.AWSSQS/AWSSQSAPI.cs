@@ -15,11 +15,20 @@ namespace Jack.DataScience.MQ.AWSSQS
         private readonly AWSSQSOptions awsSQSOptions;
         private readonly BasicAWSCredentials basicAWSCredentials;
         private readonly AmazonSQSClient amazonSQSClient;
+        private readonly SessionAWSCredentials sessionAWSCredentials;
         public AWSSQSAPI(AWSSQSOptions awsSQSOptions)
         {
             this.awsSQSOptions = awsSQSOptions;
             basicAWSCredentials = new BasicAWSCredentials(awsSQSOptions.Key, awsSQSOptions.Secret);
             amazonSQSClient = new AmazonSQSClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsSQSOptions.Region));
+        }
+
+        public AWSSQSAPI(SessionAWSCredentials sessionAWSCredentials)
+        {
+            this.sessionAWSCredentials = sessionAWSCredentials;
+            var credentials = sessionAWSCredentials.GetCredentials();
+            basicAWSCredentials = new BasicAWSCredentials(credentials.AccessKey, credentials.SecretKey);
+            amazonSQSClient = new AmazonSQSClient(sessionAWSCredentials);
         }
 
         public async Task<HttpStatusCode> SendMessage(string message, string url = null)
