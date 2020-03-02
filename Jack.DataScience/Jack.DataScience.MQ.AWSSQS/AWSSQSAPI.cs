@@ -4,6 +4,7 @@ using Amazon.SQS;
 using Amazon.SQS.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,12 @@ namespace Jack.DataScience.MQ.AWSSQS
             this.awsSQSOptions = awsSQSOptions;
             basicAWSCredentials = new BasicAWSCredentials(awsSQSOptions.Key, awsSQSOptions.Secret);
             amazonSQSClient = new AmazonSQSClient(basicAWSCredentials, RegionEndpoint.GetBySystemName(awsSQSOptions.Region));
+        }
+
+        public AWSSQSAPI(BasicAWSCredentials basicAWSCredentials, RegionEndpoint regionEndpoint)
+        {
+            this.basicAWSCredentials = basicAWSCredentials;
+            amazonSQSClient = new AmazonSQSClient(basicAWSCredentials, regionEndpoint);
         }
 
         public AWSSQSAPI(SessionAWSCredentials sessionAWSCredentials)
@@ -44,10 +51,38 @@ namespace Jack.DataScience.MQ.AWSSQS
             return sendMessageResponse.HttpStatusCode;
         }
 
+        public async Task<HttpStatusCode> SendMessages(IEnumerable<string> messages, string url = null)
+        {
+            if (url == null) url = awsSQSOptions.Url;
+            var sendMessageResponse = await amazonSQSClient.SendMessageBatchAsync(new SendMessageBatchRequest()
+            {
+                QueueUrl = url,
+                Entries = messages.Select((message, index)=> new SendMessageBatchRequestEntry()
+                {
+                    Id = index.ToString(),
+                    MessageBody = message,
+                    DelaySeconds = 0
+                }).ToList()
+            });
+            return sendMessageResponse.HttpStatusCode;
+        }
+
         public async Task<HttpStatusCode> DeleteMessage(string receiptHandle, string url = null)
         {
             if (url == null) url = awsSQSOptions.Url;
             var sendMessageResponse = await amazonSQSClient.DeleteMessageAsync(url, receiptHandle);
+            return sendMessageResponse.HttpStatusCode;
+        }
+
+        public async Task<HttpStatusCode> DeleteMessages(IEnumerable<string> receiptHandles, string url = null)
+        {
+            if (url == null) url = awsSQSOptions.Url;
+            var sendMessageResponse = await amazonSQSClient.DeleteMessageBatchAsync(url,
+                receiptHandles.Select((handle, index) => new DeleteMessageBatchRequestEntry()
+                {
+                    Id = index.ToString(),
+                    ReceiptHandle = handle
+                }).ToList()) ;
             return sendMessageResponse.HttpStatusCode;
         }
 
