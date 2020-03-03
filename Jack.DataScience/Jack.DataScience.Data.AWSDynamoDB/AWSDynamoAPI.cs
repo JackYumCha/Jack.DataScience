@@ -21,6 +21,7 @@ namespace Jack.DataScience.Data.AWSDynamoDB
         private readonly AmazonDynamoDBClient amazonDynamoDBClient;
         private readonly BasicAWSCredentials basicAWSCredentials;
         private readonly JsonSerializerSettings jsonSerializerSettings;
+        private readonly SessionAWSCredentials sessionAWSCredentials;
         private static readonly object[] EmptyObjectArray = new object[] { };
 
         public AWSDynamoAPI(AWSDynamoDBOptions awsDynamoDBOptions )
@@ -32,6 +33,14 @@ namespace Jack.DataScience.Data.AWSDynamoDB
             {
                 Converters = { new StringEnumConverter() }
             };
+        }
+
+        public AWSDynamoAPI(SessionAWSCredentials sessionAWSCredentials)
+        {
+            this.sessionAWSCredentials = sessionAWSCredentials;
+            var credentials = sessionAWSCredentials.GetCredentials();
+            basicAWSCredentials = new BasicAWSCredentials(credentials.AccessKey, credentials.SecretKey);
+            amazonDynamoDBClient = new AmazonDynamoDBClient(sessionAWSCredentials);
         }
 
         public JsonSerializerSettings JsonSerializerSettings { get => jsonSerializerSettings; }
