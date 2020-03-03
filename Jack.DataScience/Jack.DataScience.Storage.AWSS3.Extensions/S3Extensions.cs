@@ -36,6 +36,18 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             }
         }
 
+        public static async Task WriteParquet(this AWSS3API awsS3, List<string> headers, List<Type> types, IEnumerable<List<object>> data, string key, string bucket = null)
+        {
+            using (MemoryStream csvStream = new MemoryStream())
+            {
+                csvStream.WriteParquet(headers, types, data);
+                using (MemoryStream writeStream = new MemoryStream(csvStream.ToArray()))
+                {
+                    await awsS3.Upload(key, writeStream, bucket);
+                }
+            }
+        }
+
         public static async Task<List<T>> ReadCsv<T>(this AWSS3API awsS3, string key, string bucket = null, CsvConfiguration configuration = null) where T:class
         {
             using (Stream readStream = await awsS3.OpenReadAsync(key, bucket))

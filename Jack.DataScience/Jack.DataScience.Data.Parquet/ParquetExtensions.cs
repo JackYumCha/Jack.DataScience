@@ -46,6 +46,12 @@ namespace Jack.DataScience.Data.Parquet
             stream.WriteParquetColumns(columns);
         }
 
+        public static void WriteParquet(this Stream stream, List<string> headers, List<Type> types, IEnumerable<List<object>> data)
+        {
+            var columns = headers.ToDataColumns(types, data);
+            stream.WriteParquetColumns(columns);
+        }
+
         public static void WriteParquetColumns(this Stream stream, List<DataColumn> columns)
         {
             Schema schema = new Schema(new ReadOnlyCollection<Field>(columns.Select(column => column.Field).ToArray()));
@@ -53,7 +59,6 @@ namespace Jack.DataScience.Data.Parquet
             using (ParquetWriter writer = new ParquetWriter(schema, stream))
             {
                 writer.CompressionMethod = CompressionMethod.Snappy;
-
                 using (ParquetRowGroupWriter rowGroupWriter = writer.CreateRowGroup()) // items.Count()
                 {
                     foreach (var column in columns)
@@ -82,29 +87,29 @@ namespace Jack.DataScience.Data.Parquet
                     {
                         columns.Add(new DataColumn(
                             new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime, hasNulls: true),
-                            items.Select(item => {
-                                var value = prop.GetValue(item);
-                                if (value == null) return new DateTimeOffset?();
-                                return new DateTimeOffset((DateTime)value);
-                            }).ToArray()
+                                items.Select(item =>
+                                {
+                                    var value = (DateTime?)prop.GetValue(item);
+                                    if (value.HasValue)
+                                    {
+                                        return new DateTimeOffset?(new DateTimeOffset(value.Value));
+                                    }
+                                    else
+                                    {
+                                        return null;
+                                    }
+                                }).ToArray()
                             ));
                     }
                     else
                     {
                         columns.Add(new DataColumn(
-                            new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime, hasNulls: false),
-                            items.Select(item =>
-                            {
-                                var value = (DateTime?)prop.GetValue(item);
-                                if (value.HasValue)
-                                {
-                                    return new DateTimeOffset?(new DateTimeOffset(value.Value));
-                                }
-                                else
-                                {
-                                    return null;
-                                }
-                            }).ToArray()
+                            new DateTimeDataField(prop.Name, DateTimeFormat.DateAndTime),
+                                items.Select(item => {
+                                    var value = prop.GetValue(item);
+                                    if (value == null) return new DateTimeOffset?();
+                                    return new DateTimeOffset((DateTime)value);
+                                }).ToArray()
                             ));
                     }
                 }
@@ -154,7 +159,88 @@ namespace Jack.DataScience.Data.Parquet
         }
 
 
+        private static List<DataColumn> ToDataColumns(this List<string> headers, List<Type> types, IEnumerable<List<object>> data)
+        {
+            List<DataColumn> columns = new List<DataColumn>();
 
+            for(int i = 0; i < headers.Count; i++)
+            {
+                string name = headers[i];
+                Type type = types[i];
+                
+                var coreType = type.GetNonNullableType();
+                var isNullable = type.IsNullableType();
+                if (coreType == DateTimeType)
+                {
+                    if (isNullable)
+                    {
+                        columns.Add(new DataColumn(
+                            new DateTimeDataField(name, DateTimeFormat.DateAndTime, hasNulls: true),
+                                                            data.Select(item =>
+                                                            {
+                                                                var value = (DateTime?)item[i];
+                                                                if (value.HasValue)
+                                                                {
+                                                                    return new DateTimeOffset?(new DateTimeOffset(value.Value));
+                                                                }
+                                                                else
+                                                                {
+                                                                    return null;
+                                                                }
+                                                            }).ToArray()
+
+                            ));
+                    }
+                    else
+                    {
+                        columns.Add(new DataColumn(
+                            new DateTimeDataField(name, DateTimeFormat.DateAndTime),
+                                                            data.Select(item =>
+                                                            {
+                                                                var value = item[i];
+                                                                if (value == null) return new DateTimeOffset?();
+                                                                return new DateTimeOffset((DateTime)value);
+                                                            }).ToArray()
+                            ));
+                    }
+                }
+                else
+                if (type == DecimalType)
+                {
+                    int precision = 18;
+                    int scale = 3;
+
+                    if (isNullable)
+                    {
+                        columns.Add(new DataColumn(
+                            new DecimalDataField(name, precision, scale),
+                            data.Select(item => (decimal)item[i]).ToArray()
+                            ));
+                    }
+                    else
+                    {
+                        columns.Add(new DataColumn(
+                            new DecimalDataField(name, precision, scale),
+                            data.Select(item => (decimal?)item[i]).ToArray()
+                            ));
+                    }
+                }
+                else
+                {
+                    var genericArguments = new Type[] { type };
+                    var genericType = DataFieldGenericType.MakeGenericType(genericArguments);
+                    var genericConstructor = genericType.GetConstructor(DataFieldConstructorGenericArguments);
+                    DataField field = genericConstructor.Invoke(new object[] { name }) as DataField;
+                    var dataSource = data.Select(item => item[i]);
+                    var castMethod = CastMethodGeneric.MakeGenericMethod(genericArguments);
+                    var toArrayMethod = ToArrayMethodGeneric.MakeGenericMethod(genericArguments);
+                    var columnData = toArrayMethod.Invoke(null, new object[] { castMethod.Invoke(null, new object[] { dataSource }) }) as Array;
+                    var column = new DataColumn(field, columnData);
+                    columns.Add(column);
+                }
+            }
+            return columns;
+        }
 
         public static List<T> ReadParquet<T>(this Stream stream) where T: class, new()
         {

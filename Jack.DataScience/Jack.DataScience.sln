@@ -147,6 +147,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jack.DataScience.Serverless
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.Snowflake", "Jack.DataScience.Data.Snowflake\Jack.DataScience.Data.Snowflake.csproj", "{EA0C598C-2016-4E1D-AB9E-EF1493530241}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.DataScience.Data.SnowflakeEtl", "Jack.DataScience.Data.SnowflakeEtl\Jack.DataScience.Data.SnowflakeEtl.csproj", "{B3501E49-4BD2-403E-9601-DE556AA4AE20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -441,6 +443,10 @@ Global
 		{EA0C598C-2016-4E1D-AB9E-EF1493530241}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA0C598C-2016-4E1D-AB9E-EF1493530241}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA0C598C-2016-4E1D-AB9E-EF1493530241}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3501E49-4BD2-403E-9601-DE556AA4AE20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3501E49-4BD2-403E-9601-DE556AA4AE20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3501E49-4BD2-403E-9601-DE556AA4AE20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3501E49-4BD2-403E-9601-DE556AA4AE20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

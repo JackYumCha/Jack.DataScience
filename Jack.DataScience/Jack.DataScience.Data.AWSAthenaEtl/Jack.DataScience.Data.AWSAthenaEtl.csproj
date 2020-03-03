@@ -16,6 +16,7 @@
     <ProjectReference Include="..\Jack.DataScience.Data.Converters\Jack.DataScience.Data.Converters.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.CSV\Jack.DataScience.Data.CSV.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Data.Parquet\Jack.DataScience.Data.Parquet.csproj" />
+    <ProjectReference Include="..\Jack.DataScience.Data.Snowflake\Jack.DataScience.Data.Snowflake.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3.Extensions\Jack.DataScience.Storage.AWSS3.Extensions.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.AWSS3\Jack.DataScience.Storage.AWSS3.csproj" />
     <ProjectReference Include="..\Jack.DataScience.Storage.SFTP\Jack.DataScience.Storage.SFTP.csproj" />
