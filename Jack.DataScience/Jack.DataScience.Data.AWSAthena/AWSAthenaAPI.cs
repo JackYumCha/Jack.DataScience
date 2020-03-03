@@ -462,11 +462,11 @@ namespace Jack.DataScience.Data.AWSAthena
             return results;
         }
 
-        public async Task<List<List<object>>> GetQueryResults(string query)
+        public async Task<List<List<object>>> GetQueryResults(string query, int skip = 1)
         {
             var result = await ExecuteQuery(query);
             List<List<object>> results = new List<List<object>>();
-            int first = 1;
+            int first = skip;
             do
             {
                 var response = await ReadOneResult(result);
@@ -574,6 +574,7 @@ namespace Jack.DataScience.Data.AWSAthena
         {
             switch (column.Type)
             {
+                case AthenaDataTypes.@string:
                 case AthenaDataTypes.varchar:
                     return typeof(string);
                 case AthenaDataTypes.tinyint:
