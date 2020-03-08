@@ -102,6 +102,30 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        public async Task<GetObjectMetadataResponse> GetMetaData(string key, string bucket = null)
+        {
+            if (bucket == null) bucket = awsS3Options.Bucket;
+            try
+            {
+                using (AmazonS3Client client = CreateClient())
+                {
+                    //Console.WriteLine($"key: {key}, bucket: {bucket}");
+                    //Console.WriteLine($"session: key: {sessionAWSCredentials.GetCredentials().AccessKey}, token: {sessionAWSCredentials.GetCredentials().Token}");
+                    return await client.GetObjectMetadataAsync(new GetObjectMetadataRequest()
+                    {
+                        BucketName = bucket,
+                        Key = key
+                    });
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                    return null;
+                throw;
+            }
+        }
+
         public async Task CreateBucket(string name = null)
         {
             string bucketName = name;
