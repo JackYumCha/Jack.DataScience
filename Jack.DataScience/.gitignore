@@ -365,3 +365,4 @@ project/plugins/project/
 *.class
 *.log
 
+/Jack.DataScience.LogicFlow

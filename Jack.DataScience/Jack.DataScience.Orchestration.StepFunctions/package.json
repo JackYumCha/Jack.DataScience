@@ -1,0 +1,12 @@
+{
+    "scripts": {
+        "build": "tsc"
+    },
+    "main": "index.js",
+    "dependencies": {
+        "aws-sdk": "^2.643.0"
+    },
+    "devDependencies": {
+        "@types/node": "^13.9.2"
+    }
+}
