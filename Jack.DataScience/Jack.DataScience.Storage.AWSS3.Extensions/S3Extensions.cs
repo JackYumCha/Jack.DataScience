@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Jack.DataScience.Data.CSV;
 using Jack.DataScience.Data.Parquet;
 using CsvHelper.Configuration;
+using System.Text;
 
 namespace Jack.DataScience.Storage.AWSS3.Extensions
 {
@@ -54,6 +55,23 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             {
                 return readStream.ReadCsv<T>(configuration);
             }
+        }
+
+        public static async Task<string[]> ReadLines(this AWSS3API awsS3, string s3Uri)
+        {
+            return Regex.Split(Encoding.UTF8.GetString(await awsS3.Get(s3Uri)), "[\n\r]");
+        }
+
+        public static async Task AppendLines(this AWSS3API awsS3, string s3Uri, IEnumerable<string> lines)
+        {
+            List<string> list = new List<string>();
+            try
+            {
+                list.AddRange(await awsS3.ReadLines(s3Uri));
+            }
+            catch { }
+            list.AddRange(lines);
+            await awsS3.Put(s3Uri, Encoding.UTF8.GetBytes(string.Join("\n", list)));
         }
 
         private static Regex parquetSuffix = new Regex(@"\.parquet", RegexOptions.IgnoreCase);

@@ -359,6 +359,80 @@ namespace Jack.DataScience.Storage.AWSS3
             }
         }
 
+        public async Task Put(string s3Uri, string data, Encoding encoding)
+        {
+            var s3Obj = s3Uri.ParseS3URI();
+            using (MemoryStream stream = new MemoryStream(encoding.GetBytes(data)))
+            {
+                using (AmazonS3Client client = CreateClient())
+                {
+                    TransferUtility transferUtility = new TransferUtility(client);
+                    await transferUtility.UploadAsync(stream, s3Obj.BucketName, s3Obj.Key);
+                }
+            }
+        }
+
+        public async Task Put(string s3Uri, byte[] data)
+        {
+            var s3Obj = s3Uri.ParseS3URI();
+            using (MemoryStream stream = new MemoryStream(data))
+            {
+                using (AmazonS3Client client = CreateClient())
+                {
+                    TransferUtility transferUtility = new TransferUtility(client);
+                    await transferUtility.UploadAsync(stream, s3Obj.BucketName, s3Obj.Key);
+                }
+            }
+        }
+
+        public async Task<byte[]> Get(string s3Uri)
+        {
+            var s3Obj = s3Uri.ParseS3URI();
+            using(MemoryStream stream = new MemoryStream())
+            {
+                using (AmazonS3Client client = CreateClient())
+                {
+                    TransferUtility transferUtility = new TransferUtility(client);
+                    using (var read = transferUtility.OpenStream(s3Obj.BucketName, s3Obj.Key))
+                    {
+                        await read.CopyToAsync(stream);
+                    }
+                }
+                return stream.ToArray();
+            }
+        }
+
+        public async Task<List<string>> List(string s3Uri, string delimiter = "/")
+        {
+            var s3Obj = s3Uri.ParseS3URI();
+            List<string> uris = new List<string>();
+            using (AmazonS3Client client = CreateClient())
+            {
+                ListObjectsResponse response;
+                string nextMarker = null;
+                do
+                {
+                    response = await client.ListObjectsAsync(new ListObjectsRequest()
+                    {
+                        BucketName = s3Obj.BucketName,
+                        Prefix = s3Obj.Key,
+                        Delimiter = delimiter,
+                        Marker = nextMarker
+                    });
+                    nextMarker = response.NextMarker;
+                    uris.AddRange(response.S3Objects.Select(o => $"s3://{o.BucketName}/{o.Key}"));
+                } while (!string.IsNullOrEmpty(nextMarker));
+            }
+            return uris;
+        }
+
+        public async Task Upload(string key, string data, string bucket = null, Encoding encoding = null)
+        {
+            if (encoding == null) encoding = Encoding.UTF8;
+            using (MemoryStream stream = new MemoryStream(encoding.GetBytes(data)))
+                await Upload(key, stream, bucket);
+        }
+
         public async Task Upload(string key, Stream stream, string bucket = null)
         {
             string bucketName = bucket;
