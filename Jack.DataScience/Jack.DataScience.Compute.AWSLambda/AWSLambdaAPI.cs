@@ -7,6 +7,8 @@ using Amazon.Lambda;
 using Amazon.Runtime;
 using Amazon.Lambda.Model;
 using Newtonsoft.Json;
+using SystemEnvironment = System.Environment;
+using System.Threading;
 
 namespace Jack.DataScience.Compute.AWSLambda
 {
@@ -42,6 +44,18 @@ namespace Jack.DataScience.Compute.AWSLambda
                 Payload = JsonConvert.SerializeObject(parameter),
                 InvocationType = InvocationType.Event
             });
+        }
+
+        public async Task InvokeSelfAndWait(object parameter, int waitTime)
+        {
+            string AWS_LAMBDA_FUNCTION_NAME = SystemEnvironment.GetEnvironmentVariable(nameof(AWS_LAMBDA_FUNCTION_NAME));
+            await amazonLambdaClient.InvokeAsync(new InvokeRequest()
+            {
+                FunctionName = AWS_LAMBDA_FUNCTION_NAME,
+                Payload = JsonConvert.SerializeObject(parameter),
+                InvocationType = InvocationType.Event
+            });
+            Thread.Sleep(waitTime);
         }
     }
 }

@@ -18,6 +18,7 @@ using Jack.DataScience.Data.AWSAthena;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Jack.DataScience.Data.AWSAthenaEtl
 {
@@ -305,7 +306,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
                 Rows = new List<DataRow>()
             };
 
-            var config = new Configuration()
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 Delimiter = etlSettings.CsvSourceOptoins.Delimiter
             };
@@ -532,7 +533,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
         public static async Task<List<string>> TransferCsvStream(this EtlSettings etlSettings, AWSAthenaAPI awsAthenaAPI, Stream stream, string dateKey, string filename, bool keepOriginalName)
         {
             var result = new List<string>();
-            var config = new Configuration()
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 Delimiter = etlSettings.CsvSourceOptoins.Delimiter
             };

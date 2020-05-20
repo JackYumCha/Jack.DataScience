@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Jack.DataScience.AWSEnvironment\Jack.DataScience.AWSEnvironment.csproj" />
-    <ProjectReference Include="..\Jack.DataScience.Common\Jack.DataScience.Common.csproj" />
   </ItemGroup>
 
 </Project>

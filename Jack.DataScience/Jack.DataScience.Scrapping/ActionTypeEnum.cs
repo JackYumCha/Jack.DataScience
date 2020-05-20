@@ -9,7 +9,9 @@ namespace Jack.DataScience.Scrapping
         Null,
         // only works on driver
         GoTo,
-
+        Back,
+        Forward,
+        Refresh,
         // operations
         Click,
         TryClick,

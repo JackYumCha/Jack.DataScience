@@ -37,6 +37,20 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             }
         }
 
+        public static async Task WriteParquet<T>(this AWSS3API awsS3, IEnumerable<T> items, string s3Uri) where T : class
+        {
+            var s3Ojb = s3Uri.ParseS3URI();
+
+            using (MemoryStream csvStream = new MemoryStream())
+            {
+                csvStream.WriteParquet(items);
+                using (MemoryStream writeStream = new MemoryStream(csvStream.ToArray()))
+                {
+                    await awsS3.Upload(s3Ojb.Key, writeStream, s3Ojb.BucketName);
+                }
+            }
+        }
+
         public static async Task WriteParquet(this AWSS3API awsS3, List<string> headers, List<Type> types, IEnumerable<List<object>> data, string key, string bucket = null)
         {
             using (MemoryStream csvStream = new MemoryStream())
@@ -45,6 +59,20 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
                 using (MemoryStream writeStream = new MemoryStream(csvStream.ToArray()))
                 {
                     await awsS3.Upload(key, writeStream, bucket);
+                }
+            }
+        }
+
+        public static async Task WriteParquet(this AWSS3API awsS3, List<string> headers, List<Type> types, IEnumerable<List<object>> data, string s3Uri)
+        {
+            var s3Ojb = s3Uri.ParseS3URI();
+
+            using (MemoryStream csvStream = new MemoryStream())
+            {
+                csvStream.WriteParquet(headers, types, data);
+                using (MemoryStream writeStream = new MemoryStream(csvStream.ToArray()))
+                {
+                    await awsS3.Upload(s3Ojb.Key, writeStream, s3Ojb.BucketName);
                 }
             }
         }

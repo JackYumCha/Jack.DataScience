@@ -49,11 +49,20 @@ namespace Jack.DataScience.Scrapping
                     case ActionTypeEnum.GoTo:
                         driver.GoTo(parameters);
                         break;
+                    case ActionTypeEnum.Back:
+                        driver.Navigate().Back();
+                        break;
+                    case ActionTypeEnum.Forward:
+                        driver.Navigate().Forward();
+                        break;
+                    case ActionTypeEnum.Refresh:
+                        driver.Navigate().Refresh();
+                        break;
                     case ActionTypeEnum.Wait:
                         driver.Wait(parameters, results);
                         break;
                     case ActionTypeEnum.By:
-                        ByElements(parameters, null, driver, results, componentContext, operation);
+                        ByElements(parameters, null, driver, results, componentContext, operation, data);
                         break;
                     case ActionTypeEnum.LoopWhen:
                         shouldRunThen = LoopWhen(operation, parameters, null, data, jobs, references, jsons, functions, driver, level, componentContext);
@@ -235,6 +244,15 @@ namespace Jack.DataScience.Scrapping
                     case ActionTypeEnum.GoTo:
                         driver.GoTo(parameters);
                         break;
+                    case ActionTypeEnum.Back:
+                        driver.Navigate().Back();
+                        break;
+                    case ActionTypeEnum.Forward:
+                        driver.Navigate().Forward();
+                        break;
+                    case ActionTypeEnum.Refresh:
+                        driver.Navigate().Refresh();
+                        break;
                     case ActionTypeEnum.Wait:
                         driver.Wait(parameters, results);
                         break;
@@ -248,7 +266,7 @@ namespace Jack.DataScience.Scrapping
                         shouldRunThen = SwitchBy(operation, parameters, parent, data, jobs, references, jsons, functions, driver, level, componentContext);
                         break;
                     case ActionTypeEnum.By:
-                        ByElements(parameters, parent, driver, results, componentContext, operation);
+                        ByElements(parameters, parent, driver, results, componentContext, operation, data);
                         break;
                     case ActionTypeEnum.Click:
                         {
@@ -487,12 +505,14 @@ namespace Jack.DataScience.Scrapping
             }
         }
 
-        private static void ByElements(this List<string> parameters, IWebElement parent, IWebDriver driver, List<IWebElement> results, IComponentContext componentContext, BrowserOperation operation)
+        private static void ByElements(this List<string> parameters, IWebElement parent, IWebDriver driver, List<IWebElement> results, 
+            IComponentContext componentContext, BrowserOperation operation, Dictionary<string, string> data)
         {
             if (parameters.Count >= 2)
             {
                 var selectorType = parameters[0].ToLower();
                 var selector = parameters[1];
+                selector = selector.ApplyTemplateData(data, driver);
                 By by = selectorType.Selector(selector);
                 if (parent == null || (parameters.Count >= 3 && parameters[2].ToLower() == "root"))
                 {
@@ -599,6 +619,7 @@ namespace Jack.DataScience.Scrapping
                 }
                 var selectorType = parameters[1];
                 var selector = parameters[2];
+                selector = selector.ApplyTemplateData(data, driver);
                 Condition condition = parameters[3].ParseCondition();
                 if (condition == null)
                 {
@@ -677,6 +698,7 @@ namespace Jack.DataScience.Scrapping
                 }
                 var selectorType = parameters[1];
                 var selector = parameters[2];
+                selector = selector.ApplyTemplateData(data, driver);
                 var condition = parameters[3].ParseCondition();
                 if (condition == null)
                 {
@@ -903,6 +925,16 @@ namespace Jack.DataScience.Scrapping
             {
                 value = type.Substring(1);
             }
+            else if (type.StartsWith("+=")) // update the value by add
+            {
+                int delta = int.Parse(type.Substring(2));
+                value = ((data.ContainsKey(key) ? int.Parse(data[key]) : 0) + delta).ToString();
+            }
+            else if (type.StartsWith("-=")) // update the value by deduct
+            {
+                int delta = int.Parse(type.Substring(2));
+                value = ((data.ContainsKey(key) ? int.Parse(data[key]) : 0) - delta).ToString();
+            }
             else if (CountRegex.IsMatch(type))
             {
                 var match = CountRegex.Match(type);
@@ -930,6 +962,9 @@ namespace Jack.DataScience.Scrapping
                         break;
                     case "outer":
                         value = element.GetOuterHtml(driver);
+                        break;
+                    case "url":
+                        value = driver.Url;
                         break;
                 }
             }
