@@ -272,7 +272,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
             var results = new List<string>();
             var targetS3Api = etlSettings.CreateTargetS3API();
 
-            var allPaths = await targetS3Api.ListPaths($"{etlSettings.TargetS3Prefix}/");
+            var allPaths = await targetS3Api.ListPaths($"{etlSettings.TargetS3Prefix}/", "/");
 
             foreach(var path in allPaths)
             {

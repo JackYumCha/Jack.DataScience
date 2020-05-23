@@ -20,7 +20,7 @@ namespace Jack.DataScience.Data.AWSAthenaEtl
 
             var awsS3Api = etlSettings.CreateTargetS3API();
 
-            var paths = await awsS3Api.ListPaths(etlSettings.TargetS3Prefix + "/");
+            var paths = await awsS3Api.ListPaths(etlSettings.TargetS3Prefix + "/", "/");
 
             var dateFrom = DateTime.ParseExact(request.DateFrom, "yyyy-MM-dd", null);
             var dateTo = DateTime.ParseExact(request.DateTo, "yyyy-MM-dd", null);

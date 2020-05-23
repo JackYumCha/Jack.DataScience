@@ -20,14 +20,8 @@ namespace Jack.DataScience.Scrapping
 
         public static IWebElement TryXPath(this IWebDriver driver, string xpath)
         {
-            try
-            {
-                return driver.FindElement(By.XPath(xpath));
-            }
-            catch(Exception ex)
-            {
-                return null;
-            }
+            if (driver.FindElements(By.XPath(xpath)).Count == 0) return null;
+            return driver.FindElement(By.XPath(xpath));
         }
 
         public static ReadOnlyCollection<IWebElement> XPaths(this IWebDriver driver, string xpath)
@@ -39,22 +33,20 @@ namespace Jack.DataScience.Scrapping
             return element.FindElement(By.XPath(xpath));
         }
 
-        [DebuggerNonUserCode]
         public static IWebElement TryXPath(this IWebElement element, string xpath)
         {
-            try
-            {
-                return element.FindElement(By.XPath(xpath));
-            }
-            catch(Exception ex)
-            {
-                return null;
-            }
+            if (element.FindElements(By.XPath(xpath)).Count == 0) return null;
+            return element.FindElement(By.XPath(xpath));
         }
 
-        public static ReadOnlyCollection<IWebElement> XPaths(this IWebElement element, string xpath)
+        public static ReadOnlyCollection<IWebElement> XPaths(this IWebElement element, params string[] xpaths)
         {
-            return element.FindElements(By.XPath(xpath));
+            List<IWebElement> results = new List<IWebElement>();
+            foreach(var xpath in xpaths)
+            {
+                results.AddRange(element.FindElements(By.XPath(xpath)));
+            }
+            return new ReadOnlyCollection<IWebElement>(results);
         }
 
         public static void Wait(this IWebDriver driver, int seconds)

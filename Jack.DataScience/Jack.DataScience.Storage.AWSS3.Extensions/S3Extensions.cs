@@ -133,7 +133,7 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             return files;
         }
 
-        public static async Task<IEnumerable<T>> ReadParquet<T>(this AWSS3API awsS3, string key, string bucket = null) where T: class, new()
+        public static async Task<List<T>> ReadParquet<T>(this AWSS3API awsS3, string key, string bucket = null) where T: class, new()
         {
             using(Stream readStream = await awsS3.OpenReadAsync(key, bucket))
             {
@@ -141,7 +141,16 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
             }
         }
 
-        public static async Task<IEnumerable<T>> ReadParquetPartitions<T>(this AWSS3API awsS3, string prefix, string bucket = null) where T: class, new()
+        public static async Task<List<T>> ReadParquet<T>(this AWSS3API awsS3, string s3Uri) where T : class, new()
+        {
+            var s3Obj = s3Uri.ParseS3URI();
+            using (Stream readStream = await awsS3.OpenReadAsync(s3Obj.Key, s3Obj.BucketName))
+            {
+                return readStream.ReadParquet<T>();
+            }
+        }
+
+        public static async Task<List<T>> ReadParquetPartitions<T>(this AWSS3API awsS3, string prefix, string bucket = null) where T: class, new()
         {
             var objects = await awsS3.ListAllObjectsInBucket(bucket: bucket, prefix: prefix);
 
@@ -156,6 +165,12 @@ namespace Jack.DataScience.Storage.AWSS3.Extensions
                 seed.AddRange(items);
                 return seed;
             });
+        }
+
+        public static async Task<bool> Exists(this AWSS3API awsS3, string s3Uri)
+        {
+            var s3obj = s3Uri.ParseS3URI();
+            return await awsS3.FileExists(s3obj.Key, s3obj.BucketName);
         }
     }
 }
